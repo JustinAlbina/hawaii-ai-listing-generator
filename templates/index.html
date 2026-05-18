@@ -157,6 +157,52 @@
             .footer-top { grid-template-columns: 1fr; }
             .footer-bottom { flex-direction: column; align-items: flex-start; }
         }
+
+        /* Mobile menu — hidden by default on all screen sizes */
+        #mobile-menu { display: none; }
+
+        @media (max-width: 768px) {
+            #mobile-menu {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                max-width: 100vw;
+                height: 100vh;
+                overflow-y: auto;
+                overflow-x: hidden;
+                box-sizing: border-box;
+                z-index: 9999;
+                background: #0a1628;
+                padding: 1.5rem;
+            }
+            #mobile-menu-close {
+                display: block;
+                width: 100%;
+                box-sizing: border-box;
+                background: none;
+                border: none;
+                color: #c9a84c;
+                font-size: 1.5rem;
+                cursor: pointer;
+                text-align: right;
+                padding: 0 0 1.25rem 0;
+                font-family: inherit;
+                line-height: 1;
+            }
+            #mobile-menu a {
+                display: block;
+                width: 100%;
+                box-sizing: border-box;
+                color: #8892a4;
+                text-decoration: none;
+                padding: 0.75rem 0;
+                font-size: 15px;
+                border-bottom: 1px solid rgba(255,255,255,0.06);
+            }
+            #mobile-menu a:last-child { border-bottom: none; }
+            #mobile-menu a:hover { color: #c9a84c; }
+        }
     </style>
 </head>
 <body>
@@ -198,16 +244,17 @@
     </div>
 </nav>
 
-<div id="mobile-menu" style="display:none;background:#0a1628;padding:1rem 1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);max-width:100vw;overflow-x:hidden;box-sizing:border-box;">
-    <a href="/listing" style="display:block;width:100%;box-sizing:border-box;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Listing Generator</a>
-    <a href="/open-house" style="display:block;width:100%;box-sizing:border-box;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Open House Announcer</a>
-    <a href="/social-media" style="display:block;width:100%;box-sizing:border-box;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Social Media Generator</a>
-    <a href="/offer-letter" style="display:block;width:100%;box-sizing:border-box;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Offer Letter Assistant</a>
-    <a href="/market-report" style="display:block;width:100%;box-sizing:border-box;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Market Report Generator</a>
-    <a href="/client-emails" style="display:block;width:100%;box-sizing:border-box;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Client Email Templates</a>
-    <a href="/bio-generator" style="display:block;width:100%;box-sizing:border-box;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Bio Generator</a>
-    <a href="/property-comparison" style="display:block;width:100%;box-sizing:border-box;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Property Comparison</a>
-    <a href="/pricing" style="display:block;width:100%;box-sizing:border-box;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;">Pricing</a>
+<div id="mobile-menu">
+    <button id="mobile-menu-close" onclick="toggleMenu()">✕</button>
+    <a href="/listing">Listing Generator</a>
+    <a href="/open-house">Open House Announcer</a>
+    <a href="/social-media">Social Media Generator</a>
+    <a href="/offer-letter">Offer Letter Assistant</a>
+    <a href="/market-report">Market Report Generator</a>
+    <a href="/client-emails">Client Email Templates</a>
+    <a href="/bio-generator">Bio Generator</a>
+    <a href="/property-comparison">Property Comparison</a>
+    <a href="/pricing">Pricing</a>
 </div>
 
 <section class="hero">
