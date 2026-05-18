@@ -64,6 +64,8 @@
         .btn-outline { background: white; color: #0a1628; border: 2px solid #0a1628; }
         .btn-outline:hover { background: #f0f0f0; }
 
+        .disclaimer-box { background: #fff8e7; border: 1px solid rgba(201,168,76,0.35); border-radius: 10px; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 12px; color: #666; line-height: 1.7; }
+
         .footer { background: #0a1628; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 2rem; }
         .footer strong { color: #c9a84c; }
 
@@ -211,6 +213,10 @@
         </div>
         <button class="copy-btn" onclick="copyText('recommendation', this)">Copy</button>
         <div id="recommendation" style="display:none;">{{ recommendation }}</div>
+    </div>
+
+    <div class="disclaimer-box">
+        <strong>Data notice:</strong> Market statistics in this report are AI-estimated based on general knowledge of Hawaii real estate trends. Always verify figures with current MLS data before sharing with clients.
     </div>
 
     <div class="card">

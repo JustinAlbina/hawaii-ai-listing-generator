@@ -168,6 +168,16 @@
                     <input type="text" name="price" placeholder="2,950,000" required>
                 </div>
             </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Year Built</label>
+                    <input type="text" name="year_built" placeholder="e.g. 1998">
+                </div>
+                <div class="form-group">
+                    <label>Parking</label>
+                    <input type="text" name="parking" placeholder="e.g. 2-car garage, carport">
+                </div>
+            </div>
         </div>
 
         <div class="card">
@@ -197,6 +207,13 @@
             <div class="form-group">
                 <label>Standout Feature</label>
                 <input type="text" name="extra" placeholder="e.g. chef's kitchen, pool waterfalls, newly renovated" required>
+            </div>
+            <div class="form-group">
+                <label>Land Tenure</label>
+                <select name="land_tenure">
+                    <option value="Fee Simple">Fee Simple</option>
+                    <option value="Leasehold">Leasehold</option>
+                </select>
             </div>
             <button type="submit" class="btn-submit">Generate Listing with AI →</button>
             <div class="free-note">

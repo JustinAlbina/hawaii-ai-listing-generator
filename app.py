@@ -45,6 +45,9 @@ def generate():
     ocean_view = request.form["ocean_view"]
     pool = request.form["pool"]
     extra = request.form["extra"]
+    year_built = request.form.get("year_built", "").strip()
+    parking = request.form.get("parking", "").strip()
+    land_tenure = request.form.get("land_tenure", "Fee Simple")
 
     try:
         sqft_num = float(sqft.replace(",", ""))
@@ -52,6 +55,9 @@ def generate():
         price_per_sqft = round(price_num / sqft_num)
     except:
         price_per_sqft = "N/A"
+
+    year_built_line = f"Year built: {year_built}" if year_built else ""
+    parking_line = f"Parking: {parking}" if parking else ""
 
     listing_response = client.messages.create(
         model="claude-sonnet-4-5",
@@ -68,6 +74,9 @@ Price per sqft: ${price_per_sqft}
 Ocean view: {ocean_view}
 Pool: {pool}
 Standout feature: {extra}
+Land tenure: {land_tenure}
+{year_built_line}
+{parking_line}
 
 Write 2 paragraphs, around 150 words total. Make it warm, compelling, and specific to Hawaii. End with a one-line call to action."""}]
     )
@@ -154,6 +163,10 @@ def open_house_generate():
     time_start = request.form["time_start"]
     time_end = request.form["time_end"]
     extra = request.form["extra"]
+    agent_name = request.form.get("agent_name", "").strip()
+
+    agent_line = f"Agent: {agent_name}" if agent_name else ""
+    sign_off_instruction = f" Sign off all posts and the email from {agent_name}." if agent_name else ""
 
     response = client.messages.create(
         model="claude-sonnet-4-5",
@@ -169,6 +182,7 @@ Price: {price}
 Open House Date: {date}
 Time: {time_start} to {time_end}
 Highlight: {extra}
+{agent_line}
 
 Format your response EXACTLY like this:
 
@@ -182,7 +196,7 @@ EMAIL SUBJECT:
 [Compelling email subject line]
 
 EMAIL BODY:
-[Professional 3-4 sentence email announcing the open house, suitable to send to a client list]"""}]
+[Professional 3-4 sentence email announcing the open house, suitable to send to a client list{sign_off_instruction}]"""}]
     )
 
     content = response.content[0].text
@@ -259,7 +273,7 @@ FACEBOOK POST:
 [4-5 sentences, more detailed and informative, include all key details, professional yet warm]
 
 X POST:
-[Under 280 characters, punchy and attention grabbing, include price]
+[MUST be 280 characters or fewer — count carefully. Punchy and attention grabbing, include price. No hashtags here.]
 
 HASHTAGS:
 [20-25 relevant hashtags including Hawaii specific ones, real estate ones, and neighborhood specific ones]"""}]
@@ -307,6 +321,7 @@ def offer_letter_generate():
     contingencies = request.form.getlist("contingencies")
     personal_message = request.form["personal_message"]
     tone = request.form["tone"]
+    land_tenure = request.form.get("land_tenure", "Fee Simple")
 
     contingencies_str = ", ".join(contingencies) if contingencies else "None"
 
@@ -331,6 +346,7 @@ Preferred Closing Date: {closing_date}
 Contingencies: {contingencies_str}
 Personal Message from Buyer: {personal_message}
 Tone: {tone}
+Land Tenure: {land_tenure}
 
 Format your response EXACTLY like this:
 
@@ -527,8 +543,10 @@ def bio_generator_generate():
     fun_fact = request.form["fun_fact"]
     tone = request.form["tone"]
     length = request.form["length"]
+    designations = request.form.get("designations", "").strip()
 
     specialties_str = ", ".join(specialties) if specialties else "General real estate"
+    designations_line = f"Designations/Certifications: {designations}" if designations else ""
 
     response = client.messages.create(
         model="claude-sonnet-4-5",
@@ -544,6 +562,7 @@ Connection to Hawaii: {hawaii_connection}
 Fun Personal Fact: {fun_fact}
 Tone: {tone}
 Target Length: {length}
+{designations_line}
 
 Format your response EXACTLY like this:
 
@@ -620,6 +639,7 @@ def property_comparison_generate():
 
     buyer_priorities = request.form["buyer_priorities"]
     buyer_budget = request.form.get("buyer_budget", "").strip()
+    land_tenure = request.form.get("land_tenure", "Any")
 
     def calc_ppsf(price_str, sqft_str):
         try:
@@ -658,6 +678,7 @@ Property 2: {p2_address}, {p2_neighborhood}, {p2_island}
 {p3_block}
 BUYER PRIORITIES: {buyer_priorities}
 {"BUYER BUDGET: $" + buyer_budget if buyer_budget else ""}
+LAND TENURE PREFERENCE: {land_tenure}
 
 Write a detailed property comparison report. Use EXACTLY these section headers:
 
