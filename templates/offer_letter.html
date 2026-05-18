@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offer Letter Assistant — AlohaAgent</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f7f4; color: #1a1a2e; }
+
+        .top-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.6rem 1rem; font-size: 13px; font-weight: 600; }
+
+        .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .nav-left { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-btn { background: none; border: none; color: #8892a4; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 0; transition: color 0.2s; font-family: inherit; }
+        .nav-dropdown-btn:hover, .nav-dropdown:hover .nav-dropdown-btn { color: #c9a84c; }
+        .nav-dropdown:hover .nav-dropdown-btn svg { transform: rotate(180deg); }
+        .nav-dropdown-btn svg { transition: transform 0.2s; }
+        .nav-dropdown-menu { position: absolute; top: calc(100% + 14px); left: 0; background: #0d1f35; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 0.5rem; min-width: 265px; opacity: 0; pointer-events: none; transform: translateY(-6px); transition: all 0.18s ease; z-index: 300; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+        .nav-dropdown:hover .nav-dropdown-menu { opacity: 1; pointer-events: all; transform: translateY(0); }
+        .nav-dropdown-menu a { display: flex; align-items: center; gap: 10px; color: #8892a4; text-decoration: none; font-size: 13px; padding: 0.55rem 0.75rem; border-radius: 8px; transition: all 0.15s; }
+        .nav-dropdown-menu a:hover { background: rgba(201,168,76,0.1); color: #c9a84c; }
+        .nav-dropdown-menu a .menu-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9a84c; opacity: 0.6; flex-shrink: 0; }
+        .nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.35rem 0.75rem; }
+        .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px; }
+        .nav-link { color: #8892a4; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
+        .nav-link:hover { color: #c9a84c; }
+
+        .hero { background: #0a1628; color: white; padding: 2.5rem 2rem; text-align: center; }
+        .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem; }
+        .hero h1 { font-size: 1.9rem; font-weight: 700; margin-bottom: 0.4rem; letter-spacing: -0.5px; }
+        .hero p { color: #8892a4; font-size: 0.95rem; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: #8892a4; text-decoration: none; font-size: 13px; font-weight: 500; margin: 1.25rem 0 0; transition: color 0.2s; }
+        .back-link:hover { color: #c9a84c; }
+
+        .container { max-width: 720px; margin: 0 auto; padding: 0 1rem 3rem; }
+
+        .card { background: white; border-radius: 16px; padding: 2rem; margin-bottom: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #eee; }
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f0f0; }
+        .card-icon { width: 36px; height: 36px; background: #0a1628; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .card-title { font-size: 1rem; font-weight: 600; color: #0a1628; }
+        .card-subtitle { font-size: 12px; color: #888; margin-top: 1px; }
+
+        .form-group { margin-bottom: 1.1rem; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select, textarea { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid #e8e8e8; border-radius: 10px; font-size: 0.95rem; color: #1a1a2e; background: #fafafa; transition: all 0.2s; font-family: inherit; }
+        textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #c9a84c; background: white; box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.35rem; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .checkbox-item input[type="checkbox"] { width: auto; accent-color: #c9a84c; width: 16px; height: 16px; cursor: pointer; }
+        .checkbox-item span { font-size: 0.9rem; color: #333; font-weight: 500; }
+
+        .btn { width: 100%; padding: 1rem; background: #0a1628; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 0.75rem; transition: all 0.2s; letter-spacing: 0.3px; }
+        .btn:hover { background: #162840; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(10,22,40,0.3); }
+        .btn-gold { background: #c9a84c; color: #0a1628; }
+        .btn-gold:hover { background: #e8c97a; }
+
+        .footer { background: #0a1628; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 2rem; }
+        .footer strong { color: #c9a84c; }
+
+        @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="top-banner">🌺 Free tier — 3 listing generations per month. No credit card required.</div>
+
+<nav class="nav">
+        <div class="nav-left">
+        <a href="/"><img src="/static/logo.svg" style="height:90px;" alt="AlohaAgent"></a>
+        <div class="nav-dropdown">
+            <button class="nav-dropdown-btn">Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="nav-dropdown-menu">
+                <div class="nav-dropdown-group-label">Listing Tools</div>
+                <a href="/listing"><span class="menu-dot"></span>Listing Generator</a>
+                <a href="/open-house"><span class="menu-dot"></span>Open House Announcer</a>
+                <a href="/offer-letter"><span class="menu-dot"></span>Offer Letter Assistant</a>
+                <a href="/market-report"><span class="menu-dot"></span>Market Report Generator</a>
+                <a href="/property-comparison"><span class="menu-dot"></span>Property Comparison</a>
+                <div class="nav-dropdown-divider"></div>
+                <div class="nav-dropdown-group-label">Marketing Tools</div>
+                <a href="/social-media"><span class="menu-dot"></span>Social Media Generator</a>
+                <a href="/client-emails"><span class="menu-dot"></span>Client Email Templates</a>
+                <a href="/bio-generator"><span class="menu-dot"></span>Bio Generator</a>
+            </div>
+        </div>
+        <a href="/pricing" class="nav-link">Pricing</a>
+        <a href="/#how-it-works" class="nav-link">How It Works</a>
+    </div>
+    <div class="nav-badge">LIVE</div>
+</nav>
+
+<div class="hero">
+    <div class="hero-eyebrow">Offer Letter Assistant</div>
+    <h1>Craft a winning offer.</h1>
+    <p>Professional offer letters tailored to Hawaii real estate — generated in seconds.</p>
+</div>
+
+<div class="container">
+    <a href="/" class="back-link">← Back to all tools</a>
+
+    <form action="/offer-letter/generate" method="POST" style="margin-top:1.25rem;">
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-title">Property Details</div>
+                    <div class="card-subtitle">The property you're making an offer on</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Property Address</label>
+                <input type="text" name="address" placeholder="e.g. 5332 Makalea St" required>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Neighborhood</label>
+                    <input type="text" name="neighborhood" placeholder="e.g. Poipu" required>
+                </div>
+                <div class="form-group">
+                    <label>Island</label>
+                    <select name="island">
+                        <option>Kauai</option>
+                        <option>Oahu</option>
+                        <option>Maui</option>
+                        <option>Big Island</option>
+                        <option>Molokai</option>
+                        <option>Lanai</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Listing Price</label>
+                    <input type="text" name="listing_price" placeholder="e.g. 1,250,000" required>
+                </div>
+                <div class="form-group">
+                    <label>Offer Price</label>
+                    <input type="text" name="offer_price" placeholder="e.g. 1,275,000" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-title">Buyer Information</div>
+                    <div class="card-subtitle">Details about the buyer</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Buyer Name(s)</label>
+                    <input type="text" name="buyer_name" placeholder="e.g. Kai and Malia Kahale" required>
+                </div>
+                <div class="form-group">
+                    <label>Preferred Closing Date</label>
+                    <input type="date" name="closing_date" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Contingencies</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="contingencies" value="Financing">
+                        <span>Financing</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="contingencies" value="Inspection">
+                        <span>Inspection</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="contingencies" value="Appraisal">
+                        <span>Appraisal</span>
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Personal Message from Buyer <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+                <textarea name="personal_message" placeholder="Share why the buyer loves this property, their story, family situation, connection to the area..."></textarea>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-title">Letter Tone</div>
+                    <div class="card-subtitle">How should the offer letter feel?</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Tone</label>
+                <select name="tone">
+                    <option value="Professional">Professional</option>
+                    <option value="Warm and personal">Warm and personal</option>
+                    <option value="Competitive and urgent">Competitive and urgent</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-gold">Generate Offer Letter →</button>
+        </div>
+
+    </form>
+</div>
+
+<div class="footer">
+    <strong>AlohaAgent</strong> by AlohaForge · AI tools built for Hawaii real estate professionals
+</div>
+
+</body>
+</html>

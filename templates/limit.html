@@ -6,37 +6,36 @@
     <title>Free Limit Reached — AlohaAgent</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f7f4; color: #1a1a2e; }
-        .nav { background: #0a1628; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #fff; }
+        .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
         .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
-        .hero { background: #0a1628; color: white; padding: 5rem 2rem; text-align: center; }
+        .hero { background: #0a1628; color: white; padding: 5rem 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
         .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1.5rem; }
         .hero h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; }
         .hero h1 span { color: #c9a84c; }
         .hero p { color: #8892a4; font-size: 1rem; max-width: 450px; margin: 0 auto; line-height: 1.7; }
         .container { max-width: 540px; margin: 3rem auto; padding: 0 1rem; }
-        .card { background: white; border-radius: 16px; padding: 2rem; border: 1px solid #eee; margin-bottom: 1.25rem; }
-        .plan { border: 2px solid #c9a84c; border-radius: 16px; padding: 2rem; background: white; margin-bottom: 1.25rem; }
+        .plan { border: 2px solid rgba(201,168,76,0.4); border-radius: 16px; padding: 2rem; background: #162840; margin-bottom: 1.25rem; }
         .plan-badge { display: inline-block; background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-bottom: 1rem; letter-spacing: 0.5px; }
-        .plan-price { font-size: 2.5rem; font-weight: 700; color: #0a1628; margin-bottom: 0.25rem; }
-        .plan-price span { font-size: 1rem; font-weight: 400; color: #888; }
+        .plan-price { font-size: 2.5rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem; }
+        .plan-price span { font-size: 1rem; font-weight: 400; color: #8892a4; }
         .plan-features { margin: 1.25rem 0; display: flex; flex-direction: column; gap: 0.6rem; }
-        .plan-feature { font-size: 14px; color: #444; display: flex; align-items: center; gap: 8px; }
+        .plan-feature { font-size: 14px; color: #a8b8cc; display: flex; align-items: center; gap: 8px; }
         .check { color: #c9a84c; font-weight: 700; }
         .btn { display: block; width: 100%; padding: 0.9rem; border-radius: 10px; font-size: 0.95rem; font-weight: 600; text-decoration: none; text-align: center; transition: all 0.2s; border: none; cursor: pointer; }
         .btn-gold { background: #c9a84c; color: #0a1628; }
-        .btn-gold:hover { background: #b8963a; }
-        .btn-outline { background: white; color: #0a1628; border: 2px solid #0a1628; margin-top: 0.75rem; }
-        .btn-outline:hover { background: #f0f5f2; }
-        .footer { background: #0a1628; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 3rem; }
+        .btn-gold:hover { background: #e8c97a; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.35); }
+        .btn-outline { background: transparent; color: #8892a4; border: 1.5px solid rgba(255,255,255,0.15); margin-top: 0.75rem; }
+        .btn-outline:hover { border-color: #c9a84c; color: #c9a84c; }
+        .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.06); }
         .footer strong { color: #c9a84c; }
     </style>
 </head>
 <body>
 
 <nav class="nav">
-    <img src="/static/logo.svg" style="height:120px;" alt="AlohaAgent logo">
-    <div class="nav-badge">BETA</div>
+    <img src="/static/logo.svg" style="height:90px;" alt="AlohaAgent logo">
+    <div class="nav-badge">LIVE</div>
 </nav>
 
 <div class="hero">

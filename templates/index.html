@@ -6,263 +6,486 @@
     <title>AlohaAgent — AI Tools for Hawaii Real Estate</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f7f4; color: #1a1a2e; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #ffffff; }
 
-        .nav { background: #0a1628; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
-        .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px; }
+        .top-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.6rem 1rem; font-size: 13px; font-weight: 600; }
 
-        .hero { background: #0a1628; color: white; padding: 5rem 2rem 4rem; text-align: center; }
-        .hero-eyebrow { display: inline-block; background: rgba(201, 168, 76, 0.15); color: #c9a84c; border: 1px solid rgba(201, 168, 76, 0.3); padding: 6px 16px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1.5rem; }
-        .hero h1 { font-size: 3rem; font-weight: 700; line-height: 1.2; margin-bottom: 1rem; letter-spacing: -1px; }
-        .hero h1 span { color: #c9a84c; }
-        .hero p { font-size: 1.1rem; color: #8892a4; max-width: 500px; margin: 0 auto 2rem; line-height: 1.7; }
-        .hero-stats { display: flex; justify-content: center; gap: 3rem; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.08); }
-        .hero-stat-num { font-size: 1.5rem; font-weight: 700; color: #c9a84c; }
-        .hero-stat-label { font-size: 12px; color: #8892a4; margin-top: 2px; }
+        .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); position: sticky; top: 0; z-index: 200; }
+        .nav-left { display: flex; align-items: center; gap: 2rem; }
+        .nav-right { display: flex; align-items: center; gap: 1rem; }
+        .nav-link { color: #8892a4; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
+        .nav-link:hover { color: #c9a84c; }
+        .nav-btn { background: transparent; color: #c9a84c; border: 1.5px solid #c9a84c; padding: 0.45rem 1.1rem; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .nav-btn:hover { background: #c9a84c; color: #0a1628; }
+        .nav-hamburger { display: none; flex-direction: column; gap: 4px; cursor: pointer; padding: 4px; }
+        .nav-hamburger span { display: block; width: 22px; height: 2px; background: #8892a4; border-radius: 2px; }
 
-        .container { max-width: 720px; margin: 0 auto; padding: 0 1rem; }
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-btn { background: none; border: none; color: #8892a4; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 0; transition: color 0.2s; font-family: inherit; }
+        .nav-dropdown-btn:hover { color: #c9a84c; }
+        .nav-dropdown-btn svg { transition: transform 0.2s; }
+        .nav-dropdown:hover .nav-dropdown-btn { color: #c9a84c; }
+        .nav-dropdown:hover .nav-dropdown-btn svg { transform: rotate(180deg); }
+        .nav-dropdown-menu { position: absolute; top: calc(100% + 14px); left: 0; background: #0d1f35; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 0.5rem; min-width: 265px; opacity: 0; pointer-events: none; transform: translateY(-6px); transition: all 0.18s ease; z-index: 300; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+        .nav-dropdown-group-label { font-size: 10px; font-weight: 700; color: #4a5a70; text-transform: uppercase; letter-spacing: 1px; padding: 0.4rem 0.75rem 0.2rem; }
+        .nav-dropdown:hover .nav-dropdown-menu { opacity: 1; pointer-events: all; transform: translateY(0); }
+        .nav-dropdown-menu a { display: flex; align-items: center; gap: 10px; color: #8892a4; text-decoration: none; font-size: 13px; padding: 0.55rem 0.75rem; border-radius: 8px; transition: all 0.15s; }
+        .nav-dropdown-menu a:hover { background: rgba(201,168,76,0.1); color: #c9a84c; }
+        .nav-dropdown-menu a .menu-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9a84c; opacity: 0.6; flex-shrink: 0; }
+        .nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.35rem 0.75rem; }
 
-        .free-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.75rem; font-size: 13px; font-weight: 600; }
+        .hero {
+            position: relative;
+            padding: 5rem 2rem 4rem;
+            overflow: hidden;
+            background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 22, 40, 0.78);
+            z-index: 1;
+        }
+        .hero-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 420px; gap: 4rem; align-items: center; position: relative; z-index: 2; }
+        .hero-content { position: relative; z-index: 2; }
+        .hero h1 { font-size: clamp(2.8rem, 5vw, 4.2rem); font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 1.25rem; }
+        .hero h1 .gold { color: #c9a84c; }
+        .hero-sub { font-size: 1.05rem; color: #a8b8cc; max-width: 480px; line-height: 1.75; margin-bottom: 2.5rem; }
+        .hero-stats { display: flex; gap: 2.5rem; margin-bottom: 2.5rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); }
+        .hero-stat-num { font-size: 1.35rem; font-weight: 700; color: #c9a84c; }
+        .hero-stat-label { font-size: 11px; color: #8892a4; margin-top: 2px; }
+        .hero-ctas { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+        .btn-gold { background: #c9a84c; color: #0a1628; padding: 0.8rem 1.6rem; border-radius: 10px; font-size: 0.95rem; font-weight: 700; text-decoration: none; border: none; cursor: pointer; transition: all 0.2s; display: inline-block; }
+        .btn-gold:hover { background: #e8c97a; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.4); }
+        .btn-text-link { color: #a8b8cc; font-size: 0.9rem; font-weight: 500; text-decoration: none; transition: color 0.2s; }
+        .btn-text-link:hover { color: #c9a84c; }
 
-        .section-label { text-align: center; margin: 2.5rem 0 1.5rem; }
-        .section-label h2 { font-size: 1.4rem; font-weight: 700; color: #0a1628; }
-        .section-label p { font-size: 0.9rem; color: #888; margin-top: 0.4rem; }
+        .hero-visual { position: relative; display: flex; align-items: center; justify-content: center; }
+        .hero-card-mock { background: rgba(255,255,255,0.06); border: 1px solid rgba(201,168,76,0.3); border-radius: 20px; padding: 2rem; width: 100%; max-width: 380px; backdrop-filter: blur(16px); }
+        .hero-card-mock-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .mock-icon { width: 36px; height: 36px; background: rgba(201,168,76,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .mock-title { font-size: 0.9rem; font-weight: 600; color: #fff; }
+        .mock-sub { font-size: 11px; color: #8892a4; }
+        .mock-lines { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem; }
+        .mock-line { height: 10px; background: rgba(255,255,255,0.07); border-radius: 6px; }
+        .mock-line.short { width: 60%; }
+        .mock-line.medium { width: 80%; }
+        .mock-badge-row { display: flex; gap: 8px; margin-top: 0.5rem; }
+        .mock-badge { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); }
 
-        .card { background: white; border-radius: 16px; padding: 2rem; margin-bottom: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #eee; }
-        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f0f0; }
-        .card-icon { width: 36px; height: 36px; background: #0a1628; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-        .card-title { font-size: 1rem; font-weight: 600; color: #0a1628; }
-        .card-subtitle { font-size: 12px; color: #888; margin-top: 1px; }
+        .tools-section { background: #0d1f35; padding: 5rem 2rem; }
+        .tools-inner { max-width: 1100px; margin: 0 auto; }
+        .section-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #c9a84c; margin-bottom: 1rem; }
+        .section-heading { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; color: #fff; max-width: 620px; line-height: 1.3; margin-bottom: 3rem; letter-spacing: -0.5px; }
+        .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+        .tool-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.25rem; position: relative; transition: all 0.2s; cursor: default; }
+        .tool-card.live { border-color: rgba(201,168,76,0.25); cursor: pointer; }
+        .tool-card.live:hover { background: rgba(201,168,76,0.06); border-color: rgba(201,168,76,0.45); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .tool-card a { text-decoration: none; color: inherit; display: block; }
+        .tool-badge { position: absolute; top: 14px; right: 14px; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px; }
+        .badge-live { background: rgba(201,168,76,0.2); color: #c9a84c; border: 1px solid rgba(201,168,76,0.4); }
+        .badge-pro { background: rgba(136,146,164,0.15); color: #8892a4; border: 1px solid rgba(136,146,164,0.25); }
+        .tool-icon { width: 40px; height: 40px; margin-bottom: 1rem; color: #c9a84c; }
+        .tool-name { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem; }
+        .tool-desc { font-size: 13px; color: #8892a4; line-height: 1.6; }
+        .tool-link { font-size: 12px; color: #c9a84c; font-weight: 600; margin-top: 0.75rem; display: inline-block; }
 
-        .usage-bar { background: white; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; border: 1px solid #eee; }
-        .usage-track { height: 6px; background: #f0f0f0; border-radius: 999px; margin-top: 0.5rem; overflow: hidden; }
-        .usage-fill { height: 6px; background: #c9a84c; border-radius: 999px; transition: width 0.3s; }
+        .testimonial-section { background: #0a1628; padding: 5rem 2rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); }
+        .testimonial-inner { max-width: 680px; margin: 0 auto; }
+        .quote-marks { font-size: 90px; line-height: 0.7; color: #c9a84c; margin-bottom: 1.5rem; font-family: Georgia, serif; opacity: 0.55; }
+        .quote-text { font-size: clamp(1.1rem, 2vw, 1.4rem); color: #fff; line-height: 1.7; font-style: italic; margin-bottom: 2rem; font-weight: 400; }
+        .quote-attribution { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+        .avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #c9a84c, #8a6a00); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: #0a1628; flex-shrink: 0; }
+        .quote-name { font-size: 14px; font-weight: 600; color: #c9a84c; }
+        .quote-role { font-size: 12px; color: #8892a4; margin-top: 2px; }
 
-        .form-group { margin-bottom: 1.1rem; }
-        label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid #e8e8e8; border-radius: 10px; font-size: 0.95rem; color: #1a1a2e; background: #fafafa; transition: all 0.2s; }
-        input:focus, select:focus { outline: none; border-color: #c9a84c; background: white; box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
-        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .how-section { background: #f8f7f4; padding: 5rem 2rem; color: #0a1628; }
+        .how-inner { max-width: 1000px; margin: 0 auto; text-align: center; }
+        .how-section .section-eyebrow { color: #c9a84c; }
+        .how-section .section-heading { color: #0a1628; margin: 0 auto 3.5rem; }
+        .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+        .step { text-align: center; }
+        .step-num { width: 56px; height: 56px; border-radius: 50%; background: #0a1628; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; color: #c9a84c; margin: 0 auto 1.25rem; }
+        .step-title { font-size: 1rem; font-weight: 700; color: #0a1628; margin-bottom: 0.5rem; }
+        .step-desc { font-size: 0.9rem; color: #666; line-height: 1.6; }
 
-        .btn { width: 100%; padding: 1rem; background: #0a1628; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 0.75rem; transition: all 0.2s; letter-spacing: 0.3px; }
-        .btn:hover { background: #162840; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(10,22,40,0.3); }
+        .waitlist-section { background: #0a1628; padding: 5rem 2rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); }
+        .waitlist-inner { max-width: 560px; margin: 0 auto; }
+        .waitlist-section .section-heading { margin: 0 auto 0.75rem; }
+        .waitlist-sub { color: #8892a4; font-size: 0.95rem; margin-bottom: 2rem; }
+        .waitlist-form { display: flex; gap: 0.75rem; max-width: 420px; margin: 0 auto; }
+        .waitlist-form input { flex: 1; padding: 0.8rem 1rem; border: 1.5px solid rgba(255,255,255,0.12); border-radius: 10px; font-size: 0.9rem; background: rgba(255,255,255,0.06); color: #fff; font-family: inherit; }
+        .waitlist-form input::placeholder { color: #8892a4; }
+        .waitlist-form input:focus { outline: none; border-color: #c9a84c; box-shadow: none; }
+        .waitlist-form .btn-gold { white-space: nowrap; }
 
-        .free-note { text-align: center; margin-top: 1rem; }
-        .free-note p { font-size: 12px; color: #888; }
-        .free-note strong { color: #c9a84c; }
-        .note { text-align: center; color: #888; font-size: 0.85rem; margin-top: 1rem; }
+        .footer { background: #060f1e; padding: 4rem 2rem 2rem; border-top: 1px solid rgba(255,255,255,0.06); }
+        .footer-inner { max-width: 1100px; margin: 0 auto; }
+        .footer-top { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+        .footer-brand p { font-size: 13px; color: #8892a4; margin-top: 0.75rem; line-height: 1.6; max-width: 220px; }
+        .footer-col h4 { font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem; }
+        .footer-col a { display: block; font-size: 13px; color: #8892a4; text-decoration: none; margin-bottom: 0.6rem; transition: color 0.2s; }
+        .footer-col a:hover { color: #c9a84c; }
+        .footer-col p { font-size: 13px; color: #8892a4; margin-bottom: 0.4rem; }
+        .footer-divider { height: 1px; background: rgba(255,255,255,0.06); margin-bottom: 1.5rem; }
+        .footer-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+        .footer-copy { font-size: 12px; color: #8892a4; }
+        .footer-social { display: flex; gap: 1rem; }
+        .footer-social a { width: 34px; height: 34px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: #8892a4; text-decoration: none; font-size: 14px; transition: all 0.2s; }
+        .footer-social a:hover { border-color: #c9a84c; color: #c9a84c; }
+        .footer-tagline { width: 100%; text-align: center; font-size: 12px; color: #8892a4; margin-top: 1.5rem; letter-spacing: 2px; text-transform: uppercase; }
 
-        .footer { background: #0a1628; color: #8892a4; text-align: center; padding: 2rem; font-size: 13px; margin-top: 3rem; }
-        .footer strong { color: #c9a84c; }
+        @media (max-width: 1100px) {
+            .hero-inner { grid-template-columns: 1fr; }
+            .hero-visual { display: none; }
+            .tools-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
+        }
+        @media (max-width: 600px) {
+            .nav-dropdown { display: none; }
+            .nav-link { display: none; }
+            .nav-hamburger { display: flex; }
+            .hero { padding: 3rem 1.25rem; }
+            .hero h1 { font-size: 2.4rem; }
+            .tools-grid { grid-template-columns: 1fr; }
+            .steps-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+            .waitlist-form { flex-direction: column; }
+            .footer-top { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; align-items: flex-start; }
+        }
     </style>
 </head>
 <body>
 
-<div class="free-banner">
+<div class="top-banner">
     🌺 Free tier — 3 listing generations per month. No credit card required.
 </div>
 
 <nav class="nav">
-    <img src="/static/logo.svg" style="height:120px;" alt="AlohaAgent logo">
-    <div class="nav-badge">BETA</div>
+    <div class="nav-left">
+        <a href="/"><img src="/static/logo.svg" style="height:90px;" alt="AlohaAgent"></a>
+        <div class="nav-dropdown">
+            <button class="nav-dropdown-btn">
+                Tools
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="nav-dropdown-menu">
+                <div class="nav-dropdown-group-label">Listing Tools</div>
+                <a href="/listing"><span class="menu-dot"></span>Listing Generator</a>
+                <a href="/open-house"><span class="menu-dot"></span>Open House Announcer</a>
+                <a href="/offer-letter"><span class="menu-dot"></span>Offer Letter Assistant</a>
+                <a href="/market-report"><span class="menu-dot"></span>Market Report Generator</a>
+                <a href="/property-comparison"><span class="menu-dot"></span>Property Comparison</a>
+                <div class="nav-dropdown-divider"></div>
+                <div class="nav-dropdown-group-label">Marketing Tools</div>
+                <a href="/social-media"><span class="menu-dot"></span>Social Media Generator</a>
+                <a href="/client-emails"><span class="menu-dot"></span>Client Email Templates</a>
+                <a href="/bio-generator"><span class="menu-dot"></span>Bio Generator</a>
+            </div>
+        </div>
+        <a href="/pricing" class="nav-link">Pricing</a>
+        <a href="#how-it-works" class="nav-link">How It Works</a>
+    </div>
+    <div class="nav-right">
+        <a href="/listing" class="nav-btn">Get Started Free</a>
+        <div class="nav-hamburger" onclick="toggleMenu()">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
 </nav>
 
-<div class="hero">
-    <div class="hero-eyebrow">AI Tools for Hawaii Real Estate</div>
-    <h1>List smarter.<br><span>Sell faster.</span></h1>
-    <p>Professional MLS listings, market analysis, and neighborhood reports — generated by AI in seconds.</p>
-    <div class="hero-stats">
-        <div>
-            <div class="hero-stat-num">~15s</div>
-            <div class="hero-stat-label">Generation time</div>
-        </div>
-        <div>
-            <div class="hero-stat-num">150+</div>
-            <div class="hero-stat-label">Words per listing</div>
-        </div>
-        <div>
-            <div class="hero-stat-num">Free</div>
-            <div class="hero-stat-label">To get started</div>
-        </div>
-    </div>
+<div id="mobile-menu" style="display:none;background:#0a1628;padding:1rem 2rem;border-bottom:1px solid rgba(255,255,255,0.08);">
+    <a href="/listing" style="display:block;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Listing Generator</a>
+    <a href="/open-house" style="display:block;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Open House Announcer</a>
+    <a href="/social-media" style="display:block;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Social Media Generator</a>
+    <a href="/offer-letter" style="display:block;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Offer Letter Assistant</a>
+    <a href="/market-report" style="display:block;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Market Report Generator</a>
+    <a href="/client-emails" style="display:block;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Client Email Templates</a>
+    <a href="/bio-generator" style="display:block;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Bio Generator</a>
+    <a href="/property-comparison" style="display:block;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.06);">Property Comparison</a>
+    <a href="/pricing" style="display:block;color:#8892a4;text-decoration:none;padding:0.6rem 0;font-size:14px;">Pricing</a>
 </div>
 
-<div class="container">
-
-    <div class="section-label">
-        <h2>Generate a listing</h2>
-        <p>Fill in the property details and let AI do the rest</p>
-    </div>
-
-    <div class="usage-bar">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <span style="font-size:13px;color:#555;">Free listings used</span>
-            <span style="font-size:13px;font-weight:600;color:#0a1628;">{{ count }}/3</span>
-        </div>
-        <div class="usage-track">
-            <div class="usage-fill" style="width:{{ (count / 3 * 100)|int }}%"></div>
-        </div>
-    </div>
-
-    <form action="/generate" method="POST">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-icon">🏠</div>
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-content">
+            <h1>List smarter.<br><span class="gold">Sell faster.</span></h1>
+            <p class="hero-sub">Professional MLS listings, market analysis, and neighborhood reports — generated by AI in seconds.</p>
+            <div class="hero-stats">
                 <div>
-                    <div class="card-title">Property Details</div>
-                    <div class="card-subtitle">Basic information about the listing</div>
+                    <div class="hero-stat-num">~15s</div>
+                    <div class="hero-stat-label">Generation time</div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Property Address</label>
-                <input type="text" name="address" placeholder="e.g. 5332 Makalea St" required>
-            </div>
-            <div class="row">
-                <div class="form-group">
-                    <label>Neighborhood</label>
-                    <input type="text" name="neighborhood" placeholder="e.g. Poipu" required>
-                </div>
-                <div class="form-group">
-                    <label>Island</label>
-                    <select name="island">
-                        <option>Kauai</option>
-                        <option>Oahu</option>
-                        <option>Maui</option>
-                        <option>Big Island</option>
-                        <option>Molokai</option>
-                        <option>Lanai</option>
-                    </select>
-                </div>
-            </div>
-            <div class="row">
-                <div class="form-group">
-                    <label>Bedrooms</label>
-                    <input type="number" name="bedrooms" placeholder="4" required>
-                </div>
-                <div class="form-group">
-                    <label>Bathrooms</label>
-                    <input type="number" name="bathrooms" placeholder="3.5" step="0.5" required>
-                </div>
-            </div>
-            <div class="row">
-                <div class="form-group">
-                    <label>Square Footage</label>
-                    <input type="text" name="sqft" placeholder="3200" required>
-                </div>
-                <div class="form-group">
-                    <label>Listing Price</label>
-                    <input type="text" name="price" placeholder="2,950,000" required>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <div class="card-icon">✨</div>
                 <div>
-                    <div class="card-title">Property Features</div>
-                    <div class="card-subtitle">What makes this property special</div>
+                    <div class="hero-stat-num">150+</div>
+                    <div class="hero-stat-label">Words per listing</div>
+                </div>
+                <div>
+                    <div class="hero-stat-num">Free</div>
+                    <div class="hero-stat-label">To get started</div>
                 </div>
             </div>
-            <div class="row">
-                <div class="form-group">
-                    <label>Ocean View</label>
-                    <select name="ocean_view">
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
-                    </select>
+            <div class="hero-ctas">
+                <a href="/listing" class="btn-gold">Get Started Free →</a>
+                <a href="#tools" class="btn-text-link">See all tools</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-card-mock">
+                <div class="hero-card-mock-header">
+                    <div class="mock-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="mock-title">5332 Makalea St</div>
+                        <div class="mock-sub">Poipu, Kauai · AI Listing Ready</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Pool</label>
-                    <select name="pool">
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
-                    </select>
+                <div class="mock-lines">
+                    <div class="mock-line medium"></div>
+                    <div class="mock-line"></div>
+                    <div class="mock-line short"></div>
+                    <div class="mock-line medium"></div>
+                    <div class="mock-line"></div>
+                </div>
+                <div class="mock-badge-row">
+                    <span class="mock-badge">4 BD</span>
+                    <span class="mock-badge">3 BA</span>
+                    <span class="mock-badge">Ocean View</span>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Standout Feature</label>
-                <input type="text" name="extra" placeholder="e.g. chef's kitchen, pool waterfalls, newly renovated" required>
-            </div>
-            <button type="submit" class="btn">Generate Listing with AI</button>
-            <div class="free-note">
-                <p>Free tier · <strong>{{ 3 - count }} listing{{ 's' if (3 - count) != 1 else '' }} remaining</strong> · No credit card needed</p>
-            </div>
-        </div>
-    </form>
-
-    <div class="section-label">
-        <h2>More tools coming soon</h2>
-        <p>Join the waitlist to get early access when pro launches</p>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
-        <a href="/open-house" style="text-decoration:none;">
-            <div class="card" style="position:relative;overflow:hidden;cursor:pointer;border:2px solid #c9a84c;height:100%;margin-bottom:0;">
-                <div style="position:absolute;top:12px;right:12px;background:#0a1628;color:#c9a84c;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:0.5px;">LIVE</div>
-                <div style="font-size:24px;margin-bottom:0.75rem;">🏡</div>
-                <div style="font-size:0.95rem;font-weight:600;color:#0a1628;margin-bottom:0.4rem;">Open House Announcer</div>
-                <div style="font-size:12px;color:#888;line-height:1.6;">Generate social-ready open house posts for Instagram, Facebook, and email in one click.</div>
-                <div style="font-size:11px;color:#c9a84c;font-weight:600;margin-top:0.75rem;">Try it now →</div>
-            </div>
-        </a>
-        <div class="card" style="opacity:0.85;position:relative;overflow:hidden;margin-bottom:0;">
-            <div style="position:absolute;top:12px;right:12px;background:#0a1628;color:#c9a84c;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:0.5px;">PRO</div>
-            <div style="font-size:24px;margin-bottom:0.75rem;">📄</div>
-            <div style="font-size:0.95rem;font-weight:600;color:#0a1628;margin-bottom:0.4rem;">Offer Letter Assistant</div>
-            <div style="font-size:12px;color:#888;line-height:1.6;">Craft compelling, professional offer letters tailored to Hawaii real estate transactions.</div>
-        </div>
-        <a href="/social-media" style="text-decoration:none;">
-    <div class="card" style="position:relative;overflow:hidden;cursor:pointer;border:2px solid #c9a84c;height:100%;margin-bottom:0;">
-        <div style="position:absolute;top:12px;right:12px;background:#0a1628;color:#c9a84c;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:0.5px;">LIVE</div>
-        <div style="font-size:24px;margin-bottom:0.75rem;">📱</div>
-        <div style="font-size:0.95rem;font-weight:600;color:#0a1628;margin-bottom:0.4rem;">Social Media Generator</div>
-        <div style="font-size:12px;color:#888;line-height:1.6;">Turn any listing into scroll-stopping Instagram and Facebook posts with captions and hashtags.</div>
-        <div style="font-size:11px;color:#c9a84c;font-weight:600;margin-top:0.75rem;">Try it now →</div>
-    </div>
-</a>
-        <div class="card" style="opacity:0.85;position:relative;overflow:hidden;margin-bottom:0;">
-            <div style="position:absolute;top:12px;right:12px;background:#0a1628;color:#c9a84c;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:0.5px;">PRO</div>
-            <div style="font-size:24px;margin-bottom:0.75rem;">📊</div>
-            <div style="font-size:0.95rem;font-weight:600;color:#0a1628;margin-bottom:0.4rem;">Market Report Generator</div>
-            <div style="font-size:12px;color:#888;line-height:1.6;">Generate detailed neighborhood market snapshots to share with buyers and sellers.</div>
-        </div>
-        <div class="card" style="opacity:0.85;position:relative;overflow:hidden;margin-bottom:0;">
-            <div style="position:absolute;top:12px;right:12px;background:#0a1628;color:#c9a84c;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:0.5px;">PRO</div>
-            <div style="font-size:24px;margin-bottom:0.75rem;">✉️</div>
-            <div style="font-size:0.95rem;font-weight:600;color:#0a1628;margin-bottom:0.4rem;">Client Email Templates</div>
-            <div style="font-size:12px;color:#888;line-height:1.6;">Professional client communication templates for every stage of the buying and selling process.</div>
-        </div>
-        <div class="card" style="opacity:0.85;position:relative;overflow:hidden;margin-bottom:0;">
-            <div style="position:absolute;top:12px;right:12px;background:#0a1628;color:#c9a84c;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:0.5px;">PRO</div>
-            <div style="font-size:24px;margin-bottom:0.75rem;">📝</div>
-            <div style="font-size:0.95rem;font-weight:600;color:#0a1628;margin-bottom:0.4rem;">Bio Generator</div>
-            <div style="font-size:12px;color:#888;line-height:1.6;">Generate a polished realtor bio for your website, MLS profile, and social media pages.</div>
         </div>
     </div>
+</section>
 
-    <div class="card" style="margin-bottom:2rem;">
-        <div class="card-header">
-            <div class="card-icon">🌺</div>
-            <div>
-                <div class="card-title">Join the waitlist</div>
-                <div class="card-subtitle">Be first to access premium tools when they launch</div>
+<section class="tools-section" id="tools">
+    <div class="tools-inner">
+        <div class="section-eyebrow">AI TOOLS BUILT FOR HAWAII REALTORS</div>
+        <h2 class="section-heading">Everything you need to market, communicate, and close with confidence.</h2>
+        <div class="tools-grid">
+
+            <div class="tool-card live">
+                <a href="/listing">
+                    <span class="tool-badge badge-live">LIVE</span>
+                    <div class="tool-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                    </div>
+                    <div class="tool-name">Listing Generator</div>
+                    <div class="tool-desc">Generate professional MLS-ready property descriptions with neighborhood analysis and pricing insights.</div>
+                    <span class="tool-link">Try it now →</span>
+                </a>
+            </div>
+
+            <div class="tool-card live">
+                <a href="/open-house">
+                    <span class="tool-badge badge-live">LIVE</span>
+                    <div class="tool-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                    </div>
+                    <div class="tool-name">Open House Announcer</div>
+                    <div class="tool-desc">Generate social-ready open house posts for Instagram, Facebook, and email in one click.</div>
+                    <span class="tool-link">Try it now →</span>
+                </a>
+            </div>
+
+            <div class="tool-card live">
+                <a href="/offer-letter">
+                    <span class="tool-badge badge-live">LIVE</span>
+                    <div class="tool-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                    </div>
+                    <div class="tool-name">Offer Letter Assistant</div>
+                    <div class="tool-desc">Craft compelling, professional offer letters tailored to Hawaii real estate transactions.</div>
+                    <span class="tool-link">Try it now →</span>
+                </a>
+            </div>
+
+            <div class="tool-card live">
+                <a href="/social-media">
+                    <span class="tool-badge badge-live">LIVE</span>
+                    <div class="tool-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                        </svg>
+                    </div>
+                    <div class="tool-name">Social Media Generator</div>
+                    <div class="tool-desc">Turn any listing into scroll-stopping Instagram and Facebook posts with captions and hashtags.</div>
+                    <span class="tool-link">Try it now →</span>
+                </a>
+            </div>
+
+            <div class="tool-card live">
+                <a href="/market-report">
+                    <span class="tool-badge badge-live">LIVE</span>
+                    <div class="tool-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+                        </svg>
+                    </div>
+                    <div class="tool-name">Market Report Generator</div>
+                    <div class="tool-desc">Generate detailed neighborhood market snapshots to share with buyers and sellers.</div>
+                    <span class="tool-link">Try it now →</span>
+                </a>
+            </div>
+
+            <div class="tool-card live">
+                <a href="/client-emails">
+                    <span class="tool-badge badge-live">LIVE</span>
+                    <div class="tool-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                    </div>
+                    <div class="tool-name">Client Email Templates</div>
+                    <div class="tool-desc">Professional client communication templates for every stage of buying and selling.</div>
+                    <span class="tool-link">Try it now →</span>
+                </a>
+            </div>
+
+            <div class="tool-card live">
+                <a href="/bio-generator">
+                    <span class="tool-badge badge-live">LIVE</span>
+                    <div class="tool-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="tool-name">Bio Generator</div>
+                    <div class="tool-desc">Generate a polished realtor bio for your website, MLS profile, and social media pages.</div>
+                    <span class="tool-link">Try it now →</span>
+                </a>
+            </div>
+
+            <div class="tool-card live">
+                <a href="/property-comparison">
+                    <span class="tool-badge badge-live">LIVE</span>
+                    <div class="tool-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/><line x1="7" y1="8" x2="7" y2="8"/><line x1="17" y1="8" x2="17" y2="8"/>
+                        </svg>
+                    </div>
+                    <div class="tool-name">Property Comparison</div>
+                    <div class="tool-desc">Compare 2–3 properties side by side with AI analysis, pros/cons, and a clear buyer recommendation.</div>
+                    <span class="tool-link">Try it now →</span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="testimonial-section">
+    <div class="testimonial-inner">
+        <div class="quote-marks">&#8220;</div>
+        <p class="quote-text">AlohaAgent saves me hours every week. The content feels local, professional, and truly resonates with my clients.</p>
+        <div class="quote-attribution">
+            <div class="avatar">L</div>
+            <div style="text-align:left;">
+                <div class="quote-name">Leilani K.</div>
+                <div class="quote-role">Realtor, O'ahu</div>
             </div>
         </div>
-        <form action="/waitlist" method="POST">
-            <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" name="email" placeholder="your@email.com" required>
+    </div>
+</section>
+
+<section class="how-section" id="how-it-works">
+    <div class="how-inner">
+        <div class="section-eyebrow">SIMPLE BY DESIGN</div>
+        <h2 class="section-heading">From details to done in seconds.</h2>
+        <div class="steps-grid">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-title">Enter property details</div>
+                <div class="step-desc">Fill in the address, features, and what makes the property special. Takes less than a minute.</div>
             </div>
-            <button type="submit" class="btn" style="background:#c9a84c;color:#0a1628;">Join Waitlist</button>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-title">AI generates your content</div>
+                <div class="step-desc">Claude AI creates professional, Hawaii-specific copy tailored to your listing in seconds.</div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-title">Copy, paste, and close</div>
+                <div class="step-desc">One-click copy to clipboard. Paste directly into MLS, social media, or email — ready to go.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="waitlist-section" id="waitlist">
+    <div class="waitlist-inner">
+        <div class="section-eyebrow">JOIN THE COMMUNITY</div>
+        <h2 class="section-heading">Built for Hawaii. Free to start.</h2>
+        <p class="waitlist-sub">Get notified when new tools launch and stay ahead of the market with AI-powered real estate content.</p>
+        <form action="/waitlist" method="POST" class="waitlist-form">
+            <input type="email" name="email" placeholder="your@email.com" required>
+            <button type="submit" class="btn-gold">Join Waitlist</button>
         </form>
     </div>
+</section>
 
-</div>
+<footer class="footer">
+    <div class="footer-inner">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <img src="/static/logo.svg" style="height:50px;" alt="AlohaAgent">
+                <p>AI tools built for Hawaii real estate professionals. Market smarter, close faster.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="#tools">All Tools</a>
+                <a href="/pricing">Pricing</a>
+                <a href="#how-it-works">How It Works</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <p>AlohaAgent by AlohaForge</p>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <p>© 2025 AlohaAgent</p>
+            </div>
+        </div>
+        <div class="footer-divider"></div>
+        <div class="footer-bottom">
+            <span class="footer-copy">© 2025 AlohaAgent. All rights reserved.</span>
+            <div class="footer-social">
+                <a href="#" title="Instagram">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                </a>
+                <a href="#" title="Facebook">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                </a>
+                <a href="#" title="LinkedIn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                </a>
+                <a href="#" title="Email">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </a>
+            </div>
+        </div>
+        <div class="footer-tagline">MADE FOR HAWAI'I. BUILT FOR REALTORS. 🌺</div>
+    </div>
+</footer>
 
-<div class="footer">
-    <strong>AlohaAgent</strong> by AlohaForge · AI tools built for Hawaii real estate professionals
-</div>
+<script>
+function toggleMenu() {
+    const menu = document.getElementById('mobile-menu');
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+</script>
 
 </body>
 </html>

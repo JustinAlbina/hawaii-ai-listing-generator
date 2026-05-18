@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Comparison Report — AlohaAgent</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #ffffff; }
+
+        .top-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.6rem 1rem; font-size: 13px; font-weight: 600; }
+
+        .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .nav-left { display: flex; align-items: center; gap: 2rem; }
+        .nav-link { color: #8892a4; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
+        .nav-link:hover { color: #c9a84c; }
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-btn { background: none; border: none; color: #8892a4; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 0; transition: color 0.2s; font-family: inherit; }
+        .nav-dropdown-btn:hover, .nav-dropdown:hover .nav-dropdown-btn { color: #c9a84c; }
+        .nav-dropdown:hover .nav-dropdown-btn svg { transform: rotate(180deg); }
+        .nav-dropdown-btn svg { transition: transform 0.2s; }
+        .nav-dropdown-menu { position: absolute; top: calc(100% + 14px); left: 0; background: #0d1f35; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 0.5rem; min-width: 265px; opacity: 0; pointer-events: none; transform: translateY(-6px); transition: all 0.18s ease; z-index: 300; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+        .nav-dropdown:hover .nav-dropdown-menu { opacity: 1; pointer-events: all; transform: translateY(0); }
+        .nav-dropdown-menu a { display: flex; align-items: center; gap: 10px; color: #8892a4; text-decoration: none; font-size: 13px; padding: 0.55rem 0.75rem; border-radius: 8px; transition: all 0.15s; }
+        .nav-dropdown-menu a:hover { background: rgba(201,168,76,0.1); color: #c9a84c; }
+        .nav-dropdown-menu a .menu-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9a84c; opacity: 0.6; flex-shrink: 0; }
+        .nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.35rem 0.75rem; }
+        .nav-dropdown-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4a5a70; padding: 0.5rem 0.75rem 0.2rem; }
+        .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px; }
+
+        .hero { background: #0d1f35; color: white; padding: 2.5rem 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem; }
+        .hero h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.4rem; letter-spacing: -0.5px; }
+        .hero-addresses { display: flex; align-items: center; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.75rem; }
+        .hero-addr { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 4px 12px; font-size: 13px; color: #c8d5e8; }
+        .hero-vs { color: #c9a84c; font-weight: 700; font-size: 12px; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: #8892a4; text-decoration: none; font-size: 13px; font-weight: 500; margin: 1.25rem 0 0; transition: color 0.2s; }
+        .back-link:hover { color: #c9a84c; }
+
+        .container { max-width: 860px; margin: 0 auto; padding: 0 1rem 3rem; }
+
+        .card { background: #162840; border-radius: 16px; padding: 1.75rem; margin: 1.25rem 0; border: 1px solid rgba(255,255,255,0.08); }
+        .card.gold-highlight { background: linear-gradient(135deg, #162840, #1c3050); border-color: rgba(201,168,76,0.35); }
+        .card.gold-border { border: 2px solid #c9a84c; background: linear-gradient(135deg, #162840, #1c3050); }
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .card-icon { width: 32px; height: 32px; background: rgba(201,168,76,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .card-title { font-size: 0.95rem; font-weight: 600; color: #fff; }
+        .card-subtitle { font-size: 12px; color: #8892a4; margin-top: 1px; }
+        .card-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c9a84c; margin-bottom: 0.5rem; }
+
+        .content-box { background: #0d1f35; border-radius: 10px; padding: 1.25rem; font-size: 0.9rem; line-height: 1.85; color: #c8d5e8; white-space: pre-wrap; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.06); }
+
+        .copy-btn { background: #0a1628; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1); }
+        .copy-btn:hover { background: #162840; }
+        .copy-btn.copied { background: #2d7a4f; border-color: #2d7a4f; }
+
+        /* Comparison table */
+        .compare-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        .compare-table th { background: rgba(201,168,76,0.12); color: #c9a84c; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .compare-table th:first-child { color: #8892a4; font-size: 11px; }
+        .compare-table td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #c8d5e8; vertical-align: top; }
+        .compare-table td:first-child { color: #8892a4; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .compare-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .best-val { color: #c9a84c; font-weight: 600; }
+
+        /* Pros/cons columns */
+        .pros-cons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .pros-box { background: rgba(45,122,79,0.12); border: 1px solid rgba(45,122,79,0.25); border-radius: 10px; padding: 1rem; }
+        .cons-box { background: rgba(180,60,60,0.1); border: 1px solid rgba(180,60,60,0.2); border-radius: 10px; padding: 1rem; }
+        .pros-cons-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.6rem; }
+        .pros-label { color: #4caf7d; }
+        .cons-label { color: #e57373; }
+        .pros-cons-text { font-size: 0.875rem; line-height: 1.8; color: #c8d5e8; white-space: pre-wrap; }
+
+        /* Rec box */
+        .rec-box { background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.06)); border: 1px solid rgba(201,168,76,0.3); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+        .rec-box-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c9a84c; margin-bottom: 0.5rem; }
+        .rec-box p { font-size: 0.9rem; line-height: 1.75; color: #c8d5e8; white-space: pre-wrap; }
+
+        .prop-addr-tag { display: inline-block; background: rgba(201,168,76,0.12); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; margin-bottom: 1rem; }
+
+        .btn-row { display: flex; gap: 1rem; }
+        .btn { flex: 1; padding: 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; border: none; transition: all 0.2s; }
+        .btn-primary { background: #c9a84c; color: #0a1628; }
+        .btn-primary:hover { background: #e8c97a; }
+        .btn-outline { background: transparent; color: #c9a84c; border: 1.5px solid rgba(201,168,76,0.5); }
+        .btn-outline:hover { background: rgba(201,168,76,0.08); }
+
+        .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.06); }
+        .footer strong { color: #c9a84c; }
+
+        @media (max-width: 600px) { .nav-dropdown { display: none; } .nav-link { display: none; } .pros-cons-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="top-banner">🌺 Free tier — 3 listing generations per month. No credit card required.</div>
+
+<nav class="nav">
+    <div class="nav-left">
+        <a href="/"><img src="/static/logo.svg" style="height:90px;" alt="AlohaAgent"></a>
+        <div class="nav-dropdown">
+            <button class="nav-dropdown-btn">Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="nav-dropdown-menu">
+                <div class="nav-dropdown-group-label">Listing Tools</div>
+                <a href="/listing"><span class="menu-dot"></span>Listing Generator</a>
+                <a href="/open-house"><span class="menu-dot"></span>Open House Announcer</a>
+                <a href="/offer-letter"><span class="menu-dot"></span>Offer Letter Assistant</a>
+                <a href="/property-comparison"><span class="menu-dot"></span>Property Comparison</a>
+                <div class="nav-dropdown-divider"></div>
+                <div class="nav-dropdown-group-label">Marketing Tools</div>
+                <a href="/social-media"><span class="menu-dot"></span>Social Media Generator</a>
+                <a href="/market-report"><span class="menu-dot"></span>Market Report Generator</a>
+                <a href="/client-emails"><span class="menu-dot"></span>Client Email Templates</a>
+                <a href="/bio-generator"><span class="menu-dot"></span>Bio Generator</a>
+            </div>
+        </div>
+        <a href="/pricing" class="nav-link">Pricing</a>
+        <a href="/#how-it-works" class="nav-link">How It Works</a>
+    </div>
+    <div class="nav-badge">LIVE</div>
+</nav>
+
+<div class="hero">
+    <div class="hero-eyebrow">Comparison Report Ready</div>
+    <h1>Property Comparison Report</h1>
+    <div class="hero-addresses">
+        <span class="hero-addr">{{ p1_address }}</span>
+        <span class="hero-vs">VS</span>
+        <span class="hero-addr">{{ p2_address }}</span>
+        {% if has_p3 %}
+        <span class="hero-vs">VS</span>
+        <span class="hero-addr">{{ p3_address }}</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container">
+    <a href="/property-comparison" class="back-link">← Generate another comparison</a>
+
+    <!-- Executive Summary -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+            </div>
+            <div>
+                <div class="card-title">Executive Summary</div>
+                <div class="card-subtitle">High-level overview of the comparison</div>
+            </div>
+        </div>
+        <div class="content-box" id="exec-summary">{{ executive_summary }}</div>
+        <button class="copy-btn" onclick="copyText('exec-summary', this)">Copy</button>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="5" width="8" height="14" rx="1"/><rect x="14" y="5" width="8" height="14" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/>
+                </svg>
+            </div>
+            <div>
+                <div class="card-title">Side-by-Side Comparison</div>
+                <div class="card-subtitle">Key facts at a glance</div>
+            </div>
+        </div>
+        <div style="overflow-x:auto;">
+            <table class="compare-table">
+                <tr>
+                    <th></th>
+                    <th>{{ p1_address|truncate(30, True, '…') }}</th>
+                    <th>{{ p2_address|truncate(30, True, '…') }}</th>
+                    {% if has_p3 %}<th>{{ p3_address|truncate(30, True, '…') }}</th>{% endif %}
+                </tr>
+                <tr>
+                    <td>Neighborhood</td>
+                    <td>{{ p1_neighborhood }}, {{ p1_island }}</td>
+                    <td>{{ p2_neighborhood }}, {{ p2_island }}</td>
+                    {% if has_p3 %}<td>{{ p3_neighborhood }}, {{ p3_island }}</td>{% endif %}
+                </tr>
+                <tr>
+                    <td>Price</td>
+                    <td>${{ p1_price }}</td>
+                    <td>${{ p2_price }}</td>
+                    {% if has_p3 %}<td>${{ p3_price }}</td>{% endif %}
+                </tr>
+                <tr>
+                    <td>Beds / Baths</td>
+                    <td>{{ p1_bedrooms }} bd / {{ p1_bathrooms }} ba</td>
+                    <td>{{ p2_bedrooms }} bd / {{ p2_bathrooms }} ba</td>
+                    {% if has_p3 %}<td>{{ p3_bedrooms }} bd / {{ p3_bathrooms }} ba</td>{% endif %}
+                </tr>
+                <tr>
+                    <td>Sq Footage</td>
+                    <td>{{ p1_sqft }} sqft</td>
+                    <td>{{ p2_sqft }} sqft</td>
+                    {% if has_p3 %}<td>{{ p3_sqft }} sqft</td>{% endif %}
+                </tr>
+                <tr>
+                    <td>Price / Sqft</td>
+                    <td>{{ p1_ppsf }}</td>
+                    <td>{{ p2_ppsf }}</td>
+                    {% if has_p3 %}<td>{{ p3_ppsf }}</td>{% endif %}
+                </tr>
+                <tr>
+                    <td>Condition</td>
+                    <td>{{ p1_condition }}</td>
+                    <td>{{ p2_condition }}</td>
+                    {% if has_p3 %}<td>{{ p3_condition }}</td>{% endif %}
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Property 1 Pros & Cons -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+            </div>
+            <div>
+                <div class="card-title">Property 1 Analysis</div>
+                <div class="card-subtitle">{{ p1_address }}</div>
+            </div>
+        </div>
+        <div class="prop-addr-tag">{{ p1_neighborhood }}, {{ p1_island }} · ${{ p1_price }}</div>
+        <div class="pros-cons-grid">
+            <div class="pros-box">
+                <div class="pros-cons-label pros-label">Pros</div>
+                <div class="pros-cons-text" id="p1-pros">{{ p1_pros }}</div>
+            </div>
+            <div class="cons-box">
+                <div class="pros-cons-label cons-label">Cons</div>
+                <div class="pros-cons-text" id="p1-cons">{{ p1_cons }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Property 2 Pros & Cons -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+            </div>
+            <div>
+                <div class="card-title">Property 2 Analysis</div>
+                <div class="card-subtitle">{{ p2_address }}</div>
+            </div>
+        </div>
+        <div class="prop-addr-tag">{{ p2_neighborhood }}, {{ p2_island }} · ${{ p2_price }}</div>
+        <div class="pros-cons-grid">
+            <div class="pros-box">
+                <div class="pros-cons-label pros-label">Pros</div>
+                <div class="pros-cons-text" id="p2-pros">{{ p2_pros }}</div>
+            </div>
+            <div class="cons-box">
+                <div class="pros-cons-label cons-label">Cons</div>
+                <div class="pros-cons-text" id="p2-cons">{{ p2_cons }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Property 3 (conditional) -->
+    {% if has_p3 %}
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+            </div>
+            <div>
+                <div class="card-title">Property 3 Analysis</div>
+                <div class="card-subtitle">{{ p3_address }}</div>
+            </div>
+        </div>
+        <div class="prop-addr-tag">{{ p3_neighborhood }}, {{ p3_island }} · ${{ p3_price }}</div>
+        <div class="pros-cons-grid">
+            <div class="pros-box">
+                <div class="pros-cons-label pros-label">Pros</div>
+                <div class="pros-cons-text" id="p3-pros">{{ p3_pros }}</div>
+            </div>
+            <div class="cons-box">
+                <div class="pros-cons-label cons-label">Cons</div>
+                <div class="pros-cons-text" id="p3-cons">{{ p3_cons }}</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Best Value -->
+    <div class="card gold-highlight">
+        <div class="card-header">
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+            </div>
+            <div>
+                <div class="card-title">Best Value Pick</div>
+                <div class="card-subtitle">Best dollar-for-dollar value</div>
+            </div>
+        </div>
+        <div class="rec-box">
+            <div class="rec-box-label">Value Analysis</div>
+            <p id="best-value">{{ best_value }}</p>
+        </div>
+        <button class="copy-btn" onclick="copyId('best-value', this)">Copy</button>
+    </div>
+
+    <!-- Best Fit -->
+    <div class="card gold-highlight">
+        <div class="card-header">
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+            </div>
+            <div>
+                <div class="card-title">Best Fit for Buyer</div>
+                <div class="card-subtitle">Matched to stated priorities</div>
+            </div>
+        </div>
+        <div class="rec-box">
+            <div class="rec-box-label">Buyer Match</div>
+            <p id="best-fit">{{ best_fit }}</p>
+        </div>
+        <button class="copy-btn" onclick="copyId('best-fit', this)">Copy</button>
+    </div>
+
+    <!-- Recommendation -->
+    <div class="card gold-border">
+        <div class="card-header">
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+            </div>
+            <div>
+                <div class="card-title">Recommendation</div>
+                <div class="card-subtitle">Ready to share with your buyer</div>
+            </div>
+        </div>
+        <div class="rec-box">
+            <div class="rec-box-label">Our Take</div>
+            <p id="recommendation">{{ recommendation }}</p>
+        </div>
+        <button class="copy-btn" onclick="copyId('recommendation', this)">Copy Recommendation</button>
+    </div>
+
+    <div class="card">
+        <div class="btn-row">
+            <a href="/property-comparison" class="btn btn-primary">New Comparison</a>
+            <a href="/" class="btn btn-outline">Back to Home</a>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <strong>AlohaAgent</strong> by AlohaForge · AI tools built for Hawaii real estate professionals
+</div>
+
+<script>
+function copyText(id, btn) {
+    const el = document.getElementById(id);
+    const text = el.innerText || el.textContent;
+    navigator.clipboard.writeText(text.trim()).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+    });
+}
+function copyId(id, btn) {
+    copyText(id, btn);
+}
+</script>
+
+</body>
+</html>

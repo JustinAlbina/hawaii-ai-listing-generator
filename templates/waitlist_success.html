@@ -6,28 +6,28 @@
     <title>You're on the list — AlohaAgent</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f7f4; color: #1a1a2e; }
-        .nav { background: #0a1628; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #fff; }
+        .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
         .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
-        .hero { background: #0a1628; color: white; padding: 5rem 2rem; text-align: center; }
+        .hero { background: #0a1628; color: white; padding: 5rem 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
         .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1.5rem; }
         .hero h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; }
         .hero h1 span { color: #c9a84c; }
         .hero p { color: #8892a4; font-size: 1rem; max-width: 400px; margin: 0 auto 2rem; line-height: 1.7; }
         .container { max-width: 500px; margin: 3rem auto; padding: 0 1rem; text-align: center; }
-        .card { background: white; border-radius: 16px; padding: 2rem; border: 1px solid #eee; }
-        .email-display { background: #f8f7f4; border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.9rem; color: #555; margin-bottom: 1.5rem; }
-        .btn { display: block; width: 100%; padding: 0.85rem; background: #0a1628; color: white; border-radius: 10px; font-size: 0.9rem; font-weight: 600; text-decoration: none; text-align: center; transition: all 0.2s; }
-        .btn:hover { background: #162840; }
-        .footer { background: #0a1628; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 4rem; }
+        .card { background: #162840; border-radius: 16px; padding: 2rem; border: 1px solid rgba(255,255,255,0.08); }
+        .email-display { background: #1a2f45; border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.9rem; color: #a8b8cc; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.08); }
+        .btn { display: block; width: 100%; padding: 0.85rem; background: #c9a84c; color: #0a1628; border-radius: 10px; font-size: 0.9rem; font-weight: 700; text-decoration: none; text-align: center; transition: all 0.2s; }
+        .btn:hover { background: #e8c97a; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.35); }
+        .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 4rem; border-top: 1px solid rgba(255,255,255,0.06); }
         .footer strong { color: #c9a84c; }
     </style>
 </head>
 <body>
 
 <nav class="nav">
-    <img src="/static/logo.svg" style="height:120px;" alt="AlohaAgent logo">
-    <div class="nav-badge">BETA</div>
+    <img src="/static/logo.svg" style="height:90px;" alt="AlohaAgent logo">
+    <div class="nav-badge">LIVE</div>
 </nav>
 
 <div class="hero">
@@ -38,7 +38,7 @@
 
 <div class="container">
     <div class="card">
-        <p style="font-size:13px;color:#888;margin-bottom:0.5rem;">Confirmed email</p>
+        <p style="font-size:13px;color:#8892a4;margin-bottom:0.5rem;">Confirmed email</p>
         <div class="email-display">{{ email }}</div>
         <a href="/" class="btn">Try the free listing generator</a>
     </div>

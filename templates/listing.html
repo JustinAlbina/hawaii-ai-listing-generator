@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open House Announcer — AlohaAgent</title>
+    <title>Listing Generator — AlohaAgent</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #ffffff; }
+
         .top-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.6rem 1rem; font-size: 13px; font-weight: 600; }
+
         .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
         .nav-left { display: flex; align-items: center; gap: 2rem; }
         .nav-link { color: #8892a4; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
@@ -24,17 +26,29 @@
         .nav-dropdown-menu a .menu-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9a84c; opacity: 0.6; flex-shrink: 0; }
         .nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.35rem 0.75rem; }
         .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px; }
-        .hero { background: #0d1f35; color: white; padding: 3rem 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 6px 16px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1.5rem; }
-        .hero h1 { font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 1rem; letter-spacing: -1px; }
-        .hero h1 span { color: #c9a84c; }
-        .hero p { font-size: 1rem; color: #8892a4; max-width: 500px; margin: 0 auto; line-height: 1.7; }
-        .container { max-width: 720px; margin: 0 auto; padding: 0 1rem; }
-        .card { background: #162840; border-radius: 16px; padding: 2rem; margin: 1.25rem 0; border: 1px solid rgba(255,255,255,0.08); }
+
+        .hero { background: #0d1f35; padding: 3rem 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem; }
+        .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.4rem; letter-spacing: -0.5px; }
+        .hero p { color: #8892a4; font-size: 0.95rem; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: #8892a4; text-decoration: none; font-size: 13px; font-weight: 500; margin: 1.25rem 0 0; transition: color 0.2s; }
+        .back-link:hover { color: #c9a84c; }
+
+        .container { max-width: 720px; margin: 0 auto; padding: 0 1rem 3rem; }
+
+        .usage-bar { background: #162840; border-radius: 12px; padding: 1rem 1.25rem; margin: 1.25rem 0; border: 1px solid rgba(255,255,255,0.08); }
+        .usage-count-label { font-size: 13px; color: #8892a4; }
+        .usage-count-val { font-size: 13px; font-weight: 600; color: #fff; }
+        .usage-track { height: 6px; background: rgba(255,255,255,0.08); border-radius: 999px; margin-top: 0.5rem; overflow: hidden; }
+        .usage-fill { height: 6px; background: #c9a84c; border-radius: 999px; }
+
+        .card { background: #162840; border-radius: 16px; padding: 2rem; margin-bottom: 1.25rem; border: 1px solid rgba(255,255,255,0.08); }
         .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
         .card-icon { width: 36px; height: 36px; background: rgba(201,168,76,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
         .card-title { font-size: 1rem; font-weight: 600; color: #fff; }
         .card-subtitle { font-size: 12px; color: #8892a4; margin-top: 1px; }
+
         .form-group { margin-bottom: 1.1rem; }
         label { display: block; font-size: 0.75rem; font-weight: 600; color: #8892a4; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.5px; }
         input, select { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 0.95rem; color: #fff; background: #1a2f45; transition: all 0.2s; font-family: inherit; }
@@ -42,11 +56,14 @@
         input:focus, select:focus { outline: none; border-color: #c9a84c; background: #1a2f45; box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
         select option { background: #1a2f45; color: #fff; }
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .btn { width: 100%; padding: 1rem; background: #c9a84c; color: #0a1628; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.75rem; transition: all 0.2s; letter-spacing: 0.3px; }
-        .btn:hover { background: #e8c97a; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.35); }
-        .back-link { display: inline-flex; align-items: center; gap: 6px; color: #8892a4; font-size: 13px; text-decoration: none; margin: 1.5rem 0 0; transition: color 0.2s; }
-        .back-link:hover { color: #c9a84c; }
-        .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 2rem; font-size: 13px; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.06); }
+
+        .btn-submit { width: 100%; padding: 1rem; background: #c9a84c; color: #0a1628; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.75rem; transition: all 0.2s; letter-spacing: 0.3px; }
+        .btn-submit:hover { background: #e8c97a; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.35); }
+        .free-note { text-align: center; margin-top: 1rem; }
+        .free-note p { font-size: 12px; color: #8892a4; }
+        .free-note strong { color: #c9a84c; }
+
+        .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.06); }
         .footer strong { color: #c9a84c; }
 
         @media (max-width: 600px) { .nav-dropdown { display: none; } .nav-link { display: none; } .row { grid-template-columns: 1fr; } }
@@ -82,21 +99,31 @@
 </nav>
 
 <div class="hero">
-    <div class="hero-eyebrow">Live Tool</div>
-    <h1>Open House <span>Announcer</span></h1>
-    <p>Generate Instagram posts, Facebook posts, and email announcements for your open house in seconds.</p>
+    <div class="hero-eyebrow">Free Tool</div>
+    <h1>Generate your MLS Listing</h1>
+    <p>Professional, Hawaii-specific property descriptions generated by AI in seconds.</p>
 </div>
 
 <div class="container">
-    <a href="/" class="back-link">← Back to home</a>
+    <a href="/" class="back-link">← Back to all tools</a>
 
-    <form action="/open-house/generate" method="POST">
+    <div class="usage-bar">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span class="usage-count-label">Free listings used</span>
+            <span class="usage-count-val">{{ count }}/3</span>
+        </div>
+        <div class="usage-track">
+            <div class="usage-fill" style="width:{{ (count / 3 * 100)|int }}%"></div>
+        </div>
+    </div>
+
+    <form action="/generate" method="POST">
         <div class="card">
             <div class="card-header">
                 <div class="card-icon">🏠</div>
                 <div>
                     <div class="card-title">Property Details</div>
-                    <div class="card-subtitle">Tell us about the property</div>
+                    <div class="card-subtitle">Basic information about the listing</div>
                 </div>
             </div>
             <div class="form-group">
@@ -130,39 +157,50 @@
                     <input type="number" name="bathrooms" placeholder="3.5" step="0.5" required>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Listing Price</label>
-                <input type="text" name="price" placeholder="2,950,000" required>
-            </div>
-            <div class="form-group">
-                <label>Standout Feature</label>
-                <input type="text" name="extra" placeholder="e.g. ocean view, pool waterfalls, chef's kitchen" required>
+            <div class="row">
+                <div class="form-group">
+                    <label>Square Footage</label>
+                    <input type="text" name="sqft" placeholder="3200" required>
+                </div>
+                <div class="form-group">
+                    <label>Listing Price</label>
+                    <input type="text" name="price" placeholder="2,950,000" required>
+                </div>
             </div>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <div class="card-icon">📅</div>
+                <div class="card-icon">✨</div>
                 <div>
-                    <div class="card-title">Open House Details</div>
-                    <div class="card-subtitle">When is the open house?</div>
+                    <div class="card-title">Property Features</div>
+                    <div class="card-subtitle">What makes this property special</div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Date</label>
-                <input type="date" name="date" required>
             </div>
             <div class="row">
                 <div class="form-group">
-                    <label>Start Time</label>
-                    <input type="time" name="time_start" required>
+                    <label>Ocean View</label>
+                    <select name="ocean_view">
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label>End Time</label>
-                    <input type="time" name="time_end" required>
+                    <label>Pool</label>
+                    <select name="pool">
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
                 </div>
             </div>
-            <button type="submit" class="btn">Generate Announcements →</button>
+            <div class="form-group">
+                <label>Standout Feature</label>
+                <input type="text" name="extra" placeholder="e.g. chef's kitchen, pool waterfalls, newly renovated" required>
+            </div>
+            <button type="submit" class="btn-submit">Generate Listing with AI →</button>
+            <div class="free-note">
+                <p>Free tier · <strong>{{ 3 - count }} listing{{ 's' if (3 - count) != 1 else '' }} remaining</strong> · No credit card needed</p>
+            </div>
         </div>
     </form>
 </div>

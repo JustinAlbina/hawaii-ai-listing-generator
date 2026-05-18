@@ -11,9 +11,17 @@ app.secret_key = "alohaagent-secret-2024"
 
 @app.route("/")
 def home():
+    return render_template("index.html")
+
+@app.route("/listing")
+def listing():
     count = session.get("count", 0)
     remaining = max(0, 3 - count)
-    return render_template("index.html", remaining=remaining, count=count)
+    return render_template("listing.html", remaining=remaining, count=count)
+
+@app.route("/pricing")
+def pricing():
+    return render_template("pricing.html")
 
 @app.route("/generate", methods=["POST"])
 def generate():
@@ -271,5 +279,437 @@ HASHTAGS:
         x_post=sections.get("X POST", ""),
         hashtags=sections.get("HASHTAGS", "")
     )
+@app.route("/offer-letter")
+def offer_letter():
+    return render_template("offer_letter.html")
+
+@app.route("/offer-letter/generate", methods=["POST"])
+def offer_letter_generate():
+    address = request.form["address"]
+    neighborhood = request.form["neighborhood"]
+    island = request.form["island"]
+    offer_price = request.form["offer_price"]
+    listing_price = request.form["listing_price"]
+    buyer_name = request.form["buyer_name"]
+    closing_date = request.form["closing_date"]
+    contingencies = request.form.getlist("contingencies")
+    personal_message = request.form["personal_message"]
+    tone = request.form["tone"]
+
+    contingencies_str = ", ".join(contingencies) if contingencies else "None"
+
+    try:
+        offer_num = float(offer_price.replace(",", "").replace("$", ""))
+        list_num = float(listing_price.replace(",", "").replace("$", ""))
+        diff_pct = round(((offer_num - list_num) / list_num) * 100, 1)
+        price_relationship = f"{abs(diff_pct)}% {'above' if diff_pct > 0 else 'below'} asking"
+    except:
+        price_relationship = "at or near asking price"
+
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=2000,
+        messages=[{"role": "user", "content": f"""You are a Hawaii real estate expert. Generate a complete offer letter package for this property transaction.
+
+Property: {address}, {neighborhood}, {island}
+Listing Price: ${listing_price}
+Offer Price: ${offer_price} ({price_relationship})
+Buyer Name: {buyer_name}
+Preferred Closing Date: {closing_date}
+Contingencies: {contingencies_str}
+Personal Message from Buyer: {personal_message}
+Tone: {tone}
+
+Format your response EXACTLY like this:
+
+OFFER LETTER:
+[A full, formal offer letter addressed to "Dear Seller," from {buyer_name}. 3-4 paragraphs. Include property address, offer amount, closing date, contingencies, and the personal message woven in naturally. Match the requested tone. End with a professional closing.]
+
+EMAIL SUBJECT:
+[A compelling subject line for submitting this offer via email]
+
+NEGOTIATION TIP:
+[2-3 sentences of strategic advice for {buyer_name} based on the offer price vs listing price of ${listing_price}. Be specific and actionable.]"""}]
+    )
+
+    content = response.content[0].text
+    sections = {}
+    for section in ["OFFER LETTER", "EMAIL SUBJECT", "NEGOTIATION TIP"]:
+        if section + ":" in content:
+            start = content.index(section + ":") + len(section + ":")
+            next_sections = [s + ":" for s in ["OFFER LETTER", "EMAIL SUBJECT", "NEGOTIATION TIP"] if s + ":" in content and content.index(s + ":") > start]
+            if next_sections:
+                end = content.index(next_sections[0])
+                sections[section] = content[start:end].strip()
+            else:
+                sections[section] = content[start:].strip()
+
+    return render_template("offer_letter_results.html",
+        address=address,
+        neighborhood=neighborhood,
+        island=island,
+        offer_price=offer_price,
+        listing_price=listing_price,
+        buyer_name=buyer_name,
+        offer_letter=sections.get("OFFER LETTER", ""),
+        email_subject=sections.get("EMAIL SUBJECT", ""),
+        negotiation_tip=sections.get("NEGOTIATION TIP", "")
+    )
+
+@app.route("/market-report")
+def market_report():
+    return render_template("market_report.html")
+
+@app.route("/market-report/generate", methods=["POST"])
+def market_report_generate():
+    neighborhood = request.form["neighborhood"]
+    island = request.form["island"]
+    report_type = request.form["report_type"]
+    price_range = request.form["price_range"]
+    property_type = request.form["property_type"]
+
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=2000,
+        messages=[{"role": "user", "content": f"""You are a Hawaii real estate market expert. Generate a detailed market report for a client.
+
+Neighborhood: {neighborhood}
+Island: {island}
+Report Type: {report_type}
+Price Range: {price_range}
+Property Type: {property_type}
+
+Format your response EXACTLY like this:
+
+MARKET OVERVIEW:
+[2-3 sentences summarizing the {neighborhood} real estate market on {island} for {property_type} in the {price_range} range]
+
+MARKET CONDITIONS:
+[2-3 sentences describing whether it is a buyer's or seller's market and why, with specific context for {neighborhood}]
+
+PRICE TRENDS:
+[2-3 sentences on price trends, what they mean for the buyer/seller, and what to expect in the near term]
+
+TOP REASONS TO ACT NOW:
+- [Reason 1 specific to this market and report type]
+- [Reason 2 specific to this market and report type]
+- [Reason 3 specific to this market and report type]
+
+NEIGHBORHOOD HIGHLIGHTS:
+[3-4 sentences on what makes {neighborhood} on {island} special — lifestyle, amenities, schools, beaches, culture]
+
+RECOMMENDATION:
+[2-3 sentences of personalized advice tailored specifically to someone using a {report_type} in the {price_range} range for {property_type} in {neighborhood}]"""}]
+    )
+
+    content = response.content[0].text
+    sections = {}
+    for section in ["MARKET OVERVIEW", "MARKET CONDITIONS", "PRICE TRENDS", "TOP REASONS TO ACT NOW", "NEIGHBORHOOD HIGHLIGHTS", "RECOMMENDATION"]:
+        if section + ":" in content:
+            start = content.index(section + ":") + len(section + ":")
+            next_sections = [s + ":" for s in ["MARKET OVERVIEW", "MARKET CONDITIONS", "PRICE TRENDS", "TOP REASONS TO ACT NOW", "NEIGHBORHOOD HIGHLIGHTS", "RECOMMENDATION"] if s + ":" in content and content.index(s + ":") > start]
+            if next_sections:
+                end = content.index(next_sections[0])
+                sections[section] = content[start:end].strip()
+            else:
+                sections[section] = content[start:].strip()
+
+    return render_template("market_report_results.html",
+        neighborhood=neighborhood,
+        island=island,
+        report_type=report_type,
+        price_range=price_range,
+        property_type=property_type,
+        market_overview=sections.get("MARKET OVERVIEW", ""),
+        market_conditions=sections.get("MARKET CONDITIONS", ""),
+        price_trends=sections.get("PRICE TRENDS", ""),
+        top_reasons=sections.get("TOP REASONS TO ACT NOW", ""),
+        neighborhood_highlights=sections.get("NEIGHBORHOOD HIGHLIGHTS", ""),
+        recommendation=sections.get("RECOMMENDATION", "")
+    )
+
+@app.route("/client-emails")
+def client_emails():
+    return render_template("client_emails.html")
+
+@app.route("/client-emails/generate", methods=["POST"])
+def client_emails_generate():
+    email_type = request.form["email_type"]
+    client_name = request.form["client_name"]
+    address = request.form["address"]
+    neighborhood = request.form["neighborhood"]
+    island = request.form["island"]
+    key_detail = request.form["key_detail"]
+    agent_name = request.form["agent_name"]
+    tone = request.form["tone"]
+
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1800,
+        messages=[{"role": "user", "content": f"""You are a Hawaii real estate professional. Generate a complete client email package.
+
+Email Type: {email_type}
+Client Name: {client_name}
+Property Address: {address}
+Neighborhood: {neighborhood}
+Island: {island}
+Key Detail: {key_detail}
+Agent Name: {agent_name}
+Tone: {tone}
+
+Format your response EXACTLY like this:
+
+EMAIL SUBJECT:
+[A compelling, professional subject line for this {email_type} email]
+
+EMAIL BODY:
+[A complete, professional email from {agent_name} to {client_name}. 3-5 paragraphs appropriate for a {email_type}. Include relevant property details and {key_detail}. Use {tone} tone. Include a warm Hawaii-appropriate greeting. End with a clear call to action and a professional sign-off from {agent_name}.]
+
+FOLLOW UP TEXT:
+[A short, friendly SMS/text follow-up message under 160 characters. Casual and warm, referencing the email.]"""}]
+    )
+
+    content = response.content[0].text
+    sections = {}
+    for section in ["EMAIL SUBJECT", "EMAIL BODY", "FOLLOW UP TEXT"]:
+        if section + ":" in content:
+            start = content.index(section + ":") + len(section + ":")
+            next_sections = [s + ":" for s in ["EMAIL SUBJECT", "EMAIL BODY", "FOLLOW UP TEXT"] if s + ":" in content and content.index(s + ":") > start]
+            if next_sections:
+                end = content.index(next_sections[0])
+                sections[section] = content[start:end].strip()
+            else:
+                sections[section] = content[start:].strip()
+
+    return render_template("client_emails_results.html",
+        email_type=email_type,
+        client_name=client_name,
+        address=address,
+        agent_name=agent_name,
+        email_subject=sections.get("EMAIL SUBJECT", ""),
+        email_body=sections.get("EMAIL BODY", ""),
+        follow_up_text=sections.get("FOLLOW UP TEXT", "")
+    )
+
+@app.route("/bio-generator")
+def bio_generator():
+    return render_template("bio_generator.html")
+
+@app.route("/bio-generator/generate", methods=["POST"])
+def bio_generator_generate():
+    full_name = request.form["full_name"]
+    years_experience = request.form["years_experience"]
+    primary_island = request.form["primary_island"]
+    specialties = request.form.getlist("specialties")
+    languages = request.form["languages"]
+    hawaii_connection = request.form["hawaii_connection"]
+    fun_fact = request.form["fun_fact"]
+    tone = request.form["tone"]
+    length = request.form["length"]
+
+    specialties_str = ", ".join(specialties) if specialties else "General real estate"
+
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1500,
+        messages=[{"role": "user", "content": f"""You are a professional copywriter specializing in real estate agent bios. Generate a complete bio package for this Hawaii realtor.
+
+Full Name: {full_name}
+Years of Experience: {years_experience}
+Primary Area: {primary_island}
+Specialties: {specialties_str}
+Languages Spoken: {languages}
+Connection to Hawaii: {hawaii_connection}
+Fun Personal Fact: {fun_fact}
+Tone: {tone}
+Target Length: {length}
+
+Format your response EXACTLY like this:
+
+FULL BIO:
+[A {tone} bio approximately {length}. Weave in their Hawaii connection, specialties, experience, and personality. Make it feel authentic and specific to Hawaii real estate. Do not use generic phrases like "passionate about real estate." Include the fun fact naturally.]
+
+ELEVATOR PITCH:
+[2-3 compelling sentences that capture who {full_name} is and why clients should work with them. Punchy and memorable.]
+
+SOCIAL MEDIA BIO:
+[Under 150 characters. First-person, bold, include a Hawaii reference and their specialty.]"""}]
+    )
+
+    content = response.content[0].text
+    sections = {}
+    for section in ["FULL BIO", "ELEVATOR PITCH", "SOCIAL MEDIA BIO"]:
+        if section + ":" in content:
+            start = content.index(section + ":") + len(section + ":")
+            next_sections = [s + ":" for s in ["FULL BIO", "ELEVATOR PITCH", "SOCIAL MEDIA BIO"] if s + ":" in content and content.index(s + ":") > start]
+            if next_sections:
+                end = content.index(next_sections[0])
+                sections[section] = content[start:end].strip()
+            else:
+                sections[section] = content[start:].strip()
+
+    return render_template("bio_generator_results.html",
+        full_name=full_name,
+        primary_island=primary_island,
+        years_experience=years_experience,
+        full_bio=sections.get("FULL BIO", ""),
+        elevator_pitch=sections.get("ELEVATOR PITCH", ""),
+        social_bio=sections.get("SOCIAL MEDIA BIO", "")
+    )
+
+@app.route("/property-comparison")
+def property_comparison():
+    return render_template("property_comparison.html")
+
+@app.route("/property-comparison/generate", methods=["POST"])
+def property_comparison_generate():
+    p1_address = request.form["p1_address"]
+    p1_neighborhood = request.form["p1_neighborhood"]
+    p1_island = request.form["p1_island"]
+    p1_price = request.form["p1_price"]
+    p1_bedrooms = request.form["p1_bedrooms"]
+    p1_bathrooms = request.form["p1_bathrooms"]
+    p1_sqft = request.form["p1_sqft"]
+    p1_feature = request.form["p1_feature"]
+    p1_condition = request.form["p1_condition"]
+
+    p2_address = request.form["p2_address"]
+    p2_neighborhood = request.form["p2_neighborhood"]
+    p2_island = request.form["p2_island"]
+    p2_price = request.form["p2_price"]
+    p2_bedrooms = request.form["p2_bedrooms"]
+    p2_bathrooms = request.form["p2_bathrooms"]
+    p2_sqft = request.form["p2_sqft"]
+    p2_feature = request.form["p2_feature"]
+    p2_condition = request.form["p2_condition"]
+
+    p3_address = request.form.get("p3_address", "").strip()
+    p3_neighborhood = request.form.get("p3_neighborhood", "").strip()
+    p3_island = request.form.get("p3_island", "")
+    p3_price = request.form.get("p3_price", "").strip()
+    p3_bedrooms = request.form.get("p3_bedrooms", "").strip()
+    p3_bathrooms = request.form.get("p3_bathrooms", "").strip()
+    p3_sqft = request.form.get("p3_sqft", "").strip()
+    p3_feature = request.form.get("p3_feature", "").strip()
+    p3_condition = request.form.get("p3_condition", "")
+    has_p3 = bool(p3_address)
+
+    buyer_priorities = request.form["buyer_priorities"]
+    buyer_budget = request.form.get("buyer_budget", "").strip()
+
+    def calc_ppsf(price_str, sqft_str):
+        try:
+            price = float(price_str.replace(",", "").replace("$", ""))
+            sqft = float(sqft_str.replace(",", ""))
+            return f"${price / sqft:,.0f}/sqft"
+        except Exception:
+            return "N/A"
+
+    p1_ppsf = calc_ppsf(p1_price, p1_sqft)
+    p2_ppsf = calc_ppsf(p2_price, p2_sqft)
+    p3_ppsf = calc_ppsf(p3_price, p3_sqft) if has_p3 else ""
+
+    p3_block = ""
+    if has_p3:
+        p3_block = f"""
+Property 3: {p3_address}, {p3_neighborhood}, {p3_island}
+- Price: ${p3_price} | Beds: {p3_bedrooms} | Baths: {p3_bathrooms} | Sqft: {p3_sqft} | Price/sqft: {p3_ppsf}
+- Standout feature: {p3_feature}
+- Condition/notes: {p3_condition}
+"""
+
+    prompt = f"""You are a Hawaii real estate expert helping a buyer compare properties.
+
+PROPERTIES TO COMPARE:
+
+Property 1: {p1_address}, {p1_neighborhood}, {p1_island}
+- Price: ${p1_price} | Beds: {p1_bedrooms} | Baths: {p1_bathrooms} | Sqft: {p1_sqft} | Price/sqft: {p1_ppsf}
+- Standout feature: {p1_feature}
+- Condition/notes: {p1_condition}
+
+Property 2: {p2_address}, {p2_neighborhood}, {p2_island}
+- Price: ${p2_price} | Beds: {p2_bedrooms} | Baths: {p2_bathrooms} | Sqft: {p2_sqft} | Price/sqft: {p2_ppsf}
+- Standout feature: {p2_feature}
+- Condition/notes: {p2_condition}
+{p3_block}
+BUYER PRIORITIES: {buyer_priorities}
+{"BUYER BUDGET: $" + buyer_budget if buyer_budget else ""}
+
+Write a detailed property comparison report. Use EXACTLY these section headers:
+
+EXECUTIVE SUMMARY:
+[2-3 sentence overview of the comparison and key differences]
+
+PROPERTY 1 PROS:
+[3-5 bullet points starting with •]
+
+PROPERTY 1 CONS:
+[3-5 bullet points starting with •]
+
+PROPERTY 2 PROS:
+[3-5 bullet points starting with •]
+
+PROPERTY 2 CONS:
+[3-5 bullet points starting with •]
+{"PROPERTY 3 PROS:" + chr(10) + "[3-5 bullet points starting with •]" + chr(10) + chr(10) + "PROPERTY 3 CONS:" + chr(10) + "[3-5 bullet points starting with •]" if has_p3 else ""}
+
+BEST VALUE PICK:
+[Which property offers the best value per dollar and why, 2-3 sentences]
+
+BEST FIT FOR BUYER:
+[Which property best matches the buyer's stated priorities and why, 2-3 sentences]
+
+RECOMMENDATION:
+[Clear recommendation of which property to choose and the top 3 reasons, 3-4 sentences]"""
+
+    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    message = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1500,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    content = message.content[0].text
+
+    sections = {}
+    section_keys = [
+        "EXECUTIVE SUMMARY", "PROPERTY 1 PROS", "PROPERTY 1 CONS",
+        "PROPERTY 2 PROS", "PROPERTY 2 CONS",
+        "PROPERTY 3 PROS", "PROPERTY 3 CONS",
+        "BEST VALUE PICK", "BEST FIT FOR BUYER", "RECOMMENDATION"
+    ]
+    for section in section_keys:
+        if section + ":" in content:
+            start = content.index(section + ":") + len(section + ":")
+            later = [s + ":" for s in section_keys if s + ":" in content and content.index(s + ":") > start]
+            if later:
+                end = content.index(later[0])
+                sections[section] = content[start:end].strip()
+            else:
+                sections[section] = content[start:].strip()
+
+    return render_template("property_comparison_results.html",
+        p1_address=p1_address, p1_neighborhood=p1_neighborhood, p1_island=p1_island,
+        p1_price=p1_price, p1_bedrooms=p1_bedrooms, p1_bathrooms=p1_bathrooms,
+        p1_sqft=p1_sqft, p1_ppsf=p1_ppsf, p1_feature=p1_feature, p1_condition=p1_condition,
+        p2_address=p2_address, p2_neighborhood=p2_neighborhood, p2_island=p2_island,
+        p2_price=p2_price, p2_bedrooms=p2_bedrooms, p2_bathrooms=p2_bathrooms,
+        p2_sqft=p2_sqft, p2_ppsf=p2_ppsf, p2_feature=p2_feature, p2_condition=p2_condition,
+        p3_address=p3_address, p3_neighborhood=p3_neighborhood, p3_island=p3_island,
+        p3_price=p3_price, p3_bedrooms=p3_bedrooms, p3_bathrooms=p3_bathrooms,
+        p3_sqft=p3_sqft, p3_ppsf=p3_ppsf, p3_feature=p3_feature, p3_condition=p3_condition,
+        has_p3=has_p3,
+        buyer_priorities=buyer_priorities, buyer_budget=buyer_budget,
+        executive_summary=sections.get("EXECUTIVE SUMMARY", ""),
+        p1_pros=sections.get("PROPERTY 1 PROS", ""),
+        p1_cons=sections.get("PROPERTY 1 CONS", ""),
+        p2_pros=sections.get("PROPERTY 2 PROS", ""),
+        p2_cons=sections.get("PROPERTY 2 CONS", ""),
+        p3_pros=sections.get("PROPERTY 3 PROS", ""),
+        p3_cons=sections.get("PROPERTY 3 CONS", ""),
+        best_value=sections.get("BEST VALUE PICK", ""),
+        best_fit=sections.get("BEST FIT FOR BUYER", ""),
+        recommendation=sections.get("RECOMMENDATION", "")
+    )
+
 if __name__ == "__main__":
     app.run(debug=True)

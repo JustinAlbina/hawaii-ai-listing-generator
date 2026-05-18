@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bio Generator — AlohaAgent</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #fff; }
+
+        .top-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.6rem 1rem; font-size: 13px; font-weight: 600; }
+
+        .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .nav-left { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-btn { background: none; border: none; color: #8892a4; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 0; transition: color 0.2s; font-family: inherit; }
+        .nav-dropdown-btn:hover, .nav-dropdown:hover .nav-dropdown-btn { color: #c9a84c; }
+        .nav-dropdown:hover .nav-dropdown-btn svg { transform: rotate(180deg); }
+        .nav-dropdown-btn svg { transition: transform 0.2s; }
+        .nav-dropdown-menu { position: absolute; top: calc(100% + 14px); left: 0; background: #0d1f35; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 0.5rem; min-width: 265px; opacity: 0; pointer-events: none; transform: translateY(-6px); transition: all 0.18s ease; z-index: 300; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+        .nav-dropdown:hover .nav-dropdown-menu { opacity: 1; pointer-events: all; transform: translateY(0); }
+        .nav-dropdown-menu a { display: flex; align-items: center; gap: 10px; color: #8892a4; text-decoration: none; font-size: 13px; padding: 0.55rem 0.75rem; border-radius: 8px; transition: all 0.15s; }
+        .nav-dropdown-menu a:hover { background: rgba(201,168,76,0.1); color: #c9a84c; }
+        .nav-dropdown-menu a .menu-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9a84c; opacity: 0.6; flex-shrink: 0; }
+        .nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.35rem 0.75rem; }
+        .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px; }
+        .nav-link { color: #8892a4; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
+        .nav-link:hover { color: #c9a84c; }
+
+        .hero { background: #0a1628; color: white; padding: 2.5rem 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem; }
+        .hero h1 { font-size: 1.9rem; font-weight: 700; margin-bottom: 0.4rem; letter-spacing: -0.5px; }
+        .hero p { color: #8892a4; font-size: 0.95rem; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: #8892a4; text-decoration: none; font-size: 13px; font-weight: 500; margin: 1.5rem 0 0; transition: color 0.2s; }
+        .back-link:hover { color: #c9a84c; }
+
+        .container { max-width: 720px; margin: 0 auto; padding: 0 1rem 3rem; }
+
+        .card { background: #162840; border-radius: 16px; padding: 2rem; margin-bottom: 1.25rem; border: 1px solid rgba(255,255,255,0.08); }
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .card-icon { width: 36px; height: 36px; background: rgba(201,168,76,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .card-title { font-size: 1rem; font-weight: 600; color: #fff; }
+        .card-subtitle { font-size: 12px; color: #8892a4; margin-top: 1px; }
+
+        .form-group { margin-bottom: 1.1rem; }
+        label { display: block; font-size: 0.75rem; font-weight: 600; color: #8892a4; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select, textarea { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 0.95rem; color: #fff; background: #1a2f45; transition: all 0.2s; font-family: inherit; }
+        input::placeholder, textarea::placeholder { color: #4a5a70; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #c9a84c; background: #1a2f45; box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
+        select option { background: #1a2f45; color: #fff; }
+        textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.35rem; }
+        .checkbox-item { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+        .checkbox-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: #c9a84c; cursor: pointer; flex-shrink: 0; }
+        .checkbox-item span { font-size: 0.88rem; color: #c8d4e0; font-weight: 500; }
+
+        .btn { width: 100%; padding: 1rem; background: #c9a84c; color: #0a1628; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.75rem; transition: all 0.2s; }
+        .btn:hover { background: #e8c97a; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.35); }
+
+        .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.06); }
+        .footer strong { color: #c9a84c; }
+
+        @media (max-width: 600px) { .row { grid-template-columns: 1fr; } .nav-dropdown { display: none; } }
+    </style>
+</head>
+<body>
+
+<div class="top-banner">🌺 Free tier — 3 listing generations per month. No credit card required.</div>
+
+<nav class="nav">
+    <div class="nav-left">
+        <a href="/"><img src="/static/logo.svg" style="height:90px;" alt="AlohaAgent"></a>
+        <div class="nav-dropdown">
+            <button class="nav-dropdown-btn">Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="nav-dropdown-menu">
+                <div class="nav-dropdown-group-label">Listing Tools</div>
+                <a href="/listing"><span class="menu-dot"></span>Listing Generator</a>
+                <a href="/open-house"><span class="menu-dot"></span>Open House Announcer</a>
+                <a href="/offer-letter"><span class="menu-dot"></span>Offer Letter Assistant</a>
+                <a href="/market-report"><span class="menu-dot"></span>Market Report Generator</a>
+                <a href="/property-comparison"><span class="menu-dot"></span>Property Comparison</a>
+                <div class="nav-dropdown-divider"></div>
+                <div class="nav-dropdown-group-label">Marketing Tools</div>
+                <a href="/social-media"><span class="menu-dot"></span>Social Media Generator</a>
+                <a href="/client-emails"><span class="menu-dot"></span>Client Email Templates</a>
+                <a href="/bio-generator"><span class="menu-dot"></span>Bio Generator</a>
+            </div>
+        </div>
+        <a href="/pricing" class="nav-link">Pricing</a>
+        <a href="/#how-it-works" class="nav-link">How It Works</a>
+    </div>
+    <div class="nav-badge">LIVE</div>
+</nav>
+
+<div class="hero">
+    <div class="hero-eyebrow">Bio Generator</div>
+    <h1>Your story, perfectly told.</h1>
+    <p>A polished realtor bio for your website, MLS profile, and social media — in your voice.</p>
+</div>
+
+<div class="container">
+    <a href="/" class="back-link">← Back to all tools</a>
+
+    <form action="/bio-generator/generate" method="POST" style="margin-top:1.25rem;">
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-title">Your Info</div>
+                    <div class="card-subtitle">Tell us about you</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="full_name" placeholder="e.g. Leilani Kahale" required>
+                </div>
+                <div class="form-group">
+                    <label>Years of Experience</label>
+                    <input type="number" name="years_experience" placeholder="e.g. 8" min="0" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Primary Island / Area Served</label>
+                    <select name="primary_island">
+                        <option>All Hawaii Islands</option>
+                        <option>Kauai</option>
+                        <option>Oahu</option>
+                        <option>Maui</option>
+                        <option>Big Island</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Languages Spoken</label>
+                    <input type="text" name="languages" placeholder="e.g. English, Japanese, Hawaiian">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Specialties</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" name="specialties" value="Luxury Homes"><span>Luxury Homes</span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="specialties" value="First-Time Buyers"><span>First-Time Buyers</span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="specialties" value="Investment Properties"><span>Investment Properties</span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="specialties" value="Vacation Rentals"><span>Vacation Rentals</span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="specialties" value="Land"><span>Land</span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="specialties" value="Commercial"><span>Commercial</span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="specialties" value="Relocations"><span>Relocations</span></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-title">Your Story</div>
+                    <div class="card-subtitle">What makes you uniquely you</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Your Connection to Hawaii</label>
+                <textarea name="hawaii_connection" placeholder="e.g. Born and raised on Maui, third generation local. Or: Moved here 12 years ago from Seattle and never looked back." required></textarea>
+            </div>
+            <div class="form-group">
+                <label>One Fun Personal Fact</label>
+                <textarea name="fun_fact" placeholder="e.g. I surf before every listing appointment. Or: My grandmother taught me to make poi." style="min-height:70px;"></textarea>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-title">Style & Length</div>
+                    <div class="card-subtitle">How should your bio sound?</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Tone</label>
+                    <select name="tone">
+                        <option>Professional and formal</option>
+                        <option>Warm and approachable</option>
+                        <option>Bold and confident</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Length</label>
+                    <select name="length">
+                        <option>Short — 100 words</option>
+                        <option>Medium — 200 words</option>
+                        <option>Long — 300 words</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn">Generate My Bio →</button>
+        </div>
+
+    </form>
+</div>
+
+<div class="footer">
+    <strong>AlohaAgent</strong> by AlohaForge · AI tools built for Hawaii real estate professionals
+</div>
+
+</body>
+</html>

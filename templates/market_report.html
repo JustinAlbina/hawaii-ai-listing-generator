@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open House Announcer — AlohaAgent</title>
+    <title>Market Report Generator — AlohaAgent</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #ffffff; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f7f4; color: #1a1a2e; }
+
         .top-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.6rem 1rem; font-size: 13px; font-weight: 600; }
+
         .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .nav-left { display: flex; align-items: center; gap: 2rem; }
-        .nav-link { color: #8892a4; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
-        .nav-link:hover { color: #c9a84c; }
+        .nav-left { display: flex; align-items: center; gap: 1.5rem; }
         .nav-dropdown { position: relative; }
         .nav-dropdown-btn { background: none; border: none; color: #8892a4; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 0; transition: color 0.2s; font-family: inherit; }
         .nav-dropdown-btn:hover, .nav-dropdown:hover .nav-dropdown-btn { color: #c9a84c; }
@@ -24,32 +24,38 @@
         .nav-dropdown-menu a .menu-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9a84c; opacity: 0.6; flex-shrink: 0; }
         .nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.35rem 0.75rem; }
         .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px; }
-        .hero { background: #0d1f35; color: white; padding: 3rem 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 6px 16px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1.5rem; }
-        .hero h1 { font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 1rem; letter-spacing: -1px; }
-        .hero h1 span { color: #c9a84c; }
-        .hero p { font-size: 1rem; color: #8892a4; max-width: 500px; margin: 0 auto; line-height: 1.7; }
-        .container { max-width: 720px; margin: 0 auto; padding: 0 1rem; }
-        .card { background: #162840; border-radius: 16px; padding: 2rem; margin: 1.25rem 0; border: 1px solid rgba(255,255,255,0.08); }
-        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
-        .card-icon { width: 36px; height: 36px; background: rgba(201,168,76,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-        .card-title { font-size: 1rem; font-weight: 600; color: #fff; }
-        .card-subtitle { font-size: 12px; color: #8892a4; margin-top: 1px; }
-        .form-group { margin-bottom: 1.1rem; }
-        label { display: block; font-size: 0.75rem; font-weight: 600; color: #8892a4; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 0.95rem; color: #fff; background: #1a2f45; transition: all 0.2s; font-family: inherit; }
-        input::placeholder { color: #4a5a70; }
-        input:focus, select:focus { outline: none; border-color: #c9a84c; background: #1a2f45; box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
-        select option { background: #1a2f45; color: #fff; }
-        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .btn { width: 100%; padding: 1rem; background: #c9a84c; color: #0a1628; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.75rem; transition: all 0.2s; letter-spacing: 0.3px; }
-        .btn:hover { background: #e8c97a; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.35); }
-        .back-link { display: inline-flex; align-items: center; gap: 6px; color: #8892a4; font-size: 13px; text-decoration: none; margin: 1.5rem 0 0; transition: color 0.2s; }
+        .nav-link { color: #8892a4; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
+        .nav-link:hover { color: #c9a84c; }
+
+        .hero { background: #0a1628; color: white; padding: 2.5rem 2rem; text-align: center; }
+        .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem; }
+        .hero h1 { font-size: 1.9rem; font-weight: 700; margin-bottom: 0.4rem; letter-spacing: -0.5px; }
+        .hero p { color: #8892a4; font-size: 0.95rem; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: #8892a4; text-decoration: none; font-size: 13px; font-weight: 500; margin: 1.25rem 0 0; transition: color 0.2s; }
         .back-link:hover { color: #c9a84c; }
-        .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 2rem; font-size: 13px; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.06); }
+
+        .container { max-width: 720px; margin: 0 auto; padding: 0 1rem 3rem; }
+
+        .card { background: white; border-radius: 16px; padding: 2rem; margin-bottom: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #eee; }
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f0f0; }
+        .card-icon { width: 36px; height: 36px; background: #0a1628; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .card-title { font-size: 1rem; font-weight: 600; color: #0a1628; }
+        .card-subtitle { font-size: 12px; color: #888; margin-top: 1px; }
+
+        .form-group { margin-bottom: 1.1rem; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid #e8e8e8; border-radius: 10px; font-size: 0.95rem; color: #1a1a2e; background: #fafafa; transition: all 0.2s; }
+        input:focus, select:focus { outline: none; border-color: #c9a84c; background: white; box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        .btn { width: 100%; padding: 1rem; background: #c9a84c; color: #0a1628; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.75rem; transition: all 0.2s; letter-spacing: 0.3px; }
+        .btn:hover { background: #e8c97a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201,168,76,0.3); }
+
+        .footer { background: #0a1628; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 2rem; }
         .footer strong { color: #c9a84c; }
 
-        @media (max-width: 600px) { .nav-dropdown { display: none; } .nav-link { display: none; } .row { grid-template-columns: 1fr; } }
+        @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -57,7 +63,7 @@
 <div class="top-banner">🌺 Free tier — 3 listing generations per month. No credit card required.</div>
 
 <nav class="nav">
-    <div class="nav-left">
+        <div class="nav-left">
         <a href="/"><img src="/static/logo.svg" style="height:90px;" alt="AlohaAgent"></a>
         <div class="nav-dropdown">
             <button class="nav-dropdown-btn">Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
@@ -82,31 +88,32 @@
 </nav>
 
 <div class="hero">
-    <div class="hero-eyebrow">Live Tool</div>
-    <h1>Open House <span>Announcer</span></h1>
-    <p>Generate Instagram posts, Facebook posts, and email announcements for your open house in seconds.</p>
+    <div class="hero-eyebrow">Market Report Generator</div>
+    <h1>Know your market.</h1>
+    <p>Generate detailed neighborhood market snapshots to share with buyers and sellers.</p>
 </div>
 
 <div class="container">
-    <a href="/" class="back-link">← Back to home</a>
+    <a href="/" class="back-link">← Back to all tools</a>
 
-    <form action="/open-house/generate" method="POST">
+    <form action="/market-report/generate" method="POST" style="margin-top:1.25rem;">
+
         <div class="card">
             <div class="card-header">
-                <div class="card-icon">🏠</div>
-                <div>
-                    <div class="card-title">Property Details</div>
-                    <div class="card-subtitle">Tell us about the property</div>
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Property Address</label>
-                <input type="text" name="address" placeholder="e.g. 5332 Makalea St" required>
+                <div>
+                    <div class="card-title">Location</div>
+                    <div class="card-subtitle">The neighborhood you want to analyze</div>
+                </div>
             </div>
             <div class="row">
                 <div class="form-group">
                     <label>Neighborhood</label>
-                    <input type="text" name="neighborhood" placeholder="e.g. Poipu" required>
+                    <input type="text" name="neighborhood" placeholder="e.g. Kailua, Kahala, Wailea" required>
                 </div>
                 <div class="form-group">
                     <label>Island</label>
@@ -120,50 +127,52 @@
                     </select>
                 </div>
             </div>
-            <div class="row">
-                <div class="form-group">
-                    <label>Bedrooms</label>
-                    <input type="number" name="bedrooms" placeholder="4" required>
-                </div>
-                <div class="form-group">
-                    <label>Bathrooms</label>
-                    <input type="number" name="bathrooms" placeholder="3.5" step="0.5" required>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Listing Price</label>
-                <input type="text" name="price" placeholder="2,950,000" required>
-            </div>
-            <div class="form-group">
-                <label>Standout Feature</label>
-                <input type="text" name="extra" placeholder="e.g. ocean view, pool waterfalls, chef's kitchen" required>
-            </div>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <div class="card-icon">📅</div>
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+                    </svg>
+                </div>
                 <div>
-                    <div class="card-title">Open House Details</div>
-                    <div class="card-subtitle">When is the open house?</div>
+                    <div class="card-title">Report Parameters</div>
+                    <div class="card-subtitle">Customize the report for your client</div>
                 </div>
             </div>
             <div class="form-group">
-                <label>Date</label>
-                <input type="date" name="date" required>
+                <label>Report Type</label>
+                <select name="report_type">
+                    <option>Buyer Report</option>
+                    <option>Seller Report</option>
+                    <option>Investment Analysis</option>
+                </select>
             </div>
             <div class="row">
                 <div class="form-group">
-                    <label>Start Time</label>
-                    <input type="time" name="time_start" required>
+                    <label>Price Range</label>
+                    <select name="price_range">
+                        <option>Under $500k</option>
+                        <option>$500k–$1M</option>
+                        <option>$1M–$2M</option>
+                        <option>$2M–$5M</option>
+                        <option>$5M+</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label>End Time</label>
-                    <input type="time" name="time_end" required>
+                    <label>Property Type</label>
+                    <select name="property_type">
+                        <option>Single Family</option>
+                        <option>Condo</option>
+                        <option>Land</option>
+                        <option>Multi-Family</option>
+                    </select>
                 </div>
             </div>
-            <button type="submit" class="btn">Generate Announcements →</button>
+            <button type="submit" class="btn">Generate Market Report →</button>
         </div>
+
     </form>
 </div>
 

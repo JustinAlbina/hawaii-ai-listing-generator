@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Media Posts — AlohaAgent</title>
+    <title>Market Report — {{ neighborhood }}, {{ island }} — AlohaAgent</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f7f4; color: #1a1a2e; }
+
         .top-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.6rem 1rem; font-size: 13px; font-weight: 600; }
+
         .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
         .nav-left { display: flex; align-items: center; gap: 1.5rem; }
         .nav-dropdown { position: relative; }
@@ -21,31 +23,46 @@
         .nav-dropdown-menu a:hover { background: rgba(201,168,76,0.1); color: #c9a84c; }
         .nav-dropdown-menu a .menu-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9a84c; opacity: 0.6; flex-shrink: 0; }
         .nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.35rem 0.75rem; }
-        .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+        .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px; }
         .nav-link { color: #8892a4; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
         .nav-link:hover { color: #c9a84c; }
+
         .hero { background: #0a1628; color: white; padding: 2.5rem 2rem; text-align: center; }
         .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem; }
-        .hero h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .hero h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: -0.5px; }
         .hero p { color: #8892a4; font-size: 0.95rem; }
-        .container { max-width: 750px; margin: 0 auto; padding: 0 1rem; }
+
+        .meta-badges { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; }
+        .meta-badge { background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: #8892a4; text-decoration: none; font-size: 13px; font-weight: 500; margin: 1.25rem 0 0; transition: color 0.2s; }
+        .back-link:hover { color: #c9a84c; }
+
+        .container { max-width: 750px; margin: 0 auto; padding: 0 1rem 3rem; }
+
         .card { background: white; border-radius: 16px; padding: 1.75rem; margin: 1.25rem 0; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #eee; }
         .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f0f0; }
-        .card-icon { width: 32px; height: 32px; background: #0a1628; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+        .card-icon { width: 32px; height: 32px; background: #0a1628; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .card-title { font-size: 0.95rem; font-weight: 600; color: #0a1628; }
         .card-subtitle { font-size: 12px; color: #888; margin-top: 1px; }
-        .content-box { background: #f8f7f4; border-radius: 10px; padding: 1.25rem; font-size: 0.9rem; line-height: 1.8; color: #333; white-space: pre-wrap; margin-bottom: 1rem; }
-        .hashtag-box { background: #f8f7f4; border-radius: 10px; padding: 1.25rem; font-size: 0.85rem; line-height: 2; color: #185FA5; margin-bottom: 1rem; word-break: break-word; }
+
+        .content-box { background: #f8f7f4; border-radius: 10px; padding: 1.25rem; font-size: 0.9rem; line-height: 1.85; color: #333; white-space: pre-wrap; margin-bottom: 1rem; }
+
+        .rec-box { background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.06)); border: 1px solid rgba(201,168,76,0.3); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+        .rec-box-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c9a84c; margin-bottom: 0.5rem; }
+        .rec-box p { font-size: 0.9rem; line-height: 1.75; color: #333; white-space: pre-wrap; }
+
         .copy-btn { background: #0a1628; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .copy-btn:hover { background: #162840; }
         .copy-btn.copied { background: #2d7a4f; }
-        .platform-badge { display: inline-flex; align-items: center; gap: 6px; background: #f0f0f0; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; color: #444; margin-bottom: 1rem; }
-        .btn-row { display: flex; gap: 1rem; margin-top: 0.5rem; }
+
+        .btn-row { display: flex; gap: 1rem; }
         .btn { flex: 1; padding: 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; border: none; transition: all 0.2s; }
         .btn-primary { background: #0a1628; color: white; }
         .btn-primary:hover { background: #162840; }
         .btn-outline { background: white; color: #0a1628; border: 2px solid #0a1628; }
-        .btn-outline:hover { background: #f0f5f2; }
+        .btn-outline:hover { background: #f0f0f0; }
+
         .footer { background: #0a1628; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 2rem; }
         .footer strong { color: #c9a84c; }
 
@@ -82,67 +99,122 @@
 </nav>
 
 <div class="hero">
-    <div class="hero-eyebrow">Posts Ready</div>
-    <h1>{{ address }}</h1>
-    <p>{{ neighborhood }}, {{ island }} &nbsp;·&nbsp; ${{ price }}</p>
+    <div class="hero-eyebrow">Market Report Ready</div>
+    <h1>{{ neighborhood }}, {{ island }}</h1>
+    <p>{{ report_type }} &nbsp;·&nbsp; {{ property_type }} &nbsp;·&nbsp; {{ price_range }}</p>
+    <div class="meta-badges">
+        <span class="meta-badge">{{ report_type }}</span>
+        <span class="meta-badge">{{ property_type }}</span>
+        <span class="meta-badge">{{ price_range }}</span>
+    </div>
 </div>
 
 <div class="container">
+    <a href="/market-report" class="back-link">← Generate another report</a>
 
     <div class="card">
         <div class="card-header">
-            <div class="card-icon">📸</div>
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+            </div>
             <div>
-                <div class="card-title">Instagram Caption</div>
-                <div class="card-subtitle">Copy and paste into your Instagram post</div>
+                <div class="card-title">Market Overview</div>
+                <div class="card-subtitle">Current state of the {{ neighborhood }} market</div>
             </div>
         </div>
-        <div class="platform-badge">📸 Instagram</div>
-        <div class="content-box" id="instagram">{{ instagram }}</div>
-        <button class="copy-btn" onclick="copyText('instagram', this)">Copy Caption</button>
+        <div class="content-box" id="market-overview">{{ market_overview }}</div>
+        <button class="copy-btn" onclick="copyText('market-overview', this)">Copy</button>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <div class="card-icon">👥</div>
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+            </div>
             <div>
-                <div class="card-title">Facebook Post</div>
-                <div class="card-subtitle">Copy and paste into Facebook</div>
+                <div class="card-title">Market Conditions</div>
+                <div class="card-subtitle">Buyer's market vs. seller's market analysis</div>
             </div>
         </div>
-        <div class="platform-badge">👥 Facebook</div>
-        <div class="content-box" id="facebook">{{ facebook }}</div>
-        <button class="copy-btn" onclick="copyText('facebook', this)">Copy Post</button>
+        <div class="content-box" id="market-conditions">{{ market_conditions }}</div>
+        <button class="copy-btn" onclick="copyText('market-conditions', this)">Copy</button>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <div class="card-icon">🐦</div>
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+                </svg>
+            </div>
             <div>
-                <div class="card-title">X Post</div>
-                <div class="card-subtitle">Under 280 characters, ready to post</div>
+                <div class="card-title">Price Trends</div>
+                <div class="card-subtitle">What the numbers mean for your client</div>
             </div>
         </div>
-        <div class="platform-badge">𝕏 X / Twitter</div>
-        <div class="content-box" id="xpost">{{ x_post }}</div>
-        <button class="copy-btn" onclick="copyText('xpost', this)">Copy Post</button>
+        <div class="content-box" id="price-trends">{{ price_trends }}</div>
+        <button class="copy-btn" onclick="copyText('price-trends', this)">Copy</button>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <div class="card-icon">#️⃣</div>
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+            </div>
             <div>
-                <div class="card-title">Hashtags</div>
-                <div class="card-subtitle">Add to any post to maximize reach</div>
+                <div class="card-title">Top Reasons to Act Now</div>
+                <div class="card-subtitle">Key talking points for your client</div>
             </div>
         </div>
-        <div class="hashtag-box" id="hashtags">{{ hashtags }}</div>
-        <button class="copy-btn" onclick="copyText('hashtags', this)">Copy Hashtags</button>
+        <div class="content-box" id="top-reasons">{{ top_reasons }}</div>
+        <button class="copy-btn" onclick="copyText('top-reasons', this)">Copy</button>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+            </div>
+            <div>
+                <div class="card-title">Neighborhood Highlights</div>
+                <div class="card-subtitle">What makes {{ neighborhood }} special</div>
+            </div>
+        </div>
+        <div class="content-box" id="neighborhood-highlights">{{ neighborhood_highlights }}</div>
+        <button class="copy-btn" onclick="copyText('neighborhood-highlights', this)">Copy</button>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+            </div>
+            <div>
+                <div class="card-title">Recommendation</div>
+                <div class="card-subtitle">Personalized advice for your {{ report_type }}</div>
+            </div>
+        </div>
+        <div class="rec-box">
+            <div class="rec-box-label">Our Take</div>
+            <p>{{ recommendation }}</p>
+        </div>
+        <button class="copy-btn" onclick="copyText('recommendation', this)">Copy</button>
+        <div id="recommendation" style="display:none;">{{ recommendation }}</div>
     </div>
 
     <div class="card">
         <div class="btn-row">
-            <a href="/social-media" class="btn btn-primary">Generate New Posts</a>
+            <a href="/market-report" class="btn btn-primary">New Market Report</a>
             <a href="/" class="btn btn-outline">Back to Home</a>
         </div>
     </div>
@@ -155,8 +227,9 @@
 
 <script>
 function copyText(id, btn) {
-    const text = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(text).then(() => {
+    const el = document.getElementById(id);
+    const text = el.innerText || el.textContent;
+    navigator.clipboard.writeText(text.trim()).then(() => {
         const original = btn.textContent;
         btn.textContent = 'Copied!';
         btn.classList.add('copied');

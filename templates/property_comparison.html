@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Comparison Report — AlohaAgent</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #ffffff; }
+
+        .top-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.6rem 1rem; font-size: 13px; font-weight: 600; }
+
+        .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .nav-left { display: flex; align-items: center; gap: 2rem; }
+        .nav-link { color: #8892a4; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
+        .nav-link:hover { color: #c9a84c; }
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-btn { background: none; border: none; color: #8892a4; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 0; transition: color 0.2s; font-family: inherit; }
+        .nav-dropdown-btn:hover, .nav-dropdown:hover .nav-dropdown-btn { color: #c9a84c; }
+        .nav-dropdown:hover .nav-dropdown-btn svg { transform: rotate(180deg); }
+        .nav-dropdown-btn svg { transition: transform 0.2s; }
+        .nav-dropdown-menu { position: absolute; top: calc(100% + 14px); left: 0; background: #0d1f35; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 0.5rem; min-width: 265px; opacity: 0; pointer-events: none; transform: translateY(-6px); transition: all 0.18s ease; z-index: 300; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+        .nav-dropdown:hover .nav-dropdown-menu { opacity: 1; pointer-events: all; transform: translateY(0); }
+        .nav-dropdown-menu a { display: flex; align-items: center; gap: 10px; color: #8892a4; text-decoration: none; font-size: 13px; padding: 0.55rem 0.75rem; border-radius: 8px; transition: all 0.15s; }
+        .nav-dropdown-menu a:hover { background: rgba(201,168,76,0.1); color: #c9a84c; }
+        .nav-dropdown-menu a .menu-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9a84c; opacity: 0.6; flex-shrink: 0; }
+        .nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.35rem 0.75rem; }
+        .nav-dropdown-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4a5a70; padding: 0.5rem 0.75rem 0.2rem; }
+        .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px; }
+
+        .hero { background: #0d1f35; padding: 3rem 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem; }
+        .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.4rem; letter-spacing: -0.5px; }
+        .hero p { color: #8892a4; font-size: 0.95rem; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: #8892a4; text-decoration: none; font-size: 13px; font-weight: 500; margin: 1.25rem 0 0; transition: color 0.2s; }
+        .back-link:hover { color: #c9a84c; }
+
+        .container { max-width: 820px; margin: 0 auto; padding: 0 1rem 3rem; }
+
+        .card { background: #162840; border-radius: 16px; padding: 2rem; margin-bottom: 1.25rem; border: 1px solid rgba(255,255,255,0.08); }
+        .card.optional { border-style: dashed; border-color: rgba(255,255,255,0.12); }
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .card-icon { width: 36px; height: 36px; background: rgba(201,168,76,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .card-title { font-size: 1rem; font-weight: 600; color: #fff; }
+        .card-subtitle { font-size: 12px; color: #8892a4; margin-top: 1px; }
+        .property-num { display: inline-block; background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-left: 8px; }
+        .property-num.optional { background: rgba(255,255,255,0.12); color: #8892a4; }
+
+        .form-group { margin-bottom: 1.1rem; }
+        label { display: block; font-size: 0.75rem; font-weight: 600; color: #8892a4; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select, textarea { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 0.95rem; color: #fff; background: #1a2f45; transition: all 0.2s; font-family: inherit; }
+        input::placeholder, textarea::placeholder { color: #4a5a70; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #c9a84c; background: #1a2f45; box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
+        select option { background: #1a2f45; color: #fff; }
+        textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+        .btn-submit { width: 100%; padding: 1rem; background: #c9a84c; color: #0a1628; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.75rem; transition: all 0.2s; letter-spacing: 0.3px; }
+        .btn-submit:hover { background: #e8c97a; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.35); }
+
+        .optional-note { font-size: 12px; color: #8892a4; margin-bottom: 1rem; padding: 0.6rem 1rem; background: rgba(255,255,255,0.04); border-radius: 8px; border: 1px solid rgba(255,255,255,0.07); }
+
+        .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.06); }
+        .footer strong { color: #c9a84c; }
+
+        @media (max-width: 600px) { .nav-dropdown { display: none; } .nav-link { display: none; } .row { grid-template-columns: 1fr; } .row-3 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="top-banner">🌺 Free tier — 3 listing generations per month. No credit card required.</div>
+
+<nav class="nav">
+    <div class="nav-left">
+        <a href="/"><img src="/static/logo.svg" style="height:90px;" alt="AlohaAgent"></a>
+        <div class="nav-dropdown">
+            <button class="nav-dropdown-btn">Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="nav-dropdown-menu">
+                <div class="nav-dropdown-group-label">Listing Tools</div>
+                <a href="/listing"><span class="menu-dot"></span>Listing Generator</a>
+                <a href="/open-house"><span class="menu-dot"></span>Open House Announcer</a>
+                <a href="/offer-letter"><span class="menu-dot"></span>Offer Letter Assistant</a>
+                <a href="/property-comparison"><span class="menu-dot"></span>Property Comparison</a>
+                <div class="nav-dropdown-divider"></div>
+                <div class="nav-dropdown-group-label">Marketing Tools</div>
+                <a href="/social-media"><span class="menu-dot"></span>Social Media Generator</a>
+                <a href="/market-report"><span class="menu-dot"></span>Market Report Generator</a>
+                <a href="/client-emails"><span class="menu-dot"></span>Client Email Templates</a>
+                <a href="/bio-generator"><span class="menu-dot"></span>Bio Generator</a>
+            </div>
+        </div>
+        <a href="/pricing" class="nav-link">Pricing</a>
+        <a href="/#how-it-works" class="nav-link">How It Works</a>
+    </div>
+    <div class="nav-badge">LIVE</div>
+</nav>
+
+<div class="hero">
+    <div class="hero-eyebrow">Live Tool</div>
+    <h1>Property Comparison Report</h1>
+    <p>Compare 2–3 properties and generate a professional report for your buyer.</p>
+</div>
+
+<div class="container">
+    <a href="/" class="back-link">← Back to all tools</a>
+
+    <form action="/property-comparison/generate" method="POST" style="margin-top:1.25rem;">
+
+        <!-- Property 1 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-title">Property 1 <span class="property-num">REQUIRED</span></div>
+                    <div class="card-subtitle">First property to compare</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Property Address</label>
+                <input type="text" name="p1_address" placeholder="e.g. 5332 Makalea St" required>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Neighborhood</label>
+                    <input type="text" name="p1_neighborhood" placeholder="e.g. Poipu" required>
+                </div>
+                <div class="form-group">
+                    <label>Island</label>
+                    <select name="p1_island">
+                        <option>Kauai</option><option>Oahu</option><option>Maui</option><option>Big Island</option><option>Molokai</option><option>Lanai</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Listing Price</label>
+                    <input type="text" name="p1_price" placeholder="e.g. 1,250,000" required>
+                </div>
+                <div class="form-group">
+                    <label>Condition</label>
+                    <select name="p1_condition">
+                        <option>Move-in ready</option><option>Good condition</option><option>Needs work</option><option>Fixer upper</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row-3">
+                <div class="form-group">
+                    <label>Bedrooms</label>
+                    <input type="number" name="p1_bedrooms" placeholder="4" required>
+                </div>
+                <div class="form-group">
+                    <label>Bathrooms</label>
+                    <input type="number" name="p1_bathrooms" placeholder="3" step="0.5" required>
+                </div>
+                <div class="form-group">
+                    <label>Square Footage</label>
+                    <input type="text" name="p1_sqft" placeholder="2400" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Key Feature</label>
+                <input type="text" name="p1_feature" placeholder="e.g. ocean view, new kitchen, pool, corner lot" required>
+            </div>
+        </div>
+
+        <!-- Property 2 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-title">Property 2 <span class="property-num">REQUIRED</span></div>
+                    <div class="card-subtitle">Second property to compare</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Property Address</label>
+                <input type="text" name="p2_address" placeholder="e.g. 4421 Lawai Rd" required>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Neighborhood</label>
+                    <input type="text" name="p2_neighborhood" placeholder="e.g. Koloa" required>
+                </div>
+                <div class="form-group">
+                    <label>Island</label>
+                    <select name="p2_island">
+                        <option>Kauai</option><option>Oahu</option><option>Maui</option><option>Big Island</option><option>Molokai</option><option>Lanai</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Listing Price</label>
+                    <input type="text" name="p2_price" placeholder="e.g. 1,150,000" required>
+                </div>
+                <div class="form-group">
+                    <label>Condition</label>
+                    <select name="p2_condition">
+                        <option>Move-in ready</option><option>Good condition</option><option>Needs work</option><option>Fixer upper</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row-3">
+                <div class="form-group">
+                    <label>Bedrooms</label>
+                    <input type="number" name="p2_bedrooms" placeholder="3" required>
+                </div>
+                <div class="form-group">
+                    <label>Bathrooms</label>
+                    <input type="number" name="p2_bathrooms" placeholder="2" step="0.5" required>
+                </div>
+                <div class="form-group">
+                    <label>Square Footage</label>
+                    <input type="text" name="p2_sqft" placeholder="1950" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Key Feature</label>
+                <input type="text" name="p2_feature" placeholder="e.g. large lot, covered lanai, updated bathrooms" required>
+            </div>
+        </div>
+
+        <!-- Property 3 (Optional) -->
+        <div class="card optional">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8892a4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-title">Property 3 <span class="property-num optional">OPTIONAL</span></div>
+                    <div class="card-subtitle">Leave blank to compare only 2 properties</div>
+                </div>
+            </div>
+            <div class="optional-note">Leave all fields below blank if you only want to compare 2 properties.</div>
+            <div class="form-group">
+                <label>Property Address</label>
+                <input type="text" name="p3_address" placeholder="e.g. 8821 Kuhio Hwy (optional)">
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Neighborhood</label>
+                    <input type="text" name="p3_neighborhood" placeholder="e.g. Hanalei">
+                </div>
+                <div class="form-group">
+                    <label>Island</label>
+                    <select name="p3_island">
+                        <option>Kauai</option><option>Oahu</option><option>Maui</option><option>Big Island</option><option>Molokai</option><option>Lanai</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Listing Price</label>
+                    <input type="text" name="p3_price" placeholder="e.g. 1,450,000">
+                </div>
+                <div class="form-group">
+                    <label>Condition</label>
+                    <select name="p3_condition">
+                        <option>Move-in ready</option><option>Good condition</option><option>Needs work</option><option>Fixer upper</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row-3">
+                <div class="form-group">
+                    <label>Bedrooms</label>
+                    <input type="number" name="p3_bedrooms" placeholder="4">
+                </div>
+                <div class="form-group">
+                    <label>Bathrooms</label>
+                    <input type="number" name="p3_bathrooms" placeholder="3" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label>Square Footage</label>
+                    <input type="text" name="p3_sqft" placeholder="2800">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Key Feature</label>
+                <input type="text" name="p3_feature" placeholder="e.g. oceanfront, private road, guest suite">
+            </div>
+        </div>
+
+        <!-- Buyer Info -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-title">Buyer Priorities</div>
+                    <div class="card-subtitle">What matters most to your buyer?</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Buyer's Top Priorities</label>
+                <textarea name="buyer_priorities" placeholder="e.g. Price is the biggest factor, ideally under $1.2M. They want at least 3 bedrooms and value condition over location. Investment potential matters too." required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Buyer's Budget</label>
+                <input type="text" name="buyer_budget" placeholder="e.g. $1,300,000 max">
+            </div>
+            <button type="submit" class="btn-submit">Generate Comparison Report →</button>
+        </div>
+
+    </form>
+</div>
+
+<div class="footer">
+    <strong>AlohaAgent</strong> by AlohaForge · AI tools built for Hawaii real estate professionals
+</div>
+
+</body>
+</html>

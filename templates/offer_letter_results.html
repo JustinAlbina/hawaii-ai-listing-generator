@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open House Announcements — AlohaAgent</title>
+    <title>Offer Letter — AlohaAgent</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f7f4; color: #1a1a2e; }
+
         .top-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.6rem 1rem; font-size: 13px; font-weight: 600; }
+
         .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
         .nav-left { display: flex; align-items: center; gap: 1.5rem; }
         .nav-dropdown { position: relative; }
@@ -21,29 +23,44 @@
         .nav-dropdown-menu a:hover { background: rgba(201,168,76,0.1); color: #c9a84c; }
         .nav-dropdown-menu a .menu-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9a84c; opacity: 0.6; flex-shrink: 0; }
         .nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.35rem 0.75rem; }
-        .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+        .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px; }
         .nav-link { color: #8892a4; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
         .nav-link:hover { color: #c9a84c; }
+
         .hero { background: #0a1628; color: white; padding: 2.5rem 2rem; text-align: center; }
         .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem; }
-        .hero h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .hero h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: -0.5px; }
         .hero p { color: #8892a4; font-size: 0.95rem; }
-        .container { max-width: 750px; margin: 0 auto; padding: 0 1rem; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: #8892a4; text-decoration: none; font-size: 13px; font-weight: 500; margin: 1.25rem 0 0; transition: color 0.2s; }
+        .back-link:hover { color: #c9a84c; }
+
+        .container { max-width: 750px; margin: 0 auto; padding: 0 1rem 3rem; }
+
         .card { background: white; border-radius: 16px; padding: 1.75rem; margin: 1.25rem 0; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #eee; }
         .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f0f0; }
-        .card-icon { width: 32px; height: 32px; background: #0a1628; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+        .card-icon { width: 32px; height: 32px; background: #0a1628; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .card-title { font-size: 0.95rem; font-weight: 600; color: #0a1628; }
         .card-subtitle { font-size: 12px; color: #888; margin-top: 1px; }
-        .content-box { background: #f8f7f4; border-radius: 10px; padding: 1.25rem; font-size: 0.9rem; line-height: 1.8; color: #333; white-space: pre-wrap; margin-bottom: 1rem; }
+
+        .content-box { background: #f8f7f4; border-radius: 10px; padding: 1.25rem; font-size: 0.9rem; line-height: 1.85; color: #333; white-space: pre-wrap; margin-bottom: 1rem; }
+        .subject-box { background: #f8f7f4; border-radius: 10px; padding: 0.85rem 1.25rem; font-size: 0.9rem; font-weight: 600; color: #0a1628; margin-bottom: 1rem; }
+
+        .tip-box { background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.06)); border: 1px solid rgba(201,168,76,0.3); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+        .tip-box-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c9a84c; margin-bottom: 0.5rem; }
+        .tip-box p { font-size: 0.9rem; line-height: 1.75; color: #333; }
+
         .copy-btn { background: #0a1628; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .copy-btn:hover { background: #162840; }
         .copy-btn.copied { background: #2d7a4f; }
-        .btn-row { display: flex; gap: 1rem; margin-top: 0.5rem; }
+
+        .btn-row { display: flex; gap: 1rem; }
         .btn { flex: 1; padding: 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; border: none; transition: all 0.2s; }
         .btn-primary { background: #0a1628; color: white; }
         .btn-primary:hover { background: #162840; }
         .btn-outline { background: white; color: #0a1628; border: 2px solid #0a1628; }
-        .btn-outline:hover { background: #f0f5f2; }
+        .btn-outline:hover { background: #f0f0f0; }
+
         .footer { background: #0a1628; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 2rem; }
         .footer strong { color: #c9a84c; }
 
@@ -80,56 +97,67 @@
 </nav>
 
 <div class="hero">
-    <div class="hero-eyebrow">Announcements Ready</div>
+    <div class="hero-eyebrow">Offer Letter Ready</div>
     <h1>{{ address }}</h1>
-    <p>{{ neighborhood }}, {{ island }} &nbsp;·&nbsp; {{ date }} &nbsp;·&nbsp; {{ time_start }} – {{ time_end }}</p>
+    <p>{{ neighborhood }}, {{ island }} &nbsp;·&nbsp; Offer: ${{ offer_price }} &nbsp;·&nbsp; Listed: ${{ listing_price }}</p>
 </div>
 
 <div class="container">
+    <a href="/offer-letter" class="back-link">← Generate another offer letter</a>
 
     <div class="card">
         <div class="card-header">
-            <div class="card-icon">📸</div>
+            <div class="card-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                </svg>
+            </div>
             <div>
-                <div class="card-title">Instagram Post</div>
-                <div class="card-subtitle">Copy and paste into Instagram</div>
+                <div class="card-title">Email Subject Line</div>
+                <div class="card-subtitle">Use this when submitting the offer via email</div>
             </div>
         </div>
-        <div class="content-box" id="instagram">{{ instagram }}</div>
-        <button class="copy-btn" onclick="copyText('instagram', this)">Copy</button>
+        <div class="subject-box" id="email-subject">{{ email_subject }}</div>
+        <button class="copy-btn" onclick="copyText('email-subject', this)">Copy Subject</button>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <div class="card-icon">👥</div>
+            <div class="card-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+            </div>
             <div>
-                <div class="card-title">Facebook Post</div>
-                <div class="card-subtitle">Copy and paste into Facebook</div>
+                <div class="card-title">Offer Letter</div>
+                <div class="card-subtitle">Ready to include with your offer package</div>
             </div>
         </div>
-        <div class="content-box" id="facebook">{{ facebook }}</div>
-        <button class="copy-btn" onclick="copyText('facebook', this)">Copy</button>
+        <div class="content-box" id="offer-letter">{{ offer_letter }}</div>
+        <button class="copy-btn" onclick="copyText('offer-letter', this)">Copy Letter</button>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <div class="card-icon">✉️</div>
+            <div class="card-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+            </div>
             <div>
-                <div class="card-title">Email Announcement</div>
-                <div class="card-subtitle">Ready to send to your client list</div>
+                <div class="card-title">Negotiation Tip</div>
+                <div class="card-subtitle">Strategic advice based on your offer</div>
             </div>
         </div>
-        <div style="font-size:12px;color:#888;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Subject Line</div>
-        <div class="content-box" id="email-subject">{{ email_subject }}</div>
-        <button class="copy-btn" onclick="copyText('email-subject', this)" style="margin-bottom:1rem;">Copy Subject</button>
-        <div style="font-size:12px;color:#888;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Email Body</div>
-        <div class="content-box" id="email-body">{{ email_body }}</div>
-        <button class="copy-btn" onclick="copyText('email-body', this)">Copy Body</button>
+        <div class="tip-box">
+            <div class="tip-box-label">Strategy</div>
+            <p>{{ negotiation_tip }}</p>
+        </div>
     </div>
 
     <div class="card">
         <div class="btn-row">
-            <a href="/open-house" class="btn btn-primary">New Announcement</a>
+            <a href="/offer-letter" class="btn btn-primary">New Offer Letter</a>
             <a href="/" class="btn btn-outline">Back to Home</a>
         </div>
     </div>
@@ -144,10 +172,11 @@
 function copyText(id, btn) {
     const text = document.getElementById(id).innerText;
     navigator.clipboard.writeText(text).then(() => {
+        const original = btn.textContent;
         btn.textContent = 'Copied!';
         btn.classList.add('copied');
         setTimeout(() => {
-            btn.textContent = id.includes('subject') ? 'Copy Subject' : id.includes('body') ? 'Copy Body' : 'Copy';
+            btn.textContent = original;
             btn.classList.remove('copied');
         }, 2000);
     });
