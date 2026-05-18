@@ -170,8 +170,10 @@
             .nav-dropdown { display: none; }
             .nav-link { display: none; }
             .nav-btn { display: none; }
-            .nav-right { order: -1; }
+            .nav-right { order: -1; flex: 0 0 44px; }
             .nav-hamburger { display: flex; }
+            .nav-left { flex: 1; justify-content: center; }
+            .nav::after { content: ''; flex: 0 0 44px; }
 
             #mobile-menu {
                 position: fixed;
