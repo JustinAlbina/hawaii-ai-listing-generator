@@ -9,13 +9,20 @@ client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 app = Flask(__name__)
 app.secret_key = "alohaagent-secret-2024"
 
+def generation_limit_response():
+    """Check shared 3-generation cap. Returns limit page response or None."""
+    if session.get("generation_count", 0) >= 3:
+        return render_template("limit.html")
+    session["generation_count"] = session.get("generation_count", 0) + 1
+    return None
+
 @app.route("/")
 def home():
     return render_template("index.html")
 
 @app.route("/listing")
 def listing():
-    count = session.get("count", 0)
+    count = session.get("generation_count", 0)
     remaining = max(0, 3 - count)
     return render_template("listing.html", remaining=remaining, count=count)
 
@@ -25,13 +32,9 @@ def pricing():
 
 @app.route("/generate", methods=["POST"])
 def generate():
-    if "count" not in session:
-        session["count"] = 0
-
-    if session["count"] >= 3:
-        return render_template("limit.html")
-
-    session["count"] += 1
+    limit = generation_limit_response()
+    if limit:
+        return limit
     address = request.form["address"]
     bedrooms = request.form["bedrooms"]
     bathrooms = request.form["bathrooms"]
@@ -138,6 +141,9 @@ def open_house():
 
 @app.route("/open-house/generate", methods=["POST"])
 def open_house_generate():
+    limit = generation_limit_response()
+    if limit:
+        return limit
     address = request.form["address"]
     neighborhood = request.form["neighborhood"]
     island = request.form["island"]
@@ -211,6 +217,9 @@ def social_media():
 
 @app.route("/social-media/generate", methods=["POST"])
 def social_media_generate():
+    limit = generation_limit_response()
+    if limit:
+        return limit
     address = request.form["address"]
     neighborhood = request.form["neighborhood"]
     island = request.form["island"]
@@ -285,6 +294,9 @@ def offer_letter():
 
 @app.route("/offer-letter/generate", methods=["POST"])
 def offer_letter_generate():
+    limit = generation_limit_response()
+    if limit:
+        return limit
     address = request.form["address"]
     neighborhood = request.form["neighborhood"]
     island = request.form["island"]
@@ -362,6 +374,9 @@ def market_report():
 
 @app.route("/market-report/generate", methods=["POST"])
 def market_report_generate():
+    limit = generation_limit_response()
+    if limit:
+        return limit
     neighborhood = request.form["neighborhood"]
     island = request.form["island"]
     report_type = request.form["report_type"]
@@ -434,6 +449,9 @@ def client_emails():
 
 @app.route("/client-emails/generate", methods=["POST"])
 def client_emails_generate():
+    limit = generation_limit_response()
+    if limit:
+        return limit
     email_type = request.form["email_type"]
     client_name = request.form["client_name"]
     address = request.form["address"]
@@ -497,6 +515,9 @@ def bio_generator():
 
 @app.route("/bio-generator/generate", methods=["POST"])
 def bio_generator_generate():
+    limit = generation_limit_response()
+    if limit:
+        return limit
     full_name = request.form["full_name"]
     years_experience = request.form["years_experience"]
     primary_island = request.form["primary_island"]
@@ -563,6 +584,9 @@ def property_comparison():
 
 @app.route("/property-comparison/generate", methods=["POST"])
 def property_comparison_generate():
+    limit = generation_limit_response()
+    if limit:
+        return limit
     p1_address = request.form["p1_address"]
     p1_neighborhood = request.form["p1_neighborhood"]
     p1_island = request.form["p1_island"]
@@ -662,7 +686,6 @@ BEST FIT FOR BUYER:
 RECOMMENDATION:
 [Clear recommendation of which property to choose and the top 3 reasons, 3-4 sentences]"""
 
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     message = client.messages.create(
         model="claude-sonnet-4-5",
         max_tokens=1500,
