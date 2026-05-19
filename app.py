@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for, abort, make_response
+from flask import Flask, render_template, request, session, redirect, url_for, abort, make_response, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
@@ -7,6 +7,7 @@ import os
 import anthropic
 import json
 import datetime
+import io
 
 load_dotenv()
 
@@ -163,104 +164,82 @@ def download_pdf(gen_id):
     if gen.user_id != current_user.id:
         abort(403)
 
-    from fpdf import FPDF
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.colors import HexColor
+    from reportlab.lib.units import inch
 
-    pdf = FPDF()
-    pdf.set_auto_page_break(auto=True, margin=20)
-    pdf.add_page()
-    pdf.set_margins(20, 20, 20)
+    GOLD  = HexColor("#c9a84c")
+    NAVY  = HexColor("#0a1628")
+    MUTED = HexColor("#8892a4")
+    DARK  = HexColor("#1e2f45")
 
-    # ── Header bar ────────────────────────────────────
-    pdf.set_fill_color(10, 22, 40)
-    pdf.rect(0, 0, 210, 32, 'F')
-    pdf.set_y(8)
-    pdf.set_x(20)
-    pdf.set_font('Helvetica', 'B', 18)
-    pdf.set_text_color(201, 168, 76)
-    pdf.cell(0, 9, 'AlohaAgent', ln=True)
-    pdf.set_x(20)
-    pdf.set_font('Helvetica', '', 9)
-    pdf.set_text_color(140, 150, 165)
-    pdf.cell(0, 6, 'AI Tools for Hawaii Real Estate', ln=True)
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf, pagesize=letter,
+        leftMargin=0.85*inch, rightMargin=0.85*inch,
+        topMargin=0.85*inch, bottomMargin=0.85*inch
+    )
 
-    pdf.set_y(40)
+    styles = getSampleStyleSheet()
+    s_brand   = ParagraphStyle("brand",   fontSize=24, fontName="Helvetica-Bold", textColor=GOLD,  spaceAfter=2)
+    s_sub     = ParagraphStyle("sub",     fontSize=10, fontName="Helvetica",      textColor=MUTED, spaceAfter=14)
+    s_tool    = ParagraphStyle("tool",    fontSize=18, fontName="Helvetica-Bold", textColor=NAVY,  spaceAfter=4)
+    s_meta    = ParagraphStyle("meta",    fontSize=10, fontName="Helvetica",      textColor=MUTED, spaceAfter=14)
+    s_section = ParagraphStyle("section", fontSize=11, fontName="Helvetica-Bold", textColor=NAVY,  spaceBefore=10, spaceAfter=4)
+    s_body    = ParagraphStyle("body",    fontSize=10, fontName="Helvetica",      textColor=DARK,  leading=15, spaceAfter=4)
+    s_footer  = ParagraphStyle("footer",  fontSize=8,  fontName="Helvetica",      textColor=MUTED, alignment=1)
 
-    # ── Tool name & meta ──────────────────────────────
-    pdf.set_font('Helvetica', 'B', 14)
-    pdf.set_text_color(10, 22, 40)
-    pdf.cell(0, 8, gen.tool_name, ln=True)
-    pdf.set_font('Helvetica', '', 9)
-    pdf.set_text_color(100, 110, 125)
-    date_str = gen.created_at.strftime('%B %d, %Y')
-    pdf.cell(0, 6, f"Generated {date_str}  |  {current_user.email}", ln=True)
+    date_str = gen.created_at.strftime("%B %d, %Y")
+    safe_name = gen.tool_name.lower().replace(" ", "-")
 
-    pdf.ln(3)
-    pdf.set_draw_color(201, 168, 76)
-    pdf.set_line_width(0.8)
-    pdf.line(20, pdf.get_y(), 190, pdf.get_y())
-    pdf.ln(5)
+    story = [
+        Paragraph("AlohaAgent", s_brand),
+        Paragraph("AI Tools for Hawaii Real Estate", s_sub),
+        HRFlowable(width="100%", thickness=1, color=GOLD, spaceAfter=12),
+        Paragraph(gen.tool_name, s_tool),
+        Paragraph(f"Generated {date_str} &nbsp;·&nbsp; {current_user.email}", s_meta),
+        HRFlowable(width="100%", thickness=0.5, color=HexColor("#d2dae8"), spaceAfter=10),
+    ]
 
-    # ── Input summary ─────────────────────────────────
     input_data = gen.input_parsed
     if input_data:
-        pdf.set_font('Helvetica', 'B', 10)
-        pdf.set_text_color(10, 22, 40)
-        pdf.cell(0, 6, 'Property Details', ln=True)
-        pdf.ln(1)
-        pdf.set_font('Helvetica', '', 9)
-        pdf.set_text_color(60, 70, 85)
+        story.append(Paragraph("Property Details", s_section))
         for key, val in list(input_data.items())[:8]:
             if val:
-                label = key.replace('_', ' ').title()
-                pdf.set_x(20)
-                pdf.cell(55, 5, f"{label}:", border=0)
-                pdf.multi_cell(0, 5, str(val))
-        pdf.ln(3)
-        pdf.set_draw_color(210, 218, 230)
-        pdf.set_line_width(0.3)
-        pdf.line(20, pdf.get_y(), 190, pdf.get_y())
-        pdf.ln(5)
+                label = key.replace("_", " ").title()
+                story.append(Paragraph(f"<b>{label}:</b> {val}", s_body))
+        story.append(HRFlowable(width="100%", thickness=0.5, color=HexColor("#d2dae8"), spaceBefore=8, spaceAfter=8))
 
-    # ── Output text ───────────────────────────────────
-    pdf.set_font('Helvetica', 'B', 10)
-    pdf.set_text_color(10, 22, 40)
-    pdf.cell(0, 6, 'Generated Content', ln=True)
-    pdf.ln(2)
+    story.append(Paragraph("Generated Content", s_section))
+    story.append(Spacer(1, 4))
 
-    output = gen.output_text.replace('\r\n', '\n').replace('\r', '\n')
-    for line in output.split('\n'):
+    output = gen.output_text.replace("\r\n", "\n").replace("\r", "\n")
+    for line in output.split("\n"):
         line = line.strip()
         if not line:
-            pdf.ln(3)
-            continue
-        if line.isupper() and len(line) < 60:
-            pdf.set_font('Helvetica', 'B', 10)
-            pdf.set_text_color(10, 22, 40)
-            pdf.ln(2)
-            pdf.cell(0, 6, line, ln=True)
-            pdf.set_font('Helvetica', '', 9)
-            pdf.set_text_color(30, 40, 55)
+            story.append(Spacer(1, 6))
+        elif line.isupper() and len(line) < 60:
+            story.append(Paragraph(line, s_section))
         else:
-            pdf.set_font('Helvetica', '', 9)
-            pdf.set_text_color(30, 40, 55)
-            pdf.multi_cell(0, 5, line)
+            safe_line = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            story.append(Paragraph(safe_line, s_body))
 
-    # ── Footer ────────────────────────────────────────
-    pdf.set_y(-18)
-    pdf.set_draw_color(201, 168, 76)
-    pdf.set_line_width(0.5)
-    pdf.line(20, pdf.get_y(), 190, pdf.get_y())
-    pdf.ln(3)
-    pdf.set_font('Helvetica', '', 7)
-    pdf.set_text_color(140, 150, 165)
-    pdf.cell(0, 5, 'AlohaAgent · listaloha.onrender.com · AI-generated content for informational purposes only', align='C')
+    story += [
+        Spacer(1, 20),
+        HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=6),
+        Paragraph("Generated by AlohaAgent &nbsp;·&nbsp; listaloha.onrender.com", s_footer),
+    ]
 
-    pdf_bytes = bytes(pdf.output())
-    response = make_response(pdf_bytes)
-    response.headers["Content-Type"] = "application/pdf"
-    safe_name = gen.tool_name.lower().replace(' ', '_')
-    response.headers["Content-Disposition"] = f"attachment; filename=alohaagent_{safe_name}_{gen.id}.pdf"
-    return response
+    doc.build(story)
+    buf.seek(0)
+    return send_file(
+        buf,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"alohaagent-{safe_name}-{gen.id}.pdf"
+    )
 
 # ─── Existing routes ───────────────────────────────────────────────────────────
 
