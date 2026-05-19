@@ -158,23 +158,127 @@ def dashboard():
 @app.route("/download/<int:gen_id>")
 @login_required
 def download_pdf(gen_id):
+    import re as _re
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable, Table, TableStyle
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib.colors import Color, HexColor
+    from reportlab.lib.units import inch
+    from reportlab.lib.enums import TA_RIGHT, TA_CENTER
+
     gen = db.session.get(Generation, gen_id)
     if gen is None:
         abort(404)
     if gen.user_id != current_user.id:
         abort(403)
 
-    from reportlab.lib.pagesizes import letter
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.colors import HexColor
-    from reportlab.lib.units import inch
-
-    GOLD  = HexColor("#c9a84c")
-    NAVY  = HexColor("#0a1628")
+    GOLD  = Color(0.788, 0.659, 0.298)
     MUTED = HexColor("#8892a4")
     DARK  = HexColor("#1e2f45")
 
+    s_brand   = ParagraphStyle("brand",   fontSize=20, fontName="Helvetica-Bold", textColor=GOLD,  spaceAfter=2)
+    s_sub     = ParagraphStyle("sub",     fontSize=9,  fontName="Helvetica",      textColor=MUTED, spaceAfter=1)
+    s_date    = ParagraphStyle("date",    fontSize=9,  fontName="Helvetica",      textColor=MUTED, alignment=TA_RIGHT)
+    s_subject = ParagraphStyle("subject", fontSize=13, fontName="Helvetica-Bold", textColor=DARK,  spaceAfter=14, spaceBefore=10)
+    s_heading = ParagraphStyle("heading", fontSize=13, fontName="Helvetica-Bold", textColor=DARK,  spaceAfter=4,  spaceBefore=10)
+    s_body    = ParagraphStyle("body",    fontSize=10, fontName="Helvetica",      textColor=DARK,  leading=14,    spaceAfter=3)
+    s_footer  = ParagraphStyle("footer",  fontSize=8,  fontName="Helvetica",      textColor=MUTED, alignment=TA_CENTER)
+
+    date_str  = gen.created_at.strftime("%B %d, %Y")
+    safe_name = gen.tool_name.lower().replace(" ", "-")
+
+    def esc(t):
+        return str(t).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+    # ── Subject line: pick the most relevant identifier from input_data ──────────
+    inp = gen.input_parsed
+    subject = ""
+    for key in ("address", "street_address", "property_address"):
+        if inp.get(key):
+            parts = [inp[key]]
+            for sub in ("neighborhood", "area", "community"):
+                if inp.get(sub): parts.append(inp[sub]); break
+            for isl in ("island",):
+                if inp.get(isl): parts.append(inp[isl]); break
+            subject = " · ".join(parts)
+            break
+    if not subject:
+        for key in ("neighborhood", "area", "community"):
+            if inp.get(key):
+                subject = inp[key]
+                if inp.get("island"): subject += f" · {inp['island']}"
+                break
+    if not subject:
+        for key in ("full_name", "agent_name", "name"):
+            if inp.get(key):
+                subject = inp[key]; break
+    if not subject:
+        for key in ("client_name", "email_type"):
+            if inp.get(key):
+                subject = inp[key]; break
+
+    # ── Markdown stripper ────────────────────────────────────────────────────────
+    SECTION_LABELS = _re.compile(
+        r'^(LISTING|ANALYSIS|NEIGHBORHOOD REPORT|MARKET REPORT|OPEN HOUSE|'
+        r'OFFER|SOCIAL MEDIA|EMAIL|BIO|COMPARISON|REPORT|SUMMARY|OVERVIEW|'
+        r'DESCRIPTION|FEATURES|HIGHLIGHTS|NOTES|DETAILS|PROPERTY DETAILS|'
+        r'PROPERTY INFORMATION|AGENT BIO|CLIENT EMAIL)\s*:?\s*$',
+        _re.IGNORECASE
+    )
+
+    def process_output(raw):
+        lines = raw.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+        result = []
+        blank_run = 0
+        for line in lines:
+            stripped = line.strip()
+
+            # skip horizontal rules
+            if _re.match(r'^-{3,}$', stripped) or _re.match(r'^_{3,}$', stripped) or _re.match(r'^\*{3,}$', stripped):
+                continue
+
+            # headings: # or ## → bold heading
+            m = _re.match(r'^#{1,3}\s+(.*)', stripped)
+            if m:
+                blank_run = 0
+                result.append(("heading", esc(m.group(1).strip())))
+                continue
+
+            # section label lines (ALL CAPS with optional colon)
+            if SECTION_LABELS.match(stripped):
+                blank_run = 0
+                result.append(("heading", esc(stripped.rstrip(":"))))
+                continue
+
+            # ALL-CAPS short lines → heading
+            if stripped.isupper() and 3 < len(stripped) < 60 and not _re.search(r'\d{4}', stripped):
+                blank_run = 0
+                result.append(("heading", esc(stripped)))
+                continue
+
+            # bullet points
+            m = _re.match(r'^[\*\-]\s+(.*)', stripped)
+            if m:
+                blank_run = 0
+                inner = _re.sub(r'\*\*(.*?)\*\*', r'\1', m.group(1))
+                result.append(("bullet", "• " + esc(inner)))
+                continue
+
+            # strip inline **bold** markers for body text
+            clean = _re.sub(r'\*\*(.*?)\*\*', r'\1', stripped)
+            clean = _re.sub(r'\*(.*?)\*', r'\1', clean)
+
+            if not clean:
+                blank_run += 1
+                if blank_run <= 2:
+                    result.append(("blank", ""))
+            else:
+                blank_run = 0
+                result.append(("body", esc(clean)))
+
+        return result
+
+    # ── Build story ──────────────────────────────────────────────────────────────
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
         buf, pagesize=letter,
@@ -182,52 +286,45 @@ def download_pdf(gen_id):
         topMargin=0.85*inch, bottomMargin=0.85*inch
     )
 
-    styles = getSampleStyleSheet()
-    s_brand   = ParagraphStyle("brand",   fontSize=24, fontName="Helvetica-Bold", textColor=GOLD,  spaceAfter=2)
-    s_sub     = ParagraphStyle("sub",     fontSize=10, fontName="Helvetica",      textColor=MUTED, spaceAfter=14)
-    s_tool    = ParagraphStyle("tool",    fontSize=18, fontName="Helvetica-Bold", textColor=NAVY,  spaceAfter=4)
-    s_meta    = ParagraphStyle("meta",    fontSize=10, fontName="Helvetica",      textColor=MUTED, spaceAfter=14)
-    s_section = ParagraphStyle("section", fontSize=11, fontName="Helvetica-Bold", textColor=NAVY,  spaceBefore=10, spaceAfter=4)
-    s_body    = ParagraphStyle("body",    fontSize=10, fontName="Helvetica",      textColor=DARK,  leading=15, spaceAfter=4)
-    s_footer  = ParagraphStyle("footer",  fontSize=8,  fontName="Helvetica",      textColor=MUTED, alignment=1)
-
-    date_str = gen.created_at.strftime("%B %d, %Y")
-    safe_name = gen.tool_name.lower().replace(" ", "-")
-
-    story = [
+    left_col = [
         Paragraph("AlohaAgent", s_brand),
         Paragraph("AI Tools for Hawaii Real Estate", s_sub),
-        HRFlowable(width="100%", thickness=1, color=GOLD, spaceAfter=12),
-        Paragraph(gen.tool_name, s_tool),
-        Paragraph(f"Generated {date_str} &nbsp;·&nbsp; {current_user.email}", s_meta),
-        HRFlowable(width="100%", thickness=0.5, color=HexColor("#d2dae8"), spaceAfter=10),
+        Paragraph(esc(current_user.email), s_sub),
+    ]
+    right_col = [Paragraph(date_str, s_date)]
+
+    header_table = Table(
+        [[left_col, right_col]],
+        colWidths=[4.5*inch, 2.3*inch]
+    )
+    header_table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("ALIGN",  (1, 0), (1, 0),  "RIGHT"),
+        ("LEFTPADDING",  (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING",   (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING",(0, 0), (-1, -1), 0),
+    ]))
+
+    story = [
+        header_table,
+        HRFlowable(width="100%", thickness=1, color=GOLD, spaceBefore=8, spaceAfter=0),
     ]
 
-    input_data = gen.input_parsed
-    if input_data:
-        story.append(Paragraph("Property Details", s_section))
-        for key, val in list(input_data.items())[:8]:
-            if val:
-                label = key.replace("_", " ").title()
-                story.append(Paragraph(f"<b>{label}:</b> {val}", s_body))
-        story.append(HRFlowable(width="100%", thickness=0.5, color=HexColor("#d2dae8"), spaceBefore=8, spaceAfter=8))
+    if subject:
+        story.append(Paragraph(esc(subject), s_subject))
 
-    story.append(Paragraph("Generated Content", s_section))
-    story.append(Spacer(1, 4))
-
-    output = gen.output_text.replace("\r\n", "\n").replace("\r", "\n")
-    for line in output.split("\n"):
-        line = line.strip()
-        if not line:
-            story.append(Spacer(1, 6))
-        elif line.isupper() and len(line) < 60:
-            story.append(Paragraph(line, s_section))
+    paragraphs = process_output(gen.output_text)
+    for kind, text in paragraphs:
+        if kind == "heading":
+            story.append(Paragraph(text, s_heading))
+        elif kind in ("body", "bullet"):
+            story.append(Paragraph(text, s_body))
         else:
-            safe_line = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            story.append(Paragraph(safe_line, s_body))
+            story.append(Spacer(1, 6))
 
     story += [
-        Spacer(1, 20),
+        Spacer(1, 24),
         HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=6),
         Paragraph("Generated by AlohaAgent &nbsp;·&nbsp; listaloha.onrender.com", s_footer),
     ]
