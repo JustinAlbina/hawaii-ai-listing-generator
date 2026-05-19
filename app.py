@@ -1,20 +1,268 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect, url_for, abort, make_response
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
 import os
 import anthropic
+import json
+import datetime
 
 load_dotenv()
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 app = Flask(__name__)
-app.secret_key = "alohaagent-secret-2024"
+app.secret_key = os.getenv("SECRET_KEY", "alohaagent-secret-2024")
+
+database_url = os.getenv("DATABASE_URL", "sqlite:///alohaagent.db")
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+login_manager = LoginManager(app)
+login_manager.login_view = "login"
+
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+# ─── Models ───────────────────────────────────────────────────────────────────
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    plan = db.Column(db.String(20), default='free')
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    generations = db.relationship('Generation', backref='user', lazy=True)
+
+class Generation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    tool_name = db.Column(db.String(100), nullable=False)
+    input_data = db.Column(db.Text, nullable=False)
+    output_text = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    @property
+    def input_parsed(self):
+        try:
+            return json.loads(self.input_data)
+        except Exception:
+            return {}
+
+    @property
+    def output_preview(self):
+        text = self.output_text.strip()
+        return text[:200] + "..." if len(text) > 200 else text
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(User, int(user_id))
+
+with app.app_context():
+    db.create_all()
+
+# ─── Generation helpers ────────────────────────────────────────────────────────
+
+def get_monthly_count(user):
+    now = datetime.datetime.utcnow()
+    start = datetime.datetime(now.year, now.month, 1)
+    return Generation.query.filter(
+        Generation.user_id == user.id,
+        Generation.created_at >= start
+    ).count()
 
 def generation_limit_response():
-    """Check shared 3-generation cap. Returns limit page response or None."""
+    """Check limit. Returns limit page or None. Increments session counter for non-auth users."""
+    if current_user.is_authenticated:
+        if current_user.plan == 'free' and get_monthly_count(current_user) >= 3:
+            return render_template("limit.html")
+        return None
     if session.get("generation_count", 0) >= 3:
         return render_template("limit.html")
     session["generation_count"] = session.get("generation_count", 0) + 1
     return None
+
+def save_generation(tool_name, input_data, output_text):
+    if current_user.is_authenticated:
+        gen = Generation(
+            user_id=current_user.id,
+            tool_name=tool_name,
+            input_data=json.dumps(input_data),
+            output_text=output_text
+        )
+        db.session.add(gen)
+        db.session.commit()
+
+# ─── Auth routes ──────────────────────────────────────────────────────────────
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard"))
+    error = None
+    if request.method == "POST":
+        email = request.form["email"].strip().lower()
+        password = request.form["password"]
+        confirm = request.form["confirm_password"]
+        if password != confirm:
+            error = "Passwords do not match."
+        elif len(password) < 8:
+            error = "Password must be at least 8 characters."
+        elif User.query.filter_by(email=email).first():
+            error = "An account with that email already exists. Log in instead."
+        else:
+            pw_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+            user = User(email=email, password_hash=pw_hash)
+            db.session.add(user)
+            db.session.commit()
+            login_user(user)
+            return redirect(url_for("dashboard"))
+    return render_template("register.html", error=error)
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard"))
+    error = None
+    if request.method == "POST":
+        email = request.form["email"].strip().lower()
+        password = request.form["password"]
+        user = User.query.filter_by(email=email).first()
+        if not user or not bcrypt.check_password_hash(user.password_hash, password):
+            error = "Invalid email or password."
+        else:
+            login_user(user)
+            next_page = request.args.get("next")
+            return redirect(next_page or url_for("dashboard"))
+    return render_template("login.html", error=error)
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("home"))
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    generations = Generation.query.filter_by(user_id=current_user.id).order_by(Generation.created_at.desc()).all()
+    monthly_count = get_monthly_count(current_user)
+    return render_template("dashboard.html",
+        generations=generations,
+        monthly_count=monthly_count
+    )
+
+@app.route("/download/<int:gen_id>")
+@login_required
+def download_pdf(gen_id):
+    gen = db.session.get(Generation, gen_id)
+    if gen is None:
+        abort(404)
+    if gen.user_id != current_user.id:
+        abort(403)
+
+    from fpdf import FPDF
+
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=20)
+    pdf.add_page()
+    pdf.set_margins(20, 20, 20)
+
+    # ── Header bar ────────────────────────────────────
+    pdf.set_fill_color(10, 22, 40)
+    pdf.rect(0, 0, 210, 32, 'F')
+    pdf.set_y(8)
+    pdf.set_x(20)
+    pdf.set_font('Helvetica', 'B', 18)
+    pdf.set_text_color(201, 168, 76)
+    pdf.cell(0, 9, 'AlohaAgent', ln=True)
+    pdf.set_x(20)
+    pdf.set_font('Helvetica', '', 9)
+    pdf.set_text_color(140, 150, 165)
+    pdf.cell(0, 6, 'AI Tools for Hawaii Real Estate', ln=True)
+
+    pdf.set_y(40)
+
+    # ── Tool name & meta ──────────────────────────────
+    pdf.set_font('Helvetica', 'B', 14)
+    pdf.set_text_color(10, 22, 40)
+    pdf.cell(0, 8, gen.tool_name, ln=True)
+    pdf.set_font('Helvetica', '', 9)
+    pdf.set_text_color(100, 110, 125)
+    date_str = gen.created_at.strftime('%B %d, %Y')
+    pdf.cell(0, 6, f"Generated {date_str}  |  {current_user.email}", ln=True)
+
+    pdf.ln(3)
+    pdf.set_draw_color(201, 168, 76)
+    pdf.set_line_width(0.8)
+    pdf.line(20, pdf.get_y(), 190, pdf.get_y())
+    pdf.ln(5)
+
+    # ── Input summary ─────────────────────────────────
+    input_data = gen.input_parsed
+    if input_data:
+        pdf.set_font('Helvetica', 'B', 10)
+        pdf.set_text_color(10, 22, 40)
+        pdf.cell(0, 6, 'Property Details', ln=True)
+        pdf.ln(1)
+        pdf.set_font('Helvetica', '', 9)
+        pdf.set_text_color(60, 70, 85)
+        for key, val in list(input_data.items())[:8]:
+            if val:
+                label = key.replace('_', ' ').title()
+                pdf.set_x(20)
+                pdf.cell(55, 5, f"{label}:", border=0)
+                pdf.multi_cell(0, 5, str(val))
+        pdf.ln(3)
+        pdf.set_draw_color(210, 218, 230)
+        pdf.set_line_width(0.3)
+        pdf.line(20, pdf.get_y(), 190, pdf.get_y())
+        pdf.ln(5)
+
+    # ── Output text ───────────────────────────────────
+    pdf.set_font('Helvetica', 'B', 10)
+    pdf.set_text_color(10, 22, 40)
+    pdf.cell(0, 6, 'Generated Content', ln=True)
+    pdf.ln(2)
+
+    output = gen.output_text.replace('\r\n', '\n').replace('\r', '\n')
+    for line in output.split('\n'):
+        line = line.strip()
+        if not line:
+            pdf.ln(3)
+            continue
+        if line.isupper() and len(line) < 60:
+            pdf.set_font('Helvetica', 'B', 10)
+            pdf.set_text_color(10, 22, 40)
+            pdf.ln(2)
+            pdf.cell(0, 6, line, ln=True)
+            pdf.set_font('Helvetica', '', 9)
+            pdf.set_text_color(30, 40, 55)
+        else:
+            pdf.set_font('Helvetica', '', 9)
+            pdf.set_text_color(30, 40, 55)
+            pdf.multi_cell(0, 5, line)
+
+    # ── Footer ────────────────────────────────────────
+    pdf.set_y(-18)
+    pdf.set_draw_color(201, 168, 76)
+    pdf.set_line_width(0.5)
+    pdf.line(20, pdf.get_y(), 190, pdf.get_y())
+    pdf.ln(3)
+    pdf.set_font('Helvetica', '', 7)
+    pdf.set_text_color(140, 150, 165)
+    pdf.cell(0, 5, 'AlohaAgent · listaloha.onrender.com · AI-generated content for informational purposes only', align='C')
+
+    pdf_bytes = bytes(pdf.output())
+    response = make_response(pdf_bytes)
+    response.headers["Content-Type"] = "application/pdf"
+    safe_name = gen.tool_name.lower().replace(' ', '_')
+    response.headers["Content-Disposition"] = f"attachment; filename=alohaagent_{safe_name}_{gen.id}.pdf"
+    return response
+
+# ─── Existing routes ───────────────────────────────────────────────────────────
 
 @app.route("/")
 def home():
@@ -22,8 +270,12 @@ def home():
 
 @app.route("/listing")
 def listing():
-    count = session.get("generation_count", 0)
-    remaining = max(0, 3 - count)
+    if current_user.is_authenticated:
+        count = get_monthly_count(current_user)
+        remaining = max(0, 3 - count) if current_user.plan == 'free' else 999
+    else:
+        count = session.get("generation_count", 0)
+        remaining = max(0, 3 - count)
     return render_template("listing.html", remaining=remaining, count=count)
 
 @app.route("/pricing")
@@ -53,7 +305,7 @@ def generate():
         sqft_num = float(sqft.replace(",", ""))
         price_num = float(price.replace(",", "").replace("$", ""))
         price_per_sqft = round(price_num / sqft_num)
-    except:
+    except Exception:
         price_per_sqft = "N/A"
 
     year_built_line = f"Year built: {year_built}" if year_built else ""
@@ -121,6 +373,16 @@ NEIGHBORHOOD VIBE:
 [2-3 sentences]"""}]
     )
 
+    listing_text = listing_response.content[0].text
+    analysis_text = analysis_response.content[0].text
+    neighborhood_text = neighborhood_response.content[0].text
+
+    save_generation("Listing Generator",
+        {"address": address, "neighborhood": neighborhood, "island": island,
+         "price": price, "bedrooms": bedrooms, "bathrooms": bathrooms, "sqft": sqft},
+        f"LISTING:\n{listing_text}\n\nANALYSIS:\n{analysis_text}\n\nNEIGHBORHOOD REPORT:\n{neighborhood_text}"
+    )
+
     return render_template("results.html",
         address=address,
         bedrooms=bedrooms,
@@ -132,9 +394,9 @@ NEIGHBORHOOD VIBE:
         ocean_view=ocean_view,
         pool=pool,
         price_per_sqft=price_per_sqft,
-        listing=listing_response.content[0].text,
-        analysis=analysis_response.content[0].text,
-        neighborhood_report=neighborhood_response.content[0].text
+        listing=listing_text,
+        analysis=analysis_text,
+        neighborhood_report=neighborhood_text
     )
 
 @app.route("/waitlist", methods=["POST"])
@@ -212,6 +474,11 @@ EMAIL BODY:
             else:
                 sections[section] = content[start:].strip()
 
+    save_generation("Open House Announcer",
+        {"address": address, "neighborhood": neighborhood, "island": island, "date": date, "price": price},
+        content
+    )
+
     return render_template("open_house_results.html",
         address=address,
         neighborhood=neighborhood,
@@ -225,6 +492,7 @@ EMAIL BODY:
         email_subject=sections.get("EMAIL SUBJECT", ""),
         email_body=sections.get("EMAIL BODY", "")
     )
+
 @app.route("/social-media")
 def social_media():
     return render_template("social_media.html")
@@ -292,6 +560,11 @@ HASHTAGS:
             else:
                 sections[section] = content[start:].strip()
 
+    save_generation("Social Media Generator",
+        {"address": address, "neighborhood": neighborhood, "island": island, "price": price, "tone": tone},
+        content
+    )
+
     return render_template("social_media_results.html",
         address=address,
         neighborhood=neighborhood,
@@ -302,6 +575,7 @@ HASHTAGS:
         x_post=sections.get("X POST", ""),
         hashtags=sections.get("HASHTAGS", "")
     )
+
 @app.route("/offer-letter")
 def offer_letter():
     return render_template("offer_letter.html")
@@ -330,7 +604,7 @@ def offer_letter_generate():
         list_num = float(listing_price.replace(",", "").replace("$", ""))
         diff_pct = round(((offer_num - list_num) / list_num) * 100, 1)
         price_relationship = f"{abs(diff_pct)}% {'above' if diff_pct > 0 else 'below'} asking"
-    except:
+    except Exception:
         price_relationship = "at or near asking price"
 
     response = client.messages.create(
@@ -371,6 +645,12 @@ NEGOTIATION TIP:
                 sections[section] = content[start:end].strip()
             else:
                 sections[section] = content[start:].strip()
+
+    save_generation("Offer Letter Assistant",
+        {"address": address, "neighborhood": neighborhood, "island": island,
+         "offer_price": offer_price, "listing_price": listing_price, "buyer_name": buyer_name},
+        content
+    )
 
     return render_template("offer_letter_results.html",
         address=address,
@@ -445,6 +725,11 @@ RECOMMENDATION:
             else:
                 sections[section] = content[start:].strip()
 
+    save_generation("Market Report Generator",
+        {"neighborhood": neighborhood, "island": island, "report_type": report_type, "price_range": price_range},
+        content
+    )
+
     return render_template("market_report_results.html",
         neighborhood=neighborhood,
         island=island,
@@ -514,6 +799,12 @@ FOLLOW UP TEXT:
                 sections[section] = content[start:end].strip()
             else:
                 sections[section] = content[start:].strip()
+
+    save_generation("Client Email Templates",
+        {"email_type": email_type, "client_name": client_name, "address": address,
+         "neighborhood": neighborhood, "island": island, "agent_name": agent_name},
+        content
+    )
 
     return render_template("client_emails_results.html",
         email_type=email_type,
@@ -587,6 +878,11 @@ SOCIAL MEDIA BIO:
                 sections[section] = content[start:end].strip()
             else:
                 sections[section] = content[start:].strip()
+
+    save_generation("Bio Generator",
+        {"full_name": full_name, "primary_island": primary_island, "years_experience": years_experience, "tone": tone},
+        content
+    )
 
     return render_template("bio_generator_results.html",
         full_name=full_name,
@@ -730,6 +1026,12 @@ RECOMMENDATION:
                 sections[section] = content[start:end].strip()
             else:
                 sections[section] = content[start:].strip()
+
+    save_generation("Property Comparison",
+        {"p1_address": p1_address, "p2_address": p2_address, "p3_address": p3_address or "",
+         "p1_neighborhood": p1_neighborhood, "p2_neighborhood": p2_neighborhood},
+        content
+    )
 
     return render_template("property_comparison_results.html",
         p1_address=p1_address, p1_neighborhood=p1_neighborhood, p1_island=p1_island,

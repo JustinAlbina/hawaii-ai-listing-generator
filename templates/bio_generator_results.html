@@ -93,7 +93,15 @@
         <a href="/pricing" class="nav-link">Pricing</a>
         <a href="/#how-it-works" class="nav-link">How It Works</a>
     </div>
-    <div class="nav-badge">LIVE</div>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+        {% if current_user.is_authenticated %}
+            <a href="/dashboard" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Dashboard</a>
+            <a href="/logout" style="color:#c9a84c;font-size:13px;font-weight:600;border:1.5px solid #c9a84c;padding:0.4rem 1rem;border-radius:8px;text-decoration:none;">Log Out</a>
+        {% else %}
+            <a href="/login" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Log In</a>
+            <a href="/register" style="color:#c9a84c;font-size:13px;font-weight:600;border:1.5px solid #c9a84c;padding:0.4rem 1rem;border-radius:8px;text-decoration:none;">Get Started Free</a>
+        {% endif %}
+    </div>
 </nav>
 
 <div class="hero">

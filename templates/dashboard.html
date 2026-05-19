@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — AlohaAgent</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #ffffff; }
+
+        .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); position: sticky; top: 0; z-index: 100; }
+        .nav-left { display: flex; align-items: center; gap: 2rem; }
+        .nav-link { color: #8892a4; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
+        .nav-link:hover { color: #c9a84c; }
+
+        .hero { background: #0d1f35; padding: 2.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .hero-inner { max-width: 900px; margin: 0 auto; }
+        .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.75rem; }
+        .hero h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.25rem; }
+        .hero-sub { color: #8892a4; font-size: 0.9rem; }
+
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; max-width: 900px; margin: 0 auto; padding: 1.5rem 2rem 0; }
+        .stat-card { background: #162840; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.25rem 1.5rem; }
+        .stat-label { font-size: 11px; color: #8892a4; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.35rem; }
+        .stat-value { font-size: 1.75rem; font-weight: 700; color: #fff; }
+        .stat-sub { font-size: 12px; color: #8892a4; margin-top: 2px; }
+        .stat-value.gold { color: #c9a84c; }
+
+        .usage-bar-wrap { background: rgba(255,255,255,0.06); height: 6px; border-radius: 999px; margin-top: 0.6rem; overflow: hidden; }
+        .usage-bar-fill { height: 6px; background: #c9a84c; border-radius: 999px; transition: width 0.3s; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+        .section-title { font-size: 1rem; font-weight: 700; color: #fff; }
+        .section-count { font-size: 12px; color: #8892a4; }
+
+        .tools-link { display: inline-flex; align-items: center; gap: 6px; background: #c9a84c; color: #0a1628; padding: 0.6rem 1.25rem; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none; transition: all 0.2s; }
+        .tools-link:hover { background: #e8c97a; }
+
+        .empty-state { background: #162840; border: 1px dashed rgba(255,255,255,0.1); border-radius: 16px; padding: 3rem 2rem; text-align: center; }
+        .empty-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .empty-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .empty-sub { color: #8892a4; font-size: 0.875rem; margin-bottom: 1.5rem; }
+
+        .gen-card { background: #162840; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 0.75rem; transition: border-color 0.2s; }
+        .gen-card:hover { border-color: rgba(201,168,76,0.25); }
+        .gen-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+        .gen-meta { flex: 1; min-width: 0; }
+        .gen-tool { font-size: 13px; font-weight: 700; color: #c9a84c; margin-bottom: 2px; }
+        .gen-date { font-size: 11px; color: #4a5a70; margin-bottom: 0.5rem; }
+        .gen-address { font-size: 13px; color: #8892a4; }
+        .gen-preview { font-size: 13px; color: #a8b8cc; line-height: 1.6; margin-top: 0.6rem; display: none; }
+        .gen-preview.visible { display: block; }
+
+        .gen-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+        .btn-sm { font-size: 12px; font-weight: 600; padding: 0.4rem 0.85rem; border-radius: 8px; cursor: pointer; text-decoration: none; border: none; transition: all 0.18s; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-view { background: rgba(255,255,255,0.06); color: #a8b8cc; }
+        .btn-view:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-view.active { background: rgba(201,168,76,0.12); color: #c9a84c; }
+        .btn-pdf { background: rgba(201,168,76,0.12); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); }
+        .btn-pdf:hover { background: rgba(201,168,76,0.2); }
+
+        .plan-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: 0.5px; text-transform: uppercase; }
+        .plan-free { background: rgba(255,255,255,0.08); color: #8892a4; }
+        .plan-pro { background: rgba(201,168,76,0.2); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); }
+
+        .upgrade-banner { background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.06)); border: 1px solid rgba(201,168,76,0.25); border-radius: 14px; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .upgrade-text { font-size: 0.875rem; color: #a8b8cc; }
+        .upgrade-text strong { color: #fff; }
+        .btn-upgrade { background: #c9a84c; color: #0a1628; padding: 0.55rem 1.25rem; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap; transition: all 0.2s; }
+        .btn-upgrade:hover { background: #e8c97a; }
+
+        .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 1.25rem; font-size: 12px; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.06); }
+        .footer strong { color: #c9a84c; }
+
+        @media (max-width: 600px) {
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .stats-row .stat-card:last-child { grid-column: 1 / -1; }
+            .gen-top { flex-direction: column; }
+            .gen-actions { width: 100%; }
+            .upgrade-banner { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-left">
+        <a href="/"><img src="/static/logo.svg" style="height:90px;" alt="AlohaAgent"></a>
+        <a href="/listing" class="nav-link">Tools</a>
+        <a href="/pricing" class="nav-link">Pricing</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+        <span style="color:#8892a4;font-size:13px;">{{ current_user.email }}</span>
+        <a href="/logout" style="color:#c9a84c;font-size:13px;font-weight:600;border:1.5px solid #c9a84c;padding:0.4rem 1rem;border-radius:8px;text-decoration:none;">Log Out</a>
+    </div>
+</nav>
+
+<div class="hero">
+    <div class="hero-inner">
+        <div class="hero-eyebrow">My Dashboard</div>
+        <h1>Welcome back{% if current_user.email %}, {{ current_user.email.split('@')[0] }}{% endif %}</h1>
+        <p class="hero-sub">
+            {{ current_user.plan | capitalize }} plan
+            &nbsp;·&nbsp;
+            {{ generations | length }} total generation{{ 's' if generations | length != 1 else '' }}
+        </p>
+    </div>
+</div>
+
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-label">Plan</div>
+        <div class="stat-value" style="font-size:1.2rem;margin-top:4px;">
+            {% if current_user.plan == 'pro' %}
+                <span class="plan-badge plan-pro">Pro</span>
+            {% else %}
+                <span class="plan-badge plan-free">Free</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">This Month</div>
+        <div class="stat-value gold">{{ monthly_count }}</div>
+        {% if current_user.plan == 'free' %}
+        <div class="stat-sub">of 3 free</div>
+        <div class="usage-bar-wrap">
+            <div class="usage-bar-fill" style="width:{{ [monthly_count / 3 * 100, 100] | min | int }}%"></div>
+        </div>
+        {% else %}
+        <div class="stat-sub">unlimited</div>
+        {% endif %}
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">All Time</div>
+        <div class="stat-value">{{ generations | length }}</div>
+        <div class="stat-sub">generation{{ 's' if generations | length != 1 else '' }}</div>
+    </div>
+</div>
+
+<div class="container">
+
+    {% if current_user.plan == 'free' and monthly_count >= 2 %}
+    <div class="upgrade-banner">
+        <div class="upgrade-text">
+            {% if monthly_count >= 3 %}
+                <strong>You've hit your free limit for this month.</strong> Upgrade to Pro for unlimited generations across all 8 tools.
+            {% else %}
+                <strong>1 free generation left this month.</strong> Upgrade to Pro for unlimited access.
+            {% endif %}
+        </div>
+        <a href="/#waitlist" class="btn-upgrade">Upgrade to Pro →</a>
+    </div>
+    {% endif %}
+
+    <div class="section-header">
+        <div class="section-title">Saved Generations</div>
+        <span class="section-count">{{ generations | length }} total</span>
+    </div>
+
+    {% if generations %}
+        {% for gen in generations %}
+        <div class="gen-card">
+            <div class="gen-top">
+                <div class="gen-meta">
+                    <div class="gen-tool">{{ gen.tool_name }}</div>
+                    <div class="gen-date">{{ gen.created_at.strftime('%B %d, %Y at %-I:%M %p') }}</div>
+                    {% set inp = gen.input_parsed %}
+                    {% if inp.get('address') %}
+                        <div class="gen-address">{{ inp.get('address') }}{% if inp.get('neighborhood') %}, {{ inp.get('neighborhood') }}{% endif %}{% if inp.get('island') %} — {{ inp.get('island') }}{% endif %}</div>
+                    {% elif inp.get('neighborhood') %}
+                        <div class="gen-address">{{ inp.get('neighborhood') }}{% if inp.get('island') %}, {{ inp.get('island') }}{% endif %}</div>
+                    {% elif inp.get('full_name') %}
+                        <div class="gen-address">{{ inp.get('full_name') }}</div>
+                    {% elif inp.get('p1_address') %}
+                        <div class="gen-address">{{ inp.get('p1_address') }} vs {{ inp.get('p2_address', '') }}</div>
+                    {% endif %}
+                    <div class="gen-preview" id="preview-{{ gen.id }}">{{ gen.output_preview }}</div>
+                </div>
+                <div class="gen-actions">
+                    <button class="btn-sm btn-view" id="btn-{{ gen.id }}" onclick="togglePreview({{ gen.id }})">
+                        <span>&#128065;</span> View
+                    </button>
+                    <a href="/download/{{ gen.id }}" class="btn-sm btn-pdf">
+                        <span>&#8595;</span> PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">&#127968;</div>
+            <div class="empty-title">No generations yet</div>
+            <div class="empty-sub">Use any AI tool and your output will be saved here automatically.</div>
+            <a href="/listing" class="tools-link">Try a tool →</a>
+        </div>
+    {% endif %}
+
+    {% if generations %}
+    <div style="text-align:center;margin-top:2rem;">
+        <a href="/listing" class="tools-link">Generate something new →</a>
+    </div>
+    {% endif %}
+
+</div>
+
+<div class="footer">
+    <strong>AlohaAgent</strong> by AlohaForge &nbsp;·&nbsp; AI tools built for Hawaii real estate professionals &nbsp;·&nbsp; &copy; 2026
+</div>
+
+<script>
+function togglePreview(id) {
+    const preview = document.getElementById('preview-' + id);
+    const btn = document.getElementById('btn-' + id);
+    const isVisible = preview.classList.contains('visible');
+    preview.classList.toggle('visible', !isVisible);
+    btn.classList.toggle('active', !isVisible);
+    btn.innerHTML = isVisible ? '<span>&#128065;</span> View' : '<span>&#215;</span> Hide';
+}
+</script>
+
+</body>
+</html>
