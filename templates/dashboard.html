@@ -26,10 +26,11 @@
         .nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.35rem 0.75rem; }
         .nav-dropdown-group-label { font-size: 10px; font-weight: 700; color: #4a5a70; text-transform: uppercase; letter-spacing: 1px; padding: 0.4rem 0.75rem 0.2rem; }
 
-        .hero { background: #0d1f35; padding: 2.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .hero { background: #162840; padding: 60px 2rem; border-bottom: 1px solid rgba(255,255,255,0.06); text-align: center; }
         .hero-inner { max-width: 900px; margin: 0 auto; }
-        .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.75rem; }
+        .hero-eyebrow { border: 1px solid #c9a84c; color: #c9a84c; border-radius: 999px; padding: 4px 16px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; display: inline-block; margin-bottom: 1.25rem; }
         .hero h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.25rem; }
+        .hero h1 span { color: #c9a84c; }
         .hero-sub { color: #8892a4; font-size: 0.9rem; }
 
         .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; max-width: 900px; margin: 0 auto; padding: 1.5rem 2rem 0; }
@@ -129,7 +130,7 @@
 <div class="hero">
     <div class="hero-inner">
         <div class="hero-eyebrow">My Dashboard</div>
-        <h1>Welcome back{% if current_user.email %}, {{ current_user.email.split('@')[0] }}{% endif %}</h1>
+        <h1>Welcome back{% if current_user.email %}, <span>{{ current_user.email.split('@')[0] }}</span>{% endif %}</h1>
         <p class="hero-sub">
             {{ current_user.plan | capitalize }} plan
             &nbsp;·&nbsp;
