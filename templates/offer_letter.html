@@ -6,7 +6,7 @@
     <title>Offer Letter Assistant — AlohaAgent</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f7f4; color: #1a1a2e; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #e8edf4; }
 
         .top-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.6rem 1rem; font-size: 13px; font-weight: 600; }
 
@@ -38,23 +38,23 @@
 
         .container { max-width: 720px; margin: 0 auto; padding: 0 1rem 3rem; }
 
-        .card { background: white; border-radius: 16px; padding: 2rem; margin-bottom: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #eee; }
-        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f0f0; }
+        .card { background: #162840; border-radius: 16px; padding: 2rem; margin-bottom: 1.25rem; border: 1px solid rgba(255,255,255,0.08); }
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
         .card-icon { width: 36px; height: 36px; background: #0a1628; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .card-title { font-size: 1rem; font-weight: 600; color: #0a1628; }
-        .card-subtitle { font-size: 12px; color: #888; margin-top: 1px; }
+        .card-title { font-size: 1rem; font-weight: 600; color: #fff; }
+        .card-subtitle { font-size: 12px; color: #8892a4; margin-top: 1px; }
 
         .form-group { margin-bottom: 1.1rem; }
-        label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select, textarea { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid #e8e8e8; border-radius: 10px; font-size: 0.95rem; color: #1a1a2e; background: #fafafa; transition: all 0.2s; font-family: inherit; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; color: #8892a4; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select, textarea { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 0.95rem; color: #fff; background: #1a2f45; transition: all 0.2s; font-family: inherit; }
         textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: #c9a84c; background: white; box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #c9a84c; background: #1a2f45; box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
         .checkbox-group { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.35rem; }
         .checkbox-item { display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .checkbox-item input[type="checkbox"] { width: auto; accent-color: #c9a84c; width: 16px; height: 16px; cursor: pointer; }
-        .checkbox-item span { font-size: 0.9rem; color: #333; font-weight: 500; }
+        .checkbox-item span { font-size: 0.9rem; color: #a8b8cc; font-weight: 500; }
 
         .btn { width: 100%; padding: 1rem; background: #0a1628; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 0.75rem; transition: all 0.2s; letter-spacing: 0.3px; }
         .btn:hover { background: #162840; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(10,22,40,0.3); }

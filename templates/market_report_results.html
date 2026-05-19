@@ -6,7 +6,7 @@
     <title>Market Report — {{ neighborhood }}, {{ island }} — AlohaAgent</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f7f4; color: #1a1a2e; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #e8edf4; }
 
         .top-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.6rem 1rem; font-size: 13px; font-weight: 600; }
 
@@ -41,17 +41,17 @@
 
         .container { max-width: 750px; margin: 0 auto; padding: 0 1rem 3rem; }
 
-        .card { background: white; border-radius: 16px; padding: 1.75rem; margin: 1.25rem 0; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #eee; }
-        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f0f0; }
+        .card { background: #162840; border-radius: 16px; padding: 1.75rem; margin: 1.25rem 0; border: 1px solid rgba(255,255,255,0.08); }
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
         .card-icon { width: 32px; height: 32px; background: #0a1628; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .card-title { font-size: 0.95rem; font-weight: 600; color: #0a1628; }
-        .card-subtitle { font-size: 12px; color: #888; margin-top: 1px; }
+        .card-title { font-size: 0.95rem; font-weight: 600; color: #fff; }
+        .card-subtitle { font-size: 12px; color: #8892a4; margin-top: 1px; }
 
-        .content-box { background: #f8f7f4; border-radius: 10px; padding: 1.25rem; font-size: 0.9rem; line-height: 1.85; color: #333; white-space: pre-wrap; margin-bottom: 1rem; }
+        .content-box { background: #1a2f45; border-radius: 10px; padding: 1.25rem; font-size: 0.9rem; line-height: 1.85; color: #e8edf4; white-space: pre-wrap; margin-bottom: 1rem; }
 
         .rec-box { background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.06)); border: 1px solid rgba(201,168,76,0.3); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
         .rec-box-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c9a84c; margin-bottom: 0.5rem; }
-        .rec-box p { font-size: 0.9rem; line-height: 1.75; color: #333; white-space: pre-wrap; }
+        .rec-box p { font-size: 0.9rem; line-height: 1.75; color: #a8b8cc; white-space: pre-wrap; }
 
         .copy-btn { background: #0a1628; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .copy-btn:hover { background: #162840; }
@@ -61,10 +61,10 @@
         .btn { flex: 1; padding: 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; border: none; transition: all 0.2s; }
         .btn-primary { background: #0a1628; color: white; }
         .btn-primary:hover { background: #162840; }
-        .btn-outline { background: white; color: #0a1628; border: 2px solid #0a1628; }
-        .btn-outline:hover { background: #f0f0f0; }
+        .btn-outline { background: transparent; color: #8892a4; border: 1.5px solid rgba(255,255,255,0.15); }
+        .btn-outline:hover { border-color: #c9a84c; color: #c9a84c; }
 
-        .disclaimer-box { background: #fff8e7; border: 1px solid rgba(201,168,76,0.35); border-radius: 10px; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 12px; color: #666; line-height: 1.7; }
+        .disclaimer-box { background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.25); border-radius: 10px; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 12px; color: #a8b8cc; line-height: 1.7; }
 
         .footer { background: #0a1628; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 2rem; }
         .footer strong { color: #c9a84c; }
