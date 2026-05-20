@@ -383,6 +383,21 @@ def download_pdf(gen_id):
 
 # ─── Existing routes ───────────────────────────────────────────────────────────
 
+@app.route("/run-migration")
+def run_migration():
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(db.text("""
+                ALTER TABLE "user" ADD COLUMN IF NOT EXISTS full_name VARCHAR(100);
+                ALTER TABLE "user" ADD COLUMN IF NOT EXISTS brokerage VARCHAR(100);
+                ALTER TABLE "user" ADD COLUMN IF NOT EXISTS island VARCHAR(50);
+                ALTER TABLE "user" ADD COLUMN IF NOT EXISTS license_number VARCHAR(50);
+            """))
+            conn.commit()
+        return "Migration complete", 200
+    except Exception as e:
+        return str(e), 500
+
 @app.route("/terms")
 def terms():
     return render_template("terms.html")
