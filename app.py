@@ -35,6 +35,10 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(256), nullable=False)
     plan = db.Column(db.String(20), default='free')
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    full_name = db.Column(db.String(100), nullable=True)
+    brokerage = db.Column(db.String(100), nullable=True)
+    island = db.Column(db.String(50), nullable=True)
+    license_number = db.Column(db.String(50), nullable=True)
     generations = db.relationship('Generation', backref='user', lazy=True)
 
 class Generation(db.Model):
@@ -379,9 +383,31 @@ def download_pdf(gen_id):
 
 # ─── Existing routes ───────────────────────────────────────────────────────────
 
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    if request.method == "POST":
+        current_user.full_name = request.form.get("full_name", "").strip()
+        current_user.brokerage = request.form.get("brokerage", "").strip()
+        current_user.island = request.form.get("island", "").strip()
+        current_user.license_number = request.form.get("license_number", "").strip()
+        db.session.commit()
+        flash("Profile updated.", "success")
+        return redirect(url_for("profile"))
+    return render_template("profile.html", user=current_user)
+
 @app.route("/")
 def home():
-    return render_template("index.html")
+    total_gen = db.session.query(Generation).count()
+    return render_template("index.html", total_generations=total_gen)
 
 @app.route("/listing")
 def listing():
@@ -391,7 +417,7 @@ def listing():
     else:
         count = session.get("generation_count", 0)
         remaining = max(0, 3 - count)
-    return render_template("listing.html", remaining=remaining, count=count)
+    return render_template("listing.html", remaining=remaining, count=count, current_user=current_user)
 
 @app.route("/pricing")
 def pricing():
@@ -523,7 +549,7 @@ def waitlist():
 
 @app.route("/open-house")
 def open_house():
-    return render_template("open_house.html")
+    return render_template("open_house.html", current_user=current_user)
 
 @app.route("/open-house/generate", methods=["POST"])
 def open_house_generate():
@@ -610,7 +636,7 @@ EMAIL BODY:
 
 @app.route("/social-media")
 def social_media():
-    return render_template("social_media.html")
+    return render_template("social_media.html", current_user=current_user)
 
 @app.route("/social-media/generate", methods=["POST"])
 def social_media_generate():
@@ -693,7 +719,7 @@ HASHTAGS:
 
 @app.route("/offer-letter")
 def offer_letter():
-    return render_template("offer_letter.html")
+    return render_template("offer_letter.html", current_user=current_user)
 
 @app.route("/offer-letter/generate", methods=["POST"])
 def offer_letter_generate():
@@ -781,7 +807,7 @@ NEGOTIATION TIP:
 
 @app.route("/market-report")
 def market_report():
-    return render_template("market_report.html")
+    return render_template("market_report.html", current_user=current_user)
 
 @app.route("/market-report/generate", methods=["POST"])
 def market_report_generate():
@@ -861,7 +887,7 @@ RECOMMENDATION:
 
 @app.route("/client-emails")
 def client_emails():
-    return render_template("client_emails.html")
+    return render_template("client_emails.html", current_user=current_user)
 
 @app.route("/client-emails/generate", methods=["POST"])
 def client_emails_generate():
@@ -933,7 +959,7 @@ FOLLOW UP TEXT:
 
 @app.route("/bio-generator")
 def bio_generator():
-    return render_template("bio_generator.html")
+    return render_template("bio_generator.html", current_user=current_user)
 
 @app.route("/bio-generator/generate", methods=["POST"])
 def bio_generator_generate():
@@ -1010,7 +1036,7 @@ SOCIAL MEDIA BIO:
 
 @app.route("/property-comparison")
 def property_comparison():
-    return render_template("property_comparison.html")
+    return render_template("property_comparison.html", current_user=current_user)
 
 @app.route("/property-comparison/generate", methods=["POST"])
 def property_comparison_generate():

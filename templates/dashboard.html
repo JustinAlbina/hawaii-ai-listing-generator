@@ -88,6 +88,8 @@
         .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 1.25rem; font-size: 12px; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.06); }
         .footer strong { color: #c9a84c; }
 
+        #gen-search:focus, #gen-tool-filter:focus { outline: none; border-color: #c9a84c; }
+
         @media (max-width: 600px) {
             .stats-row { grid-template-columns: 1fr 1fr; }
             .stats-row .stat-card:last-child { grid-column: 1 / -1; }
@@ -123,6 +125,7 @@
     </div>
     <div style="display:flex;align-items:center;gap:0.75rem;">
         <span style="color:#8892a4;font-size:13px;">{{ current_user.email }}</span>
+        <a href="/profile" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Profile</a>
         <a href="/logout" style="color:#c9a84c;font-size:13px;font-weight:600;border:1.5px solid #c9a84c;padding:0.4rem 1rem;border-radius:8px;text-decoration:none;">Log Out</a>
     </div>
 </nav>
@@ -184,6 +187,22 @@
     </div>
     {% endif %}
 
+    <div style="display:flex;gap:0.75rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+        <input type="text" id="gen-search" placeholder="Search your generations..." style="flex:1;min-width:200px;padding:0.65rem 1rem;border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;font-size:0.875rem;color:#fff;background:#1a2f45;font-family:inherit;" oninput="filterGens()">
+        <select id="gen-tool-filter" style="padding:0.65rem 1rem;border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;font-size:0.875rem;color:#fff;background:#1a2f45;font-family:inherit;min-width:180px;" onchange="filterGens()">
+            <option value="">All Tools</option>
+            <option value="Listing Generator">Listing Generator</option>
+            <option value="Open House Announcer">Open House Announcer</option>
+            <option value="Offer Letter Assistant">Offer Letter Assistant</option>
+            <option value="Social Media Generator">Social Media Generator</option>
+            <option value="Market Report Generator">Market Report Generator</option>
+            <option value="Client Email Templates">Client Email Templates</option>
+            <option value="Bio Generator">Bio Generator</option>
+            <option value="Property Comparison">Property Comparison</option>
+        </select>
+    </div>
+    <div id="no-results" style="display:none;background:#162840;border:1px dashed rgba(255,255,255,0.1);border-radius:16px;padding:2rem;text-align:center;color:#8892a4;font-size:0.9rem;">No results found.</div>
+
     <div class="section-header">
         <div class="section-title">Saved Generations</div>
         <span class="section-count">{{ generations | length }} total</span>
@@ -191,7 +210,7 @@
 
     {% if generations %}
         {% for gen in generations %}
-        <div class="gen-card">
+        <div class="gen-card" data-tool="{{ gen.tool_name }}" data-content="{{ gen.input_data | lower }}">
             <div class="gen-top">
                 <div class="gen-meta">
                     <div class="gen-tool">{{ gen.tool_name }}</div>
@@ -241,6 +260,24 @@
 </div>
 
 <script>
+function filterGens() {
+    var search = document.getElementById('gen-search').value.toLowerCase();
+    var tool = document.getElementById('gen-tool-filter').value;
+    var cards = document.querySelectorAll('.gen-card');
+    var visible = 0;
+    cards.forEach(function(card) {
+        var matchTool = !tool || card.dataset.tool === tool;
+        var matchSearch = !search || card.dataset.content.includes(search);
+        if (matchTool && matchSearch) {
+            card.style.display = '';
+            visible++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    document.getElementById('no-results').style.display = visible === 0 && cards.length > 0 ? 'block' : 'none';
+}
+
 function togglePreview(id) {
     const preview = document.getElementById('preview-' + id);
     const btn = document.getElementById('btn-' + id);

@@ -82,6 +82,7 @@
     <div style="display:flex;align-items:center;gap:0.75rem;">
         {% if current_user.is_authenticated %}
             <a href="/dashboard" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Dashboard</a>
+            <a href="/profile" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Profile</a>
             <a href="/logout" style="color:#c9a84c;font-size:13px;font-weight:600;border:1.5px solid #c9a84c;padding:0.4rem 1rem;border-radius:8px;text-decoration:none;">Log Out</a>
         {% else %}
             <a href="/login" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Log In</a>
@@ -105,10 +106,12 @@
                 <div class="card-title">Instagram Caption</div>
                 <div class="card-subtitle">Copy and paste into your Instagram post</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="output-main" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="platform-badge">📸 Instagram</div>
-        <div class="content-box" id="instagram">{{ instagram }}</div>
-        <button class="copy-btn" onclick="copyText('instagram', this)">Copy Caption</button>
+        <div class="content-box" id="output-main">{{ instagram }}</div>
+        <button class="copy-btn" onclick="copyText('output-main', this)">Copy Caption</button>
+        <p style="font-size:11px;color:#8892a4;margin-top:16px;padding-top:12px;border-top:1px solid rgba(201,168,76,0.15);">AI-generated content. Review before use. Not affiliated with HAR. Verify all outputs with a licensed Hawaii real estate professional.</p>
     </div>
 
     <div class="card">
@@ -163,6 +166,19 @@
 </div>
 
 <script>
+function copySection(btn) {
+    var el = document.getElementById(btn.getAttribute('data-target'));
+    navigator.clipboard.writeText(el.innerText).then(function() {
+        btn.textContent = '✓ Copied!';
+        btn.style.background = '#2ecc71';
+        btn.style.color = '#fff';
+        setTimeout(function() {
+            btn.textContent = '📋 Copy';
+            btn.style.background = '#c9a84c';
+            btn.style.color = '#0a1628';
+        }, 2000);
+    });
+}
 function copyText(id, btn) {
     const text = document.getElementById(id).innerText;
     navigator.clipboard.writeText(text).then(() => {

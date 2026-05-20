@@ -99,6 +99,7 @@
     <div style="display:flex;align-items:center;gap:0.75rem;">
         {% if current_user.is_authenticated %}
             <a href="/dashboard" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Dashboard</a>
+            <a href="/profile" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Profile</a>
             <a href="/logout" style="color:#c9a84c;font-size:13px;font-weight:600;border:1.5px solid #c9a84c;padding:0.4rem 1rem;border-radius:8px;text-decoration:none;">Log Out</a>
         {% else %}
             <a href="/login" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Log In</a>
@@ -142,8 +143,9 @@
                 </div>
                 <div class="form-group">
                     <label>Island</label>
+                    {% set _island = current_user.island if current_user.is_authenticated else '' %}
                     <select name="p1_island">
-                        <option>Kauai</option><option>Oahu</option><option>Maui</option><option>Big Island</option><option>Molokai</option><option>Lanai</option>
+                        <option {% if _island == 'Kauai' %}selected{% endif %}>Kauai</option><option {% if _island == 'Oahu' %}selected{% endif %}>Oahu</option><option {% if _island == 'Maui' %}selected{% endif %}>Maui</option><option {% if _island == 'Big Island' %}selected{% endif %}>Big Island</option><option>Molokai</option><option>Lanai</option>
                     </select>
                 </div>
             </div>
@@ -204,7 +206,7 @@
                 <div class="form-group">
                     <label>Island</label>
                     <select name="p2_island">
-                        <option>Kauai</option><option>Oahu</option><option>Maui</option><option>Big Island</option><option>Molokai</option><option>Lanai</option>
+                        <option {% if _island == 'Kauai' %}selected{% endif %}>Kauai</option><option {% if _island == 'Oahu' %}selected{% endif %}>Oahu</option><option {% if _island == 'Maui' %}selected{% endif %}>Maui</option><option {% if _island == 'Big Island' %}selected{% endif %}>Big Island</option><option>Molokai</option><option>Lanai</option>
                     </select>
                 </div>
             </div>
@@ -266,7 +268,7 @@
                 <div class="form-group">
                     <label>Island</label>
                     <select name="p3_island">
-                        <option>Kauai</option><option>Oahu</option><option>Maui</option><option>Big Island</option><option>Molokai</option><option>Lanai</option>
+                        <option {% if _island == 'Kauai' %}selected{% endif %}>Kauai</option><option {% if _island == 'Oahu' %}selected{% endif %}>Oahu</option><option {% if _island == 'Maui' %}selected{% endif %}>Maui</option><option {% if _island == 'Big Island' %}selected{% endif %}>Big Island</option><option>Molokai</option><option>Lanai</option>
                     </select>
                 </div>
             </div>

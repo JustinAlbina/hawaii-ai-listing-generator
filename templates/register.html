@@ -87,6 +87,7 @@
     <div style="display:flex;align-items:center;gap:0.75rem;">
         {% if current_user.is_authenticated %}
             <a href="/dashboard" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Dashboard</a>
+            <a href="/profile" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Profile</a>
             <a href="/logout" style="color:#c9a84c;font-size:13px;font-weight:600;border:1.5px solid #c9a84c;padding:0.4rem 1rem;border-radius:8px;text-decoration:none;">Log Out</a>
         {% else %}
             <a href="/login" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Log In</a>
@@ -120,7 +121,11 @@
             <button type="submit" class="btn-submit">Create Account →</button>
         </form>
 
-        <p class="terms">By creating an account you agree to our Terms of Service and Privacy Policy.</p>
+        <p style="font-size:12px;color:#8892a4;text-align:center;margin-top:12px;">
+            By registering you agree to our
+            <a href="/terms" style="color:#c9a84c;">Terms of Service</a> and
+            <a href="/privacy" style="color:#c9a84c;">Privacy Policy</a>.
+        </p>
 
         <div class="divider">
             <div class="divider-line"></div>

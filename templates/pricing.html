@@ -110,6 +110,7 @@
     <div style="display:flex;align-items:center;gap:0.75rem;">
         {% if current_user.is_authenticated %}
             <a href="/dashboard" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Dashboard</a>
+            <a href="/profile" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Profile</a>
             <a href="/logout" style="color:#c9a84c;font-size:13px;font-weight:600;border:1.5px solid #c9a84c;padding:0.4rem 1rem;border-radius:8px;text-decoration:none;">Log Out</a>
         {% else %}
             <a href="/login" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Log In</a>
@@ -144,14 +145,6 @@
                 <li>
                     <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                     One-click copy to clipboard
-                </li>
-                <li class="dim">
-                    <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-                    Unlimited generations
-                </li>
-                <li class="dim">
-                    <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-                    Saved history & exports
                 </li>
                 <li class="dim">
                     <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
@@ -192,7 +185,7 @@
                     Early access to new tools
                 </li>
             </ul>
-            <a href="/#waitlist" class="plan-btn plan-btn-gold">Get Pro Access</a>
+            <a href="/#waitlist" class="plan-btn plan-btn-gold">Join the Pro Waitlist</a>
         </div>
 
         <div class="pricing-card">
@@ -239,7 +232,7 @@
                     Do I need a credit card to start?
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
-                <div class="faq-answer">No — the free tier is completely free with no credit card required. You get 3 AI generations per session and access to all 8 tools. Upgrade to Pro only when you're ready.</div>
+                <div class="faq-answer">No — the free tier is completely free with no credit card required. You get 3 AI generations per month and access to all 8 tools. Upgrade to Pro only when you're ready.</div>
             </div>
 
             <div class="faq-item">
@@ -247,7 +240,7 @@
                     What counts as a "generation"?
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
-                <div class="faq-answer">Each time you submit a form and receive AI-generated content counts as one generation. Free users get 3 generations per session shared across all 8 tools. Pro users get unlimited generations across every tool.</div>
+                <div class="faq-answer">Each time you submit a form and receive AI-generated content counts as one generation. Guest users get 3 free generations tracked by browser session. Creating a free account gives you a true monthly reset — your 3 generations refresh on the 1st of each month. Pro users get unlimited generations across every tool.</div>
             </div>
 
             <div class="faq-item">
