@@ -9,8 +9,11 @@ import json
 import datetime
 import io
 import markdown as md_lib
+import stripe
 
 load_dotenv()
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "alohaagent-secret-2024")
@@ -1231,6 +1234,80 @@ def admin_set_free(email):
     user.plan = "free"
     db.session.commit()
     return f"✓ {email} set to free", 200
+
+@app.context_processor
+def inject_monthly_count():
+    if current_user.is_authenticated:
+        return {"monthly_count": get_monthly_count(current_user)}
+    return {"monthly_count": 0}
+
+# ─── Stripe billing ───────────────────────────────────────────────────────────
+
+@app.route("/create-checkout-session", methods=["POST"])
+@login_required
+def create_checkout_session():
+    try:
+        session = stripe.checkout.Session.create(
+            mode="subscription",
+            customer_email=current_user.email,
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "unit_amount": 7900,
+                    "recurring": {"interval": "month"},
+                    "product_data": {"name": "AlohaAgent Pro"},
+                },
+                "quantity": 1,
+            }],
+            success_url="https://alohaagent.app/upgrade-success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url="https://alohaagent.app/pricing",
+        )
+        return redirect(session.url, code=303)
+    except Exception as e:
+        flash(f"Billing error: {str(e)}", "error")
+        return redirect("/pricing")
+
+
+@app.route("/upgrade-success")
+@login_required
+def upgrade_success():
+    session_id = request.args.get("session_id")
+    if session_id:
+        try:
+            checkout_session = stripe.checkout.Session.retrieve(session_id)
+            if checkout_session.payment_status == "paid":
+                current_user.plan = "pro"
+                db.session.commit()
+                flash("Welcome to AlohaAgent Pro! Unlimited generations are now active.", "success")
+        except Exception:
+            pass
+    return redirect("/dashboard")
+
+
+@app.route("/stripe-webhook", methods=["POST"])
+def stripe_webhook():
+    payload = request.get_data(as_text=True)
+    sig = request.headers.get("Stripe-Signature")
+    secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+    try:
+        event = stripe.Webhook.construct_event(payload, sig, secret)
+    except (ValueError, stripe.error.SignatureVerificationError):
+        return "", 400
+
+    if event["type"] == "customer.subscription.deleted":
+        email = event["data"]["object"].get("customer_email") or \
+                event["data"]["object"].get("metadata", {}).get("email")
+        if email:
+            user = User.query.filter_by(email=email).first()
+            if user:
+                user.plan = "free"
+                db.session.commit()
+    elif event["type"] == "invoice.payment_failed":
+        email = event["data"]["object"].get("customer_email")
+        app.logger.warning(f"Payment failed for {email}")
+
+    return "", 200
+
 
 if __name__ == "__main__":
     if not os.getenv("ADMIN_SECRET"):

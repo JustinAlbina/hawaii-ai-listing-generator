@@ -158,7 +158,14 @@
         <a href="/login">Log In</a>
         <a href="/register">Get Started Free</a>
     {% endif %}
+{% if current_user.is_authenticated and current_user.plan == 'free' and monthly_count >= 3 %}
+<div style="background:#c9a84c;color:#0a1628;text-align:center;padding:0.75rem 1rem;font-size:14px;font-weight:600;">
+    You've used all 3 free generations this month.
+    <a href="/pricing" style="color:#0a1628;text-decoration:underline;margin-left:0.5rem;">Upgrade to Pro for unlimited access →</a>
 </div>
+{% endif %}
+
+
 
 <div class="hero">
     <div class="hero-eyebrow">PROPERTY COMPARISON</div>

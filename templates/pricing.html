@@ -233,7 +233,13 @@
                     Early access to new tools
                 </li>
             </ul>
-            <a href="/#waitlist" class="plan-btn plan-btn-gold">Join the Pro Waitlist</a>
+            {% if current_user.is_authenticated %}
+            <form action="/create-checkout-session" method="POST" style="margin:0;">
+                <button type="submit" class="plan-btn plan-btn-gold" style="width:100%;cursor:pointer;border:none;font-family:inherit;">Upgrade to Pro — $79/month</button>
+            </form>
+            {% else %}
+            <a href="/login" class="plan-btn plan-btn-gold">Log in to upgrade</a>
+            {% endif %}
         </div>
 
         <div class="pricing-card">
