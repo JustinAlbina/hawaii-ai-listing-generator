@@ -173,10 +173,11 @@
                 <div class="card-subtitle">Strategic advice based on your offer</div>
             </div>
         </div>
-        <div class="tip-box">
+        <div class="tip-box" id="negotiation-tip">
             <div class="tip-box-label">Strategy</div>
             <p>{{ negotiation_tip | safe }}</p>
         </div>
+        <button class="copy-btn" onclick="copyText('negotiation-tip', this)">Copy Tip</button>
     </div>
 
     <div class="card">
