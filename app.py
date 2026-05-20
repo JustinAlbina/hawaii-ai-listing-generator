@@ -41,6 +41,11 @@ class User(db.Model, UserMixin):
     license_number = db.Column(db.String(50), nullable=True)
     generations = db.relationship('Generation', backref='user', lazy=True)
 
+class Waitlist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
 class Generation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -542,8 +547,8 @@ NEIGHBORHOOD VIBE:
 @app.route("/waitlist", methods=["POST"])
 def waitlist():
     email = request.form["email"]
-    with open("waitlist.txt", "a") as f:
-        f.write(email + "\n")
+    db.session.add(Waitlist(email=email))
+    db.session.commit()
     return render_template("waitlist_success.html", email=email)
 
 @app.route("/open-house")
