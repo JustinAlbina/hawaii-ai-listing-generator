@@ -58,6 +58,25 @@
 
         .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 1.25rem; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
         .footer strong { color: #c9a84c; }
+        .nav-right { display: flex; align-items: center; gap: 0.75rem; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 1.5rem; margin-left: 1rem; }
+        .nav-btn { background: transparent; color: #c9a84c; border: 1.5px solid #c9a84c; padding: 0.45rem 1.1rem; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s; white-space: nowrap; }
+        .nav-btn:hover { background: #c9a84c; color: #0a1628; }
+        .nav-hamburger { display: none; flex-direction: column; gap: 4px; cursor: pointer; padding: 4px; }
+        .nav-hamburger span { display: block; width: 22px; height: 2px; background: #8892a4; border-radius: 2px; }
+        #mobile-menu { display: none; }
+        @media (max-width: 768px) {
+            .nav { padding: 0.75rem 1rem; }
+            .nav-dropdown { display: none; }
+            .nav-link { display: none; }
+            .nav-btn { display: none; }
+            .nav-right { border-left: none; padding-left: 0; margin-left: 0; }
+            .nav-hamburger { display: flex; }
+            #mobile-menu { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; overflow-y: auto; z-index: 9999; background: #0a1628; padding: 1.5rem; box-sizing: border-box; }
+            #mobile-menu-close { display: block; width: 100%; background: none; border: none; color: #c9a84c; font-size: 1.5rem; cursor: pointer; text-align: right; padding: 0 0 1.25rem 0; font-family: inherit; }
+            #mobile-menu a { display: block; color: #8892a4; text-decoration: none; padding: 0.75rem 0; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+            #mobile-menu a:last-child { border-bottom: none; }
+            #mobile-menu a:hover { color: #c9a84c; }
+        }
     </style>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌺</text></svg>">
 </head>
@@ -90,16 +109,40 @@
         <a href="/pricing" class="nav-link">Pricing</a>
         <a href="/#how-it-works" class="nav-link">How It Works</a>
     </div>
-    <div style="display:flex;align-items:center;gap:0.75rem;">
+    <div class="nav-right">
         {% if current_user.is_authenticated %}
-            <a href="/dashboard" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Dashboard</a>
-            <a href="/profile" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Profile</a>
-            <a href="/logout" style="color:#c9a84c;font-size:13px;font-weight:600;border:1.5px solid #c9a84c;padding:0.4rem 1rem;border-radius:8px;text-decoration:none;">Log Out</a>
+            <a href="/dashboard" class="nav-link">Dashboard</a>
+            <a href="/profile" class="nav-link">Profile</a>
+            <a href="/logout" class="nav-btn">Log Out</a>
         {% else %}
-            <a href="/login" style="color:#8892a4;font-size:13px;font-weight:500;text-decoration:none;">Log In</a>
+            <a href="/login" class="nav-link">Log In</a>
         {% endif %}
+        <div class="nav-hamburger" onclick="toggleMenu()">
+            <span></span><span></span><span></span>
+        </div>
     </div>
 </nav>
+<div id="mobile-menu">
+    <button id="mobile-menu-close" onclick="toggleMenu()">✕</button>
+    <a href="/listing">Listing Generator</a>
+    <a href="/open-house">Open House Announcer</a>
+    <a href="/social-media">Social Media Generator</a>
+    <a href="/offer-letter">Offer Letter Assistant</a>
+    <a href="/market-report">Market Report Generator</a>
+    <a href="/client-emails">Client Email Templates</a>
+    <a href="/bio-generator">Bio Generator</a>
+    <a href="/property-comparison">Property Comparison</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/#how-it-works">How It Works</a>
+    {% if current_user.is_authenticated %}
+        <a href="/dashboard">Dashboard</a>
+        <a href="/profile">Profile</a>
+        <a href="/logout">Log Out</a>
+    {% else %}
+        <a href="/login">Log In</a>
+        <a href="/register">Get Started Free</a>
+    {% endif %}
+</div>
 
 <div class="main">
     <div class="card">
@@ -148,6 +191,13 @@
 <div class="footer">
     <strong>AlohaAgent</strong> by AlohaForge &nbsp;·&nbsp; AI tools built for Hawaii real estate professionals
 </div>
+
+<script>
+function toggleMenu() {
+    const menu = document.getElementById('mobile-menu');
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+</script>
 
 </body>
 </html>
