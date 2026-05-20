@@ -225,7 +225,7 @@
     {% if current_user.plan == 'free' and monthly_count >= 2 %}
     <div class="upgrade-banner">
         <div class="upgrade-text">
-            {% if monthly_count >= 3 %}
+            {% if (monthly_count|default(0)) >= 3 %}
                 <strong>You've hit your free limit for this month.</strong> Upgrade to Pro for unlimited generations across all 8 tools.
             {% else %}
                 <strong>1 free generation left this month.</strong> Upgrade to Pro for unlimited access.

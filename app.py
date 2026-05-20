@@ -1237,8 +1237,11 @@ def admin_set_free(email):
 
 @app.context_processor
 def inject_monthly_count():
-    if current_user.is_authenticated:
-        return {"monthly_count": get_monthly_count(current_user)}
+    try:
+        if current_user.is_authenticated:
+            return {"monthly_count": get_monthly_count(current_user)}
+    except Exception:
+        pass
     return {"monthly_count": 0}
 
 # ─── Stripe billing ───────────────────────────────────────────────────────────
