@@ -1206,5 +1206,33 @@ RECOMMENDATION:
         recommendation=to_html(sections.get("RECOMMENDATION", ""))
     )
 
+# ─── Admin routes ─────────────────────────────────────────────────────────────
+
+@app.route("/admin/set-pro/<email>")
+def admin_set_pro(email):
+    secret = request.args.get("key")
+    if secret != os.getenv("ADMIN_SECRET", "changeme"):
+        return "Unauthorized", 403
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return f"User {email} not found", 404
+    user.plan = "pro"
+    db.session.commit()
+    return f"✓ {email} set to pro", 200
+
+@app.route("/admin/set-free/<email>")
+def admin_set_free(email):
+    secret = request.args.get("key")
+    if secret != os.getenv("ADMIN_SECRET", "changeme"):
+        return "Unauthorized", 403
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return f"User {email} not found", 404
+    user.plan = "free"
+    db.session.commit()
+    return f"✓ {email} set to free", 200
+
 if __name__ == "__main__":
+    if not os.getenv("ADMIN_SECRET"):
+        print("WARNING: ADMIN_SECRET is not set — admin routes are using the default 'changeme' key")
     app.run(debug=True)
