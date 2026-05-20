@@ -74,7 +74,9 @@
 </head>
 <body>
 
+{% if not (current_user.is_authenticated and current_user.plan == "pro") %}
 <div class="top-banner">🌺 Free tier — 3 generations per month. No credit card required.</div>
+{% endif %}
 
 <nav class="nav">
     <div class="nav-left">
@@ -124,6 +126,7 @@
 <div class="container">
     <a href="/" class="back-link">← Back to all tools</a>
 
+    {% if not (current_user.is_authenticated and current_user.plan == "pro") %}
     <div class="usage-bar">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
             <span class="usage-count-label">Free listings used</span>
@@ -133,6 +136,7 @@
             <div class="usage-fill" style="width:{{ (count / 3 * 100)|int }}%"></div>
         </div>
     </div>
+    {% endif %}
 
     <form action="/generate" method="POST">
         <div class="card">
@@ -233,9 +237,11 @@
                 </select>
             </div>
             <button type="submit" class="btn-submit">Generate Listing with AI →</button>
+            {% if not (current_user.is_authenticated and current_user.plan == "pro") %}
             <div class="free-note">
                 <p>Free tier · <strong>{{ 3 - count }} listing{{ 's' if (3 - count) != 1 else '' }} remaining</strong> · No credit card needed</p>
             </div>
+            {% endif %}
         </div>
     </form>
 </div>

@@ -75,7 +75,9 @@
 </head>
 <body>
 
+{% if not (current_user.is_authenticated and current_user.plan == "pro") %}
 <div class="top-banner">🌺 Free tier — 3 generations per month. No credit card required.</div>
+{% endif %}
 
 <nav class="nav">
         <div class="nav-left">
