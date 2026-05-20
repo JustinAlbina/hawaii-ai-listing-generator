@@ -154,7 +154,7 @@
             <div class="card-title">AI-Generated Listing</div>
             <button class="copy-section-btn" onclick="copySection(this)" data-target="output-main" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
-        <div class="content-box" id="output-main">{{ listing }}</div>
+        <div class="content-box" id="output-main">{{ listing | safe }}</div>
         <p style="font-size:11px;color:#8892a4;margin-top:16px;padding-top:12px;border-top:1px solid rgba(201,168,76,0.15);">AI-generated content. Review before use. Not affiliated with HAR. Verify all outputs with a licensed Hawaii real estate professional.</p>
     </div>
 
@@ -163,7 +163,7 @@
             <div class="card-icon">📊</div>
             <div class="card-title">Property Analysis</div>
         </div>
-        <div class="content-box">{{ analysis }}</div>
+        <div class="content-box">{{ analysis | safe }}</div>
     </div>
 
     <div class="card">
@@ -171,7 +171,7 @@
             <div class="card-icon">🗺️</div>
             <div class="card-title">Neighborhood Report</div>
         </div>
-        <div class="content-box">{{ neighborhood_report }}</div>
+        <div class="content-box">{{ neighborhood_report | safe }}</div>
     </div>
 
     <div class="card">

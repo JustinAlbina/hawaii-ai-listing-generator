@@ -115,7 +115,7 @@
             <button class="copy-section-btn" onclick="copySection(this)" data-target="output-main" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="platform-badge">📸 Instagram</div>
-        <div class="content-box" id="output-main">{{ instagram }}</div>
+        <div class="content-box" id="output-main">{{ instagram | safe }}</div>
         <button class="copy-btn" onclick="copyText('output-main', this)">Copy Caption</button>
         <p style="font-size:11px;color:#8892a4;margin-top:16px;padding-top:12px;border-top:1px solid rgba(201,168,76,0.15);">AI-generated content. Review before use. Not affiliated with HAR. Verify all outputs with a licensed Hawaii real estate professional.</p>
     </div>
@@ -129,7 +129,7 @@
             </div>
         </div>
         <div class="platform-badge">👥 Facebook</div>
-        <div class="content-box" id="facebook">{{ facebook }}</div>
+        <div class="content-box" id="facebook">{{ facebook | safe }}</div>
         <button class="copy-btn" onclick="copyText('facebook', this)">Copy Post</button>
     </div>
 
@@ -142,7 +142,7 @@
             </div>
         </div>
         <div class="platform-badge">𝕏 X / Twitter</div>
-        <div class="content-box" id="xpost">{{ x_post }}</div>
+        <div class="content-box" id="xpost">{{ x_post | safe }}</div>
         <button class="copy-btn" onclick="copyText('xpost', this)">Copy Post</button>
     </div>
 
@@ -154,7 +154,7 @@
                 <div class="card-subtitle">Add to any post to maximize reach</div>
             </div>
         </div>
-        <div class="hashtag-box" id="hashtags">{{ hashtags }}</div>
+        <div class="hashtag-box" id="hashtags">{{ hashtags | safe }}</div>
         <button class="copy-btn" onclick="copyText('hashtags', this)">Copy Hashtags</button>
     </div>
 

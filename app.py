@@ -8,6 +8,7 @@ import anthropic
 import json
 import datetime
 import io
+import markdown as md_lib
 
 load_dotenv()
 
@@ -74,6 +75,9 @@ with app.app_context():
     db.create_all()
 
 # ─── Generation helpers ────────────────────────────────────────────────────────
+
+def to_html(text):
+    return md_lib.markdown(text or "", extensions=["nl2br"])
 
 def get_monthly_count(user):
     now = datetime.datetime.utcnow()
@@ -539,9 +543,9 @@ NEIGHBORHOOD VIBE:
         ocean_view=ocean_view,
         pool=pool,
         price_per_sqft=price_per_sqft,
-        listing=listing_text,
-        analysis=analysis_text,
-        neighborhood_report=neighborhood_text
+        listing=to_html(listing_text),
+        analysis=to_html(analysis_text),
+        neighborhood_report=to_html(neighborhood_text)
     )
 
 @app.route("/waitlist", methods=["POST"])
@@ -632,10 +636,10 @@ EMAIL BODY:
         time_start=time_start,
         time_end=time_end,
         price=price,
-        instagram=sections.get("INSTAGRAM POST", ""),
-        facebook=sections.get("FACEBOOK POST", ""),
+        instagram=to_html(sections.get("INSTAGRAM POST", "")),
+        facebook=to_html(sections.get("FACEBOOK POST", "")),
         email_subject=sections.get("EMAIL SUBJECT", ""),
-        email_body=sections.get("EMAIL BODY", "")
+        email_body=to_html(sections.get("EMAIL BODY", ""))
     )
 
 @app.route("/social-media")
@@ -715,10 +719,10 @@ HASHTAGS:
         neighborhood=neighborhood,
         island=island,
         price=price,
-        instagram=sections.get("INSTAGRAM CAPTION", ""),
-        facebook=sections.get("FACEBOOK POST", ""),
-        x_post=sections.get("X POST", ""),
-        hashtags=sections.get("HASHTAGS", "")
+        instagram=to_html(sections.get("INSTAGRAM CAPTION", "")),
+        facebook=to_html(sections.get("FACEBOOK POST", "")),
+        x_post=to_html(sections.get("X POST", "")),
+        hashtags=to_html(sections.get("HASHTAGS", ""))
     )
 
 @app.route("/offer-letter")
@@ -804,9 +808,9 @@ NEGOTIATION TIP:
         offer_price=offer_price,
         listing_price=listing_price,
         buyer_name=buyer_name,
-        offer_letter=sections.get("OFFER LETTER", ""),
+        offer_letter=to_html(sections.get("OFFER LETTER", "")),
         email_subject=sections.get("EMAIL SUBJECT", ""),
-        negotiation_tip=sections.get("NEGOTIATION TIP", "")
+        negotiation_tip=to_html(sections.get("NEGOTIATION TIP", ""))
     )
 
 @app.route("/market-report")
@@ -881,12 +885,12 @@ RECOMMENDATION:
         report_type=report_type,
         price_range=price_range,
         property_type=property_type,
-        market_overview=sections.get("MARKET OVERVIEW", ""),
-        market_conditions=sections.get("MARKET CONDITIONS", ""),
-        price_trends=sections.get("PRICE TRENDS", ""),
-        top_reasons=sections.get("TOP REASONS TO ACT NOW", ""),
-        neighborhood_highlights=sections.get("NEIGHBORHOOD HIGHLIGHTS", ""),
-        recommendation=sections.get("RECOMMENDATION", "")
+        market_overview=to_html(sections.get("MARKET OVERVIEW", "")),
+        market_conditions=to_html(sections.get("MARKET CONDITIONS", "")),
+        price_trends=to_html(sections.get("PRICE TRENDS", "")),
+        top_reasons=to_html(sections.get("TOP REASONS TO ACT NOW", "")),
+        neighborhood_highlights=to_html(sections.get("NEIGHBORHOOD HIGHLIGHTS", "")),
+        recommendation=to_html(sections.get("RECOMMENDATION", ""))
     )
 
 @app.route("/client-emails")
@@ -957,8 +961,8 @@ FOLLOW UP TEXT:
         address=address,
         agent_name=agent_name,
         email_subject=sections.get("EMAIL SUBJECT", ""),
-        email_body=sections.get("EMAIL BODY", ""),
-        follow_up_text=sections.get("FOLLOW UP TEXT", "")
+        email_body=to_html(sections.get("EMAIL BODY", "")),
+        follow_up_text=to_html(sections.get("FOLLOW UP TEXT", ""))
     )
 
 @app.route("/bio-generator")
@@ -1033,9 +1037,9 @@ SOCIAL MEDIA BIO:
         full_name=full_name,
         primary_island=primary_island,
         years_experience=years_experience,
-        full_bio=sections.get("FULL BIO", ""),
-        elevator_pitch=sections.get("ELEVATOR PITCH", ""),
-        social_bio=sections.get("SOCIAL MEDIA BIO", "")
+        full_bio=to_html(sections.get("FULL BIO", "")),
+        elevator_pitch=to_html(sections.get("ELEVATOR PITCH", "")),
+        social_bio=to_html(sections.get("SOCIAL MEDIA BIO", ""))
     )
 
 @app.route("/property-comparison")
@@ -1190,16 +1194,16 @@ RECOMMENDATION:
         p3_sqft=p3_sqft, p3_ppsf=p3_ppsf, p3_feature=p3_feature, p3_condition=p3_condition,
         has_p3=has_p3,
         buyer_priorities=buyer_priorities, buyer_budget=buyer_budget,
-        executive_summary=sections.get("EXECUTIVE SUMMARY", ""),
-        p1_pros=sections.get("PROPERTY 1 PROS", ""),
-        p1_cons=sections.get("PROPERTY 1 CONS", ""),
-        p2_pros=sections.get("PROPERTY 2 PROS", ""),
-        p2_cons=sections.get("PROPERTY 2 CONS", ""),
-        p3_pros=sections.get("PROPERTY 3 PROS", ""),
-        p3_cons=sections.get("PROPERTY 3 CONS", ""),
-        best_value=sections.get("BEST VALUE PICK", ""),
-        best_fit=sections.get("BEST FIT FOR BUYER", ""),
-        recommendation=sections.get("RECOMMENDATION", "")
+        executive_summary=to_html(sections.get("EXECUTIVE SUMMARY", "")),
+        p1_pros=to_html(sections.get("PROPERTY 1 PROS", "")),
+        p1_cons=to_html(sections.get("PROPERTY 1 CONS", "")),
+        p2_pros=to_html(sections.get("PROPERTY 2 PROS", "")),
+        p2_cons=to_html(sections.get("PROPERTY 2 CONS", "")),
+        p3_pros=to_html(sections.get("PROPERTY 3 PROS", "")),
+        p3_cons=to_html(sections.get("PROPERTY 3 CONS", "")),
+        best_value=to_html(sections.get("BEST VALUE PICK", "")),
+        best_fit=to_html(sections.get("BEST FIT FOR BUYER", "")),
+        recommendation=to_html(sections.get("RECOMMENDATION", ""))
     )
 
 if __name__ == "__main__":

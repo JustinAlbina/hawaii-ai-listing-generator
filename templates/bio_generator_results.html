@@ -133,7 +133,7 @@
             </div>
             <button class="copy-section-btn" onclick="copySection(this)" data-target="output-main" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
-        <div class="content-box" id="output-main">{{ full_bio }}</div>
+        <div class="content-box" id="output-main">{{ full_bio | safe }}</div>
         <button class="copy-btn" onclick="copyText('output-main', this)">Copy Bio</button>
         <p style="font-size:11px;color:#8892a4;margin-top:16px;padding-top:12px;border-top:1px solid rgba(201,168,76,0.15);">AI-generated content. Review before use. Not affiliated with HAR. Verify all outputs with a licensed Hawaii real estate professional.</p>
     </div>
@@ -150,7 +150,7 @@
                 <div class="card-subtitle">2–3 sentences — perfect for introductions and email signatures</div>
             </div>
         </div>
-        <div class="elevator-box" id="elevator-pitch">{{ elevator_pitch }}</div>
+        <div class="elevator-box" id="elevator-pitch">{{ elevator_pitch | safe }}</div>
         <button class="copy-btn" onclick="copyText('elevator-pitch', this)">Copy Pitch</button>
     </div>
 
@@ -166,7 +166,7 @@
                 <div class="card-subtitle">Under 150 characters — ready for Instagram, X, or LinkedIn</div>
             </div>
         </div>
-        <div class="social-box" id="social-bio">{{ social_bio }}</div>
+        <div class="social-box" id="social-bio">{{ social_bio | safe }}</div>
         <button class="copy-btn" onclick="copyText('social-bio', this)">Copy Social Bio</button>
     </div>
 
