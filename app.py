@@ -406,8 +406,7 @@ def profile():
 
 @app.route("/")
 def home():
-    total_gen = db.session.query(Generation).count()
-    return render_template("index.html", total_generations=total_gen)
+    return render_template("index.html")
 
 @app.route("/listing")
 def listing():
