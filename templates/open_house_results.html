@@ -36,13 +36,10 @@
         .card-title { font-size: 0.95rem; font-weight: 600; color: #fff; }
         .card-subtitle { font-size: 12px; color: #8892a4; margin-top: 1px; }
         .content-box { background: #1a2f45; border-radius: 10px; padding: 1.25rem; font-size: 0.9rem; line-height: 1.8; color: #e8edf4; white-space: pre-wrap; margin-bottom: 1rem; }
-        .copy-btn { background: #0a1628; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .copy-btn:hover { background: #162840; }
-        .copy-btn.copied { background: #2d7a4f; }
         .btn-row { display: flex; gap: 1rem; margin-top: 0.5rem; }
         .btn { flex: 1; padding: 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; border: none; transition: all 0.2s; }
-        .btn-primary { background: #0a1628; color: white; }
-        .btn-primary:hover { background: #162840; }
+        .btn-primary { background: #c9a84c; color: #0a1628; }
+        .btn-primary:hover { background: #e8c97a; }
         .btn-outline { background: transparent; color: #8892a4; border: 1.5px solid rgba(255,255,255,0.15); }
         .btn-outline:hover { border-color: #c9a84c; color: #c9a84c; }
         .footer { background: #0a1628; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 2rem; }
@@ -159,7 +156,6 @@
             <button class="copy-section-btn" onclick="copySection(this)" data-target="output-main" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="content-box" id="output-main">{{ instagram | safe }}</div>
-        <button class="copy-btn" onclick="copyText('output-main', this)">Copy</button>
         <p style="font-size:11px;color:#8892a4;margin-top:16px;padding-top:12px;border-top:1px solid rgba(201,168,76,0.15);">AI-generated content. Review before use. Not affiliated with HAR. Verify all outputs with a licensed Hawaii real estate professional.</p>
     </div>
 
@@ -170,9 +166,9 @@
                 <div class="card-title">Facebook Post</div>
                 <div class="card-subtitle">Copy and paste into Facebook</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="facebook" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="content-box" id="facebook">{{ facebook | safe }}</div>
-        <button class="copy-btn" onclick="copyText('facebook', this)">Copy</button>
     </div>
 
     <div class="card">
@@ -182,13 +178,12 @@
                 <div class="card-title">Email Announcement</div>
                 <div class="card-subtitle">Ready to send to your client list</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="email-body" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div style="font-size:12px;color:#888;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Subject Line</div>
         <div class="content-box" id="email-subject">{{ email_subject }}</div>
-        <button class="copy-btn" onclick="copyText('email-subject', this)" style="margin-bottom:1rem;">Copy Subject</button>
         <div style="font-size:12px;color:#888;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Email Body</div>
         <div class="content-box" id="email-body">{{ email_body | safe }}</div>
-        <button class="copy-btn" onclick="copyText('email-body', this)">Copy Body</button>
     </div>
 
     <div class="card">
@@ -208,26 +203,15 @@
 <script>
 function copySection(btn) {
     var el = document.getElementById(btn.getAttribute('data-target'));
+    if (!el) return;
     navigator.clipboard.writeText(el.innerText).then(function() {
         btn.textContent = '✓ Copied!';
-        btn.style.background = '#2ecc71';
+        btn.style.background = '#2d7a4f';
         btn.style.color = '#fff';
         setTimeout(function() {
             btn.textContent = '📋 Copy';
             btn.style.background = '#c9a84c';
             btn.style.color = '#0a1628';
-        }, 2000);
-    });
-}
-
-function copyText(id, btn) {
-    const text = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(text).then(() => {
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => {
-            btn.textContent = id.includes('subject') ? 'Copy Subject' : id.includes('body') ? 'Copy Body' : 'Copy';
-            btn.classList.remove('copied');
         }, 2000);
     });
 }

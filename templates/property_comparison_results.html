@@ -52,10 +52,6 @@
 
         .content-box { background: #0d1f35; border-radius: 10px; padding: 1.25rem; font-size: 0.9rem; line-height: 1.85; color: #c8d5e8; white-space: pre-wrap; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.06); }
 
-        .copy-btn { background: #0a1628; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1); }
-        .copy-btn:hover { background: #162840; }
-        .copy-btn.copied { background: #2d7a4f; border-color: #2d7a4f; }
-
         /* Comparison table */
         .compare-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
         .compare-table th { background: rgba(201,168,76,0.12); color: #c9a84c; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08); }
@@ -219,7 +215,6 @@
             <button class="copy-section-btn" onclick="copySection(this)" data-target="output-main" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="content-box" id="output-main">{{ executive_summary | safe }}</div>
-        <button class="copy-btn" onclick="copyText('output-main', this)">Copy</button>
         <p style="font-size:11px;color:#8892a4;margin-top:16px;padding-top:12px;border-top:1px solid rgba(201,168,76,0.15);">AI-generated content. Review before use. Not affiliated with HAR. Verify all outputs with a licensed Hawaii real estate professional.</p>
     </div>
 
@@ -296,18 +291,17 @@
                 <div class="card-title">Property 1 Analysis</div>
                 <div class="card-subtitle">{{ p1_address }}</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="p1-analysis" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="prop-addr-tag">{{ p1_neighborhood }}, {{ p1_island }} · ${{ p1_price }}</div>
-        <div class="pros-cons-grid">
+        <div id="p1-analysis" class="pros-cons-grid">
             <div class="pros-box">
                 <div class="pros-cons-label pros-label">Pros</div>
-                <div class="pros-cons-text" id="p1-pros">{{ p1_pros | safe }}</div>
-                <button class="copy-btn" onclick="copyText('p1-pros', this)" style="margin-top:8px;">Copy Pros</button>
+                <div class="pros-cons-text">{{ p1_pros | safe }}</div>
             </div>
             <div class="cons-box">
                 <div class="pros-cons-label cons-label">Cons</div>
-                <div class="pros-cons-text" id="p1-cons">{{ p1_cons | safe }}</div>
-                <button class="copy-btn" onclick="copyText('p1-cons', this)" style="margin-top:8px;">Copy Cons</button>
+                <div class="pros-cons-text">{{ p1_cons | safe }}</div>
             </div>
         </div>
     </div>
@@ -324,18 +318,17 @@
                 <div class="card-title">Property 2 Analysis</div>
                 <div class="card-subtitle">{{ p2_address }}</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="p2-analysis" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="prop-addr-tag">{{ p2_neighborhood }}, {{ p2_island }} · ${{ p2_price }}</div>
-        <div class="pros-cons-grid">
+        <div id="p2-analysis" class="pros-cons-grid">
             <div class="pros-box">
                 <div class="pros-cons-label pros-label">Pros</div>
-                <div class="pros-cons-text" id="p2-pros">{{ p2_pros | safe }}</div>
-                <button class="copy-btn" onclick="copyText('p2-pros', this)" style="margin-top:8px;">Copy Pros</button>
+                <div class="pros-cons-text">{{ p2_pros | safe }}</div>
             </div>
             <div class="cons-box">
                 <div class="pros-cons-label cons-label">Cons</div>
-                <div class="pros-cons-text" id="p2-cons">{{ p2_cons | safe }}</div>
-                <button class="copy-btn" onclick="copyText('p2-cons', this)" style="margin-top:8px;">Copy Cons</button>
+                <div class="pros-cons-text">{{ p2_cons | safe }}</div>
             </div>
         </div>
     </div>
@@ -353,18 +346,17 @@
                 <div class="card-title">Property 3 Analysis</div>
                 <div class="card-subtitle">{{ p3_address }}</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="p3-analysis" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="prop-addr-tag">{{ p3_neighborhood }}, {{ p3_island }} · ${{ p3_price }}</div>
-        <div class="pros-cons-grid">
+        <div id="p3-analysis" class="pros-cons-grid">
             <div class="pros-box">
                 <div class="pros-cons-label pros-label">Pros</div>
-                <div class="pros-cons-text" id="p3-pros">{{ p3_pros | safe }}</div>
-                <button class="copy-btn" onclick="copyText('p3-pros', this)" style="margin-top:8px;">Copy Pros</button>
+                <div class="pros-cons-text">{{ p3_pros | safe }}</div>
             </div>
             <div class="cons-box">
                 <div class="pros-cons-label cons-label">Cons</div>
-                <div class="pros-cons-text" id="p3-cons">{{ p3_cons | safe }}</div>
-                <button class="copy-btn" onclick="copyText('p3-cons', this)" style="margin-top:8px;">Copy Cons</button>
+                <div class="pros-cons-text">{{ p3_cons | safe }}</div>
             </div>
         </div>
     </div>
@@ -382,12 +374,12 @@
                 <div class="card-title">Best Value Pick</div>
                 <div class="card-subtitle">Best dollar-for-dollar value</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="best-value" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="rec-box">
             <div class="rec-box-label">Value Analysis</div>
             <p id="best-value">{{ best_value | safe }}</p>
         </div>
-        <button class="copy-btn" onclick="copyId('best-value', this)">Copy</button>
     </div>
 
     <!-- Best Fit -->
@@ -402,12 +394,12 @@
                 <div class="card-title">Best Fit for Buyer</div>
                 <div class="card-subtitle">Matched to stated priorities</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="best-fit" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="rec-box">
             <div class="rec-box-label">Buyer Match</div>
             <p id="best-fit">{{ best_fit | safe }}</p>
         </div>
-        <button class="copy-btn" onclick="copyId('best-fit', this)">Copy</button>
     </div>
 
     <!-- Recommendation -->
@@ -422,12 +414,12 @@
                 <div class="card-title">Recommendation</div>
                 <div class="card-subtitle">Ready to share with your buyer</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="recommendation" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="rec-box">
             <div class="rec-box-label">Our Take</div>
             <p id="recommendation">{{ recommendation | safe }}</p>
         </div>
-        <button class="copy-btn" onclick="copyId('recommendation', this)">Copy Recommendation</button>
     </div>
 
     <div class="disclaimer-box">
@@ -451,9 +443,10 @@
 <script>
 function copySection(btn) {
     var el = document.getElementById(btn.getAttribute('data-target'));
+    if (!el) return;
     navigator.clipboard.writeText(el.innerText).then(function() {
         btn.textContent = '✓ Copied!';
-        btn.style.background = '#2ecc71';
+        btn.style.background = '#2d7a4f';
         btn.style.color = '#fff';
         setTimeout(function() {
             btn.textContent = '📋 Copy';
@@ -461,19 +454,6 @@ function copySection(btn) {
             btn.style.color = '#0a1628';
         }, 2000);
     });
-}
-function copyText(id, btn) {
-    const el = document.getElementById(id);
-    const text = el.innerText || el.textContent;
-    navigator.clipboard.writeText(text.trim()).then(() => {
-        const orig = btn.textContent;
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
-    });
-}
-function copyId(id, btn) {
-    copyText(id, btn);
 }
 </script>
 

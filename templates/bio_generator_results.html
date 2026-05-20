@@ -50,10 +50,6 @@
 
         .social-box { background: #0d1f35; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 1rem 1.25rem; font-size: 0.9rem; font-weight: 600; color: #c9a84c; white-space: pre-wrap; margin-bottom: 1rem; }
 
-        .copy-btn { background: #c9a84c; color: #0a1628; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-        .copy-btn:hover { background: #e8c97a; }
-        .copy-btn.copied { background: #2d7a4f; color: #fff; }
-
         .btn-row { display: flex; gap: 1rem; }
         .btn { flex: 1; padding: 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; border: none; transition: all 0.2s; }
         .btn-primary { background: #c9a84c; color: #0a1628; }
@@ -180,7 +176,6 @@
             <button class="copy-section-btn" onclick="copySection(this)" data-target="output-main" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="content-box" id="output-main">{{ full_bio | safe }}</div>
-        <button class="copy-btn" onclick="copyText('output-main', this)">Copy Bio</button>
         <p style="font-size:11px;color:#8892a4;margin-top:16px;padding-top:12px;border-top:1px solid rgba(201,168,76,0.15);">AI-generated content. Review before use. Not affiliated with HAR. Verify all outputs with a licensed Hawaii real estate professional.</p>
     </div>
 
@@ -195,9 +190,9 @@
                 <div class="card-title">Elevator Pitch</div>
                 <div class="card-subtitle">2–3 sentences — perfect for introductions and email signatures</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="elevator-pitch" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="elevator-box" id="elevator-pitch">{{ elevator_pitch | safe }}</div>
-        <button class="copy-btn" onclick="copyText('elevator-pitch', this)">Copy Pitch</button>
     </div>
 
     <div class="card">
@@ -211,9 +206,9 @@
                 <div class="card-title">Social Media Bio</div>
                 <div class="card-subtitle">Under 150 characters — ready for Instagram, X, or LinkedIn</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="social-bio" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="social-box" id="social-bio">{{ social_bio | safe }}</div>
-        <button class="copy-btn" onclick="copyText('social-bio', this)">Copy Social Bio</button>
     </div>
 
     <div class="card">
@@ -232,24 +227,16 @@
 <script>
 function copySection(btn) {
     var el = document.getElementById(btn.getAttribute('data-target'));
+    if (!el) return;
     navigator.clipboard.writeText(el.innerText).then(function() {
         btn.textContent = '✓ Copied!';
-        btn.style.background = '#2ecc71';
+        btn.style.background = '#2d7a4f';
         btn.style.color = '#fff';
         setTimeout(function() {
             btn.textContent = '📋 Copy';
             btn.style.background = '#c9a84c';
             btn.style.color = '#0a1628';
         }, 2000);
-    });
-}
-function copyText(id, btn) {
-    const text = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(text.trim()).then(() => {
-        const original = btn.textContent;
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 2000);
     });
 }
 </script>

@@ -208,16 +208,18 @@
         <div class="card-header">
             <div class="card-icon">📊</div>
             <div class="card-title">Property Analysis</div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="analysis" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
-        <div class="content-box">{{ analysis | safe }}</div>
+        <div class="content-box" id="analysis">{{ analysis | safe }}</div>
     </div>
 
     <div class="card">
         <div class="card-header">
             <div class="card-icon">🗺️</div>
             <div class="card-title">Neighborhood Report</div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="neighborhood-report" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
-        <div class="content-box">{{ neighborhood_report | safe }}</div>
+        <div class="content-box" id="neighborhood-report">{{ neighborhood_report | safe }}</div>
     </div>
 
     <div class="card">
@@ -237,9 +239,10 @@
 <script>
 function copySection(btn) {
     var el = document.getElementById(btn.getAttribute('data-target'));
+    if (!el) return;
     navigator.clipboard.writeText(el.innerText).then(function() {
         btn.textContent = '✓ Copied!';
-        btn.style.background = '#2ecc71';
+        btn.style.background = '#2d7a4f';
         btn.style.color = '#fff';
         setTimeout(function() {
             btn.textContent = '📋 Copy';

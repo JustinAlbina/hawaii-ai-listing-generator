@@ -53,14 +53,10 @@
         .rec-box-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c9a84c; margin-bottom: 0.5rem; }
         .rec-box p { font-size: 0.9rem; line-height: 1.75; color: #a8b8cc; white-space: pre-wrap; }
 
-        .copy-btn { background: #0a1628; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .copy-btn:hover { background: #162840; }
-        .copy-btn.copied { background: #2d7a4f; }
-
         .btn-row { display: flex; gap: 1rem; }
         .btn { flex: 1; padding: 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; border: none; transition: all 0.2s; }
-        .btn-primary { background: #0a1628; color: white; }
-        .btn-primary:hover { background: #162840; }
+        .btn-primary { background: #c9a84c; color: #0a1628; }
+        .btn-primary:hover { background: #e8c97a; }
         .btn-outline { background: transparent; color: #8892a4; border: 1.5px solid rgba(255,255,255,0.15); }
         .btn-outline:hover { border-color: #c9a84c; color: #c9a84c; }
 
@@ -190,7 +186,6 @@
             <button class="copy-section-btn" onclick="copySection(this)" data-target="output-main" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="content-box" id="output-main">{{ market_overview | safe }}</div>
-        <button class="copy-btn" onclick="copyText('output-main', this)">Copy</button>
         <p style="font-size:11px;color:#8892a4;margin-top:16px;padding-top:12px;border-top:1px solid rgba(201,168,76,0.15);">AI-generated content. Review before use. Not affiliated with HAR. Verify all outputs with a licensed Hawaii real estate professional.</p>
     </div>
 
@@ -205,9 +200,9 @@
                 <div class="card-title">Market Conditions</div>
                 <div class="card-subtitle">Buyer's market vs. seller's market analysis</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="market-conditions" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="content-box" id="market-conditions">{{ market_conditions | safe }}</div>
-        <button class="copy-btn" onclick="copyText('market-conditions', this)">Copy</button>
     </div>
 
     <div class="card">
@@ -221,9 +216,9 @@
                 <div class="card-title">Price Trends</div>
                 <div class="card-subtitle">What the numbers mean for your client</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="price-trends" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="content-box" id="price-trends">{{ price_trends | safe }}</div>
-        <button class="copy-btn" onclick="copyText('price-trends', this)">Copy</button>
     </div>
 
     <div class="card">
@@ -237,9 +232,9 @@
                 <div class="card-title">Top Reasons to Act Now</div>
                 <div class="card-subtitle">Key talking points for your client</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="top-reasons" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="content-box" id="top-reasons">{{ top_reasons | safe }}</div>
-        <button class="copy-btn" onclick="copyText('top-reasons', this)">Copy</button>
     </div>
 
     <div class="card">
@@ -253,9 +248,9 @@
                 <div class="card-title">Neighborhood Highlights</div>
                 <div class="card-subtitle">What makes {{ neighborhood }} special</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="neighborhood-highlights" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="content-box" id="neighborhood-highlights">{{ neighborhood_highlights | safe }}</div>
-        <button class="copy-btn" onclick="copyText('neighborhood-highlights', this)">Copy</button>
     </div>
 
     <div class="card">
@@ -269,13 +264,12 @@
                 <div class="card-title">Recommendation</div>
                 <div class="card-subtitle">Personalized advice for your {{ report_type }}</div>
             </div>
+            <button class="copy-section-btn" onclick="copySection(this)" data-target="recommendation" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="rec-box">
             <div class="rec-box-label">Our Take</div>
-            <p>{{ recommendation | safe }}</p>
+            <p id="recommendation">{{ recommendation | safe }}</p>
         </div>
-        <button class="copy-btn" onclick="copyText('recommendation', this)">Copy</button>
-        <div id="recommendation" style="display:none;">{{ recommendation | safe }}</div>
     </div>
 
     <div class="disclaimer-box">
@@ -299,27 +293,15 @@
 <script>
 function copySection(btn) {
     var el = document.getElementById(btn.getAttribute('data-target'));
+    if (!el) return;
     navigator.clipboard.writeText(el.innerText).then(function() {
         btn.textContent = '✓ Copied!';
-        btn.style.background = '#2ecc71';
+        btn.style.background = '#2d7a4f';
         btn.style.color = '#fff';
         setTimeout(function() {
             btn.textContent = '📋 Copy';
             btn.style.background = '#c9a84c';
             btn.style.color = '#0a1628';
-        }, 2000);
-    });
-}
-function copyText(id, btn) {
-    const el = document.getElementById(id);
-    const text = el.innerText || el.textContent;
-    navigator.clipboard.writeText(text.trim()).then(() => {
-        const original = btn.textContent;
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => {
-            btn.textContent = original;
-            btn.classList.remove('copied');
         }, 2000);
     });
 }
