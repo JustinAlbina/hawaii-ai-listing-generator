@@ -9,7 +9,9 @@ import json
 import datetime
 import io
 import markdown as md_lib
+import bleach
 import stripe
+from sqlalchemy.exc import IntegrityError
 
 load_dotenv()
 
@@ -79,8 +81,19 @@ with app.app_context():
 
 # ─── Generation helpers ────────────────────────────────────────────────────────
 
+_SAFE_TAGS = [
+    'p', 'h1', 'h2', 'h3', 'h4', 'ul', 'ol', 'li',
+    'strong', 'em', 'br', 'table', 'thead', 'tbody',
+    'tr', 'th', 'td', 'blockquote', 'pre', 'code',
+]
+_SAFE_ATTRS = {'*': ['class']}
+
+def safe_markdown(text):
+    raw = md_lib.markdown(text or "", extensions=["nl2br"])
+    return bleach.clean(raw, tags=_SAFE_TAGS, attributes=_SAFE_ATTRS, strip=True)
+
 def to_html(text):
-    return md_lib.markdown(text or "", extensions=["nl2br"])
+    return safe_markdown(text)
 
 def get_monthly_count(user):
     now = datetime.datetime.utcnow()
@@ -496,13 +509,17 @@ Square footage: {sqft}, Price: {price}
 Price per sqft: ${price_per_sqft}
 Ocean view: {ocean_view}, Pool: {pool}
 Standout feature: {extra}
+Land tenure: {land_tenure}
 
 Format exactly like this:
 LISTING SCORE: X/10
 [2-3 sentence explanation]
 
 PRICE ANALYSIS:
-[2-3 sentence explanation]"""}]
+[2-3 sentence explanation]
+
+If land tenure is Leasehold, you MUST include a prominent warning in the PRICE ANALYSIS section:
+LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold properties in Hawaii typically sell at a significant discount (20-40%) vs fee simple. Many lenders will not finance leasehold properties with fewer than 30 years remaining on the lease. Buyers should verify lease expiration, rent renegotiation terms, and financing eligibility before making an offer."""}]
     )
 
     neighborhood_response = client.messages.create(
@@ -554,9 +571,14 @@ NEIGHBORHOOD VIBE:
 @app.route("/waitlist", methods=["POST"])
 def waitlist():
     email = request.form["email"]
-    db.session.add(Waitlist(email=email))
-    db.session.commit()
-    return render_template("waitlist_success.html", email=email)
+    try:
+        db.session.add(Waitlist(email=email))
+        db.session.commit()
+        flash("You're on the waitlist!", "success")
+    except IntegrityError:
+        db.session.rollback()
+        flash("You're already on the waitlist!", "info")
+    return redirect(url_for("home"))
 
 @app.route("/open-house")
 def open_house():
@@ -862,7 +884,10 @@ NEIGHBORHOOD HIGHLIGHTS:
 [3-4 sentences on what makes {neighborhood} on {island} special — lifestyle, amenities, schools, beaches, culture]
 
 RECOMMENDATION:
-[2-3 sentences of personalized advice tailored specifically to someone using a {report_type} in the {price_range} range for {property_type} in {neighborhood}]"""}]
+[2-3 sentences of personalized advice tailored specifically to someone using a {report_type} in the {price_range} range for {property_type} in {neighborhood}]
+
+If the neighborhood or property type has significant leasehold inventory, you MUST note in the PRICE TRENDS section:
+LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold properties in Hawaii typically sell at a significant discount (20-40%) vs fee simple. Many lenders will not finance leasehold properties with fewer than 30 years remaining on the lease. Buyers should verify lease expiration, rent renegotiation terms, and financing eligibility before making an offer."""}]
     )
 
     content = response.content[0].text
@@ -1153,7 +1178,10 @@ BEST FIT FOR BUYER:
 [Which property best matches the buyer's stated priorities and why, 2-3 sentences]
 
 RECOMMENDATION:
-[Clear recommendation of which property to choose and the top 3 reasons, 3-4 sentences]"""
+[Clear recommendation of which property to choose and the top 3 reasons, 3-4 sentences]
+
+If any property has Leasehold land tenure, you MUST include a prominent warning in the RECOMMENDATION section:
+LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold properties in Hawaii typically sell at a significant discount (20-40%) vs fee simple. Many lenders will not finance leasehold properties with fewer than 30 years remaining on the lease. Buyers should verify lease expiration, rent renegotiation terms, and financing eligibility before making an offer."""
 
     message = client.messages.create(
         model="claude-sonnet-4-5",
