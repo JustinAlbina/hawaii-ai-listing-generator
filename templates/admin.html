@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel — AlohaAgent</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #ffffff; }
+
+        .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .nav-left { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-badge-admin { background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+        .hero { background: #162840; padding: 48px 2rem 40px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .hero-inner { max-width: 1100px; margin: 0 auto; }
+        .hero-eyebrow { border: 1px solid #c9a84c; color: #c9a84c; border-radius: 999px; padding: 4px 16px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; display: inline-block; margin-bottom: 1rem; }
+        .hero h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.5px; }
+        .hero h1 span { color: #c9a84c; }
+
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; max-width: 1100px; margin: 1.5rem auto 0; padding: 0 2rem; }
+        .stat-card { background: #162840; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.25rem 1.5rem; }
+        .stat-label { font-size: 11px; color: #8892a4; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.35rem; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: #c9a84c; }
+        .stat-sub { font-size: 12px; color: #8892a4; margin-top: 2px; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+
+        .section-title { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.6rem; }
+        .section-title span { font-size: 12px; color: #8892a4; font-weight: 400; }
+
+        .card { background: #162840; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 2rem; overflow: hidden; }
+        .card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: space-between; }
+        .card-title { font-size: 0.95rem; font-weight: 700; color: #fff; }
+        .card-count { font-size: 12px; color: #8892a4; background: rgba(255,255,255,0.06); padding: 3px 10px; border-radius: 999px; }
+
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; font-size: 11px; font-weight: 700; color: #4a5a70; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.85rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); white-space: nowrap; }
+        td { padding: 0.85rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); color: #a8b8cc; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .plan-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: 0.5px; text-transform: uppercase; transition: all 0.2s; }
+        .plan-free { background: rgba(255,255,255,0.08); color: #8892a4; }
+        .plan-pro { background: rgba(201,168,76,0.2); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); }
+
+        .btn-set { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 7px; cursor: pointer; border: none; transition: all 0.18s; letter-spacing: 0.3px; text-transform: uppercase; }
+        .btn-set-pro { background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); }
+        .btn-set-pro:hover { background: rgba(201,168,76,0.28); }
+        .btn-set-free { background: rgba(255,255,255,0.06); color: #8892a4; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-set-free:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+        .user-email { color: #fff; font-weight: 500; }
+        .user-id { color: #4a5a70; font-size: 12px; }
+        .gen-count { color: #e8c97a; font-weight: 600; }
+
+        .tool-bar-row { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .tool-bar-row:last-child { border-bottom: none; }
+        .tool-name { font-size: 13px; color: #a8b8cc; min-width: 220px; flex-shrink: 0; }
+        .tool-bar-wrap { flex: 1; background: rgba(255,255,255,0.06); border-radius: 999px; height: 6px; overflow: hidden; }
+        .tool-bar-fill { height: 6px; background: #c9a84c; border-radius: 999px; transition: width 0.4s; }
+        .tool-count { font-size: 13px; font-weight: 700; color: #c9a84c; min-width: 36px; text-align: right; }
+
+        .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 1.25rem; font-size: 12px; margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.06); }
+        .footer strong { color: #c9a84c; }
+
+        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #162840; border: 1px solid rgba(201,168,76,0.3); color: #e8c97a; padding: 0.75rem 1.25rem; border-radius: 10px; font-size: 13px; font-weight: 600; opacity: 0; transform: translateY(8px); transition: all 0.25s; pointer-events: none; z-index: 9999; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 768px) {
+            .stats-row { grid-template-columns: 1fr 1fr; padding: 0 1rem; }
+            .container { padding: 1.25rem 1rem; }
+            td, th { padding: 0.75rem 1rem; }
+            .tool-name { min-width: 140px; font-size: 12px; }
+        }
+    </style>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌺</text></svg>">
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-left">
+        <a href="/" style="text-decoration:none; display:flex; align-items:center; gap:10px;">
+            <span style="font-size:20px; font-weight:700; letter-spacing:0.3px;">
+                <span style="color:#ffffff;">Aloha</span><span style="color:#c9a84c;">Agent</span>
+            </span>
+        </a>
+        <span class="nav-badge-admin">Admin</span>
+    </div>
+    <a href="/?admin=1" style="color:#8892a4; text-decoration:none; font-size:13px;">← Back to site</a>
+</nav>
+
+<div class="hero">
+    <div class="hero-inner">
+        <div class="hero-eyebrow">Control Panel</div>
+        <h1>Admin <span>Panel</span></h1>
+    </div>
+</div>
+
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-value">{{ total_users }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Pro Users</div>
+        <div class="stat-value">{{ users | selectattr('plan', 'equalto', 'pro') | list | length }}</div>
+        <div class="stat-sub">{{ users | selectattr('plan', 'equalto', 'free') | list | length }} on free</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Total Generations</div>
+        <div class="stat-value">{{ total_generations }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Waitlist</div>
+        <div class="stat-value">{{ waitlist | length }}</div>
+        <div class="stat-sub">email signups</div>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- Tool Stats -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Generations by Tool</div>
+            <div class="card-count">{{ total_generations }} total</div>
+        </div>
+        {% set max_count = tool_stats[0][1] if tool_stats else 1 %}
+        {% for tool_name, cnt in tool_stats %}
+        <div class="tool-bar-row">
+            <div class="tool-name">{{ tool_name }}</div>
+            <div class="tool-bar-wrap">
+                <div class="tool-bar-fill" style="width:{{ ((cnt / max_count) * 100) | int }}%"></div>
+            </div>
+            <div class="tool-count">{{ cnt }}</div>
+        </div>
+        {% else %}
+        <div style="padding:2rem; text-align:center; color:#4a5a70;">No generations yet.</div>
+        {% endfor %}
+    </div>
+
+    <!-- Users Table -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Users</div>
+            <div class="card-count">{{ total_users }}</div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Email</th>
+                        <th>Plan</th>
+                        <th>Generations</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr id="user-row-{{ user.id }}">
+                        <td><span class="user-id">#{{ user.id }}</span></td>
+                        <td><span class="user-email">{{ user.email }}</span></td>
+                        <td>
+                            <span class="plan-badge {{ 'plan-pro' if user.plan == 'pro' else 'plan-free' }}" id="plan-badge-{{ user.id }}">
+                                {{ user.plan | capitalize }}
+                            </span>
+                        </td>
+                        <td><span class="gen-count">{{ user_gen_counts[user.id] }}</span></td>
+                        <td>{{ user.created_at.strftime('%b %d, %Y') }}</td>
+                        <td style="display:flex; gap:0.5rem; align-items:center;">
+                            <button class="btn-set btn-set-pro" onclick="setPlan({{ user.id }}, 'pro')">Set Pro</button>
+                            <button class="btn-set btn-set-free" onclick="setPlan({{ user.id }}, 'free')">Set Free</button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" style="text-align:center;color:#4a5a70;padding:2rem;">No users yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Waitlist Table -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Waitlist</div>
+            <div class="card-count">{{ waitlist | length }}</div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Email</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in waitlist %}
+                    <tr>
+                        <td><span class="user-id">{{ loop.index }}</span></td>
+                        <td><span class="user-email">{{ entry.email }}</span></td>
+                        <td>{{ entry.created_at.strftime('%b %d, %Y') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" style="text-align:center;color:#4a5a70;padding:2rem;">No waitlist entries yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <strong>AlohaAgent</strong> Admin Panel &nbsp;·&nbsp; Restricted access
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var ADMIN_SECRET = {{ secret | tojson }};
+
+function showToast(msg, ok) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.borderColor = ok ? 'rgba(201,168,76,0.3)' : 'rgba(255,80,80,0.3)';
+    t.style.color = ok ? '#e8c97a' : '#ff8080';
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function() { t.classList.remove('show'); }, 2800);
+}
+
+async function setPlan(userId, plan) {
+    try {
+        var res = await fetch('/admin/set-plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, plan: plan, secret: ADMIN_SECRET })
+        });
+        var data = await res.json();
+        if (data.ok) {
+            var badge = document.getElementById('plan-badge-' + userId);
+            if (badge) {
+                badge.className = 'plan-badge ' + (plan === 'pro' ? 'plan-pro' : 'plan-free');
+                badge.textContent = plan === 'pro' ? 'Pro' : 'Free';
+            }
+            showToast((data.email || 'User') + ' → ' + plan, true);
+        } else {
+            showToast('Error: ' + (data.error || 'Unknown'), false);
+        }
+    } catch (e) {
+        showToast('Request failed', false);
+    }
+}
+</script>
+
+</body>
+</html>

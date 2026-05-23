@@ -8,9 +8,11 @@ import anthropic
 import json
 import datetime
 import io
+import base64
 import markdown as md_lib
 import bleach
 import stripe
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 load_dotenv()
@@ -124,6 +126,23 @@ def save_generation(tool_name, input_data, output_text):
         )
         db.session.add(gen)
         db.session.commit()
+
+def _process_photos():
+    """Read uploaded photos from request, return list of (base64_data, media_type). Max 5. In-memory only."""
+    results = []
+    allowed_types = {"image/jpeg", "image/png"}
+    ext_map = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png"}
+    for f in request.files.getlist("photos")[:5]:
+        if not f or not f.filename:
+            continue
+        mt = (f.content_type or "").split(";")[0].strip().lower()
+        if mt not in allowed_types:
+            ext = f.filename.rsplit(".", 1)[-1].lower() if "." in f.filename else ""
+            mt = ext_map.get(ext)
+            if not mt:
+                continue
+        results.append((base64.b64encode(f.read()).decode("utf-8"), mt))
+    return results
 
 # ─── Auth routes ──────────────────────────────────────────────────────────────
 
@@ -476,10 +495,7 @@ def generate():
     year_built_line = f"Year built: {year_built}" if year_built else ""
     parking_line = f"Parking: {parking}" if parking else ""
 
-    listing_response = client.messages.create(
-        model="claude-sonnet-4-5",
-        max_tokens=1024,
-        messages=[{"role": "user", "content": f"""Write a professional MLS real estate listing for a Hawaii property with these details:
+    listing_prompt = f"""Write a professional MLS real estate listing for a Hawaii property with these details:
 Address: {address}
 Neighborhood: {neighborhood}
 Island: {island}
@@ -495,7 +511,29 @@ Land tenure: {land_tenure}
 {year_built_line}
 {parking_line}
 
-Write 2 paragraphs, around 150 words total. Make it warm, compelling, and specific to Hawaii. End with a one-line call to action."""}]
+Write 2 paragraphs, around 150 words total. Make it warm, compelling, and specific to Hawaii. End with a one-line call to action."""
+
+    photo_list = _process_photos()
+    if photo_list:
+        photo_prefix = (
+            f"You have been provided {len(photo_list)} property photo(s). Analyze them carefully.\n"
+            "Incorporate specific visual details you observe — finishes, fixtures,\n"
+            "views, layout, natural light, condition — into the listing description.\n"
+            "Be specific, not generic.\n\n"
+        )
+        listing_content = [
+            *[{"type": "image", "source": {"type": "base64", "media_type": mt, "data": img_data}}
+              for img_data, mt in photo_list],
+            {"type": "text", "text": photo_prefix + listing_prompt}
+        ]
+        listing_messages = [{"role": "user", "content": listing_content}]
+    else:
+        listing_messages = [{"role": "user", "content": listing_prompt}]
+
+    listing_response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1024,
+        messages=listing_messages
     )
 
     analysis_response = client.messages.create(
@@ -1262,6 +1300,50 @@ def admin_set_free(email):
     user.plan = "free"
     db.session.commit()
     return f"✓ {email} set to free", 200
+
+@app.route("/admin")
+def admin_panel():
+    secret = request.args.get("secret")
+    if not secret or secret != os.getenv("ADMIN_SECRET", "changeme"):
+        abort(403)
+
+    users = User.query.order_by(User.created_at.desc()).all()
+    waitlist = Waitlist.query.order_by(Waitlist.created_at.desc()).all()
+
+    total_users = User.query.count()
+    total_generations = Generation.query.count()
+
+    tool_stats = db.session.query(
+        Generation.tool_name, func.count(Generation.id).label("cnt")
+    ).group_by(Generation.tool_name).order_by(func.count(Generation.id).desc()).all()
+
+    user_gen_counts = {u.id: Generation.query.filter_by(user_id=u.id).count() for u in users}
+
+    return render_template("admin.html",
+        secret=secret,
+        users=users,
+        waitlist=waitlist,
+        total_users=total_users,
+        total_generations=total_generations,
+        tool_stats=tool_stats,
+        user_gen_counts=user_gen_counts
+    )
+
+@app.route("/admin/set-plan", methods=["POST"])
+def admin_set_plan():
+    data = request.get_json(force=True, silent=True) or {}
+    secret = data.get("secret")
+    if not secret or secret != os.getenv("ADMIN_SECRET", "changeme"):
+        return {"ok": False, "error": "Unauthorized"}, 403
+    user = db.session.get(User, data.get("user_id"))
+    if not user:
+        return {"ok": False, "error": "User not found"}, 404
+    plan = data.get("plan")
+    if plan not in ("pro", "free"):
+        return {"ok": False, "error": "Invalid plan"}, 400
+    user.plan = plan
+    db.session.commit()
+    return {"ok": True, "plan": plan, "email": user.email}
 
 @app.context_processor
 def inject_monthly_count():
