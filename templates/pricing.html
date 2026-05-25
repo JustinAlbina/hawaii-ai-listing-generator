@@ -7,8 +7,8 @@
 .container { max-width: 1000px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
 .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 4rem; }
 .pricing-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 20px; padding: 2rem; position: relative; display: flex; flex-direction: column; }
-.pricing-card.featured { border-color: var(--gold); background: linear-gradient(135deg, #162840, #1a3050); box-shadow: 0 0 40px rgba(201,168,76,0.15); }
-.featured-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--gold-btn); color: #000; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 999px; letter-spacing: 0.5px; white-space: nowrap; }
+.pricing-card.featured { border: 1.5px solid var(--gold); background: linear-gradient(135deg, #162840, #1a3050); box-shadow: 0 0 32px rgba(201,168,76,0.12); }
+.featured-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid rgba(201,168,76,0.5); font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 999px; letter-spacing: 0.5px; white-space: nowrap; }
 .plan-name { font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--labels); margin-bottom: 0.75rem; }
 .pricing-card.featured .plan-name { color: var(--gold); }
 .plan-price { font-size: 2.8rem; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -2px; margin-bottom: 0.25rem; }
