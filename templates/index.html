@@ -320,6 +320,7 @@
         <h2 class="section-heading">Built for Hawaii. Free to start.</h2>
         <p class="waitlist-sub">Get notified when new tools launch and stay ahead of the market with AI-powered real estate content.</p>
         <form action="/waitlist" method="POST" class="waitlist-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="email" name="email" placeholder="your@email.com" required>
             <button type="submit" class="btn-gold">Join Waitlist</button>
         </form>

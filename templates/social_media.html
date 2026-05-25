@@ -43,6 +43,7 @@ select option { background: #1a2f45; color: #fff; }
     <a href="/" class="back-link">← Back to home</a>
 
     <form action="/social-media/generate" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="card">
             <div class="card-header">
                 <div class="card-icon">🏠</div>

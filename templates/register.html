@@ -36,6 +36,7 @@ input:focus { outline: none; border-color: #c9a84c; box-shadow: 0 0 0 3px rgba(2
         {% endif %}
 
         <form action="/register" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
                 <label>Email address</label>
                 <input type="email" name="email" placeholder="you@example.com" required autofocus>

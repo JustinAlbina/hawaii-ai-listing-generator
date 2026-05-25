@@ -42,6 +42,7 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
     <a href="/" class="back-link">← Back to all tools</a>
 
     <form action="/property-comparison/generate" method="POST" style="margin-top:1.25rem;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <!-- Property 1 -->
         <div class="card">

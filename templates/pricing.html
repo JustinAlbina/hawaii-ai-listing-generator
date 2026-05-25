@@ -103,6 +103,7 @@
             </ul>
             {% if current_user.is_authenticated %}
             <form action="/create-checkout-session" method="POST" style="margin:0;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="plan-btn plan-btn-gold">Upgrade to Pro — $79/month</button>
             </form>
             {% else %}

@@ -37,6 +37,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
     <a href="/" class="back-link">← Back to all tools</a>
 
     <form action="/client-emails/generate" method="POST" style="margin-top:1.25rem;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <div class="card">
             <div class="card-header">
