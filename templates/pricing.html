@@ -8,7 +8,7 @@
 .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 4rem; }
 .pricing-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 20px; padding: 2rem; position: relative; display: flex; flex-direction: column; }
 .pricing-card.featured { border: 1.5px solid var(--gold); background: linear-gradient(135deg, #162840, #1a3050); box-shadow: 0 0 32px rgba(201,168,76,0.12); }
-.featured-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid rgba(201,168,76,0.5); font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 999px; letter-spacing: 0.5px; white-space: nowrap; }
+.featured-badge { display: inline-block; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 20px; white-space: nowrap; margin-bottom: 8px; }
 .plan-name { font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--labels); margin-bottom: 0.75rem; }
 .pricing-card.featured .plan-name { color: var(--gold); }
 .plan-price { font-size: 2.8rem; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -2px; margin-bottom: 0.25rem; }
@@ -18,13 +18,11 @@
 .plan-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.875rem; color: #c8d5e8; margin-bottom: 0.75rem; line-height: 1.5; }
 .plan-features li .check { width: 18px; height: 18px; border-radius: 50%; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.4); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
 .plan-features li .check svg { width: 10px; height: 10px; stroke: var(--gold); }
-.plan-btn { display: block; text-align: center; padding: 0.85rem 1rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; width: 100%; font-family: inherit; }
-.plan-btn-outline { background: transparent; color: var(--gold); border: 1.5px solid rgba(201,168,76,0.5); }
-.plan-btn-outline:hover { background: rgba(201,168,76,0.08); border-color: var(--gold); }
-.plan-btn-gold { background: var(--gold-btn); color: #000; }
+.plan-btn { display: block; text-align: center; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; width: 100%; font-family: inherit; box-sizing: border-box; }
+.plan-btn-outline { background: transparent; color: var(--gold); border: 1.5px solid var(--gold); }
+.plan-btn-outline:hover { background: rgba(201,168,76,0.08); }
+.plan-btn-gold { background: var(--gold-btn); color: #000; font-weight: 600; }
 .plan-btn-gold:hover { filter: brightness(1.1); transform: scale(1.01); }
-.plan-btn-dark { background: rgba(255,255,255,0.06); color: var(--labels); border: 1px solid rgba(255,255,255,0.1); }
-.plan-btn-dark:hover { background: rgba(255,255,255,0.1); color: #fff; }
 .faq-section { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 3rem; }
 .faq-heading { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 2rem; text-align: center; letter-spacing: -0.5px; }
 .faq-list { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
@@ -70,8 +68,11 @@
             <a href="/listing" class="plan-btn plan-btn-outline">Get Started Free</a>
         </div>
 
+        <div style="margin-top:2rem;">
+        <div style="text-align:center;">
+            <span class="featured-badge">MOST POPULAR</span>
+        </div>
         <div class="pricing-card featured">
-            <div class="featured-badge">MOST POPULAR</div>
             <div class="plan-name">Pro</div>
             <div class="plan-price">$79<span>/mo</span></div>
             <div class="plan-desc">For active agents who need more, faster.</div>
@@ -110,6 +111,7 @@
             <a href="/login" class="plan-btn plan-btn-gold">Log in to upgrade</a>
             {% endif %}
         </div>
+        </div>
 
         <div class="pricing-card">
             <div class="plan-name">Brokerage</div>
@@ -141,7 +143,7 @@
                     SLA &amp; priority support
                 </li>
             </ul>
-            <a href="mailto:justin@alohaagent.app" class="plan-btn plan-btn-dark">Contact Us</a>
+            <a href="mailto:justin@alohaagent.app" class="plan-btn plan-btn-outline">Contact Us</a>
         </div>
 
     </div>
