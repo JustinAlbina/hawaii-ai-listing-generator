@@ -5,12 +5,11 @@
 .hero h1 { font-size: clamp(1.9rem, 4vw, 2.8rem); font-weight: 800; margin-bottom: 0.6rem; letter-spacing: -1px; }
 .hero p { color: #8892a4; font-size: 1rem; max-width: 500px; margin: 0 auto; }
 .container { max-width: 1000px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
-.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 4rem; }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 4rem; padding-top: 1.75rem; }
 .pricing-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 20px; padding: 2rem; position: relative; display: flex; flex-direction: column; }
 .pricing-card.featured { border: 1.5px solid var(--gold); background: linear-gradient(135deg, #162840, #1a3050); box-shadow: 0 0 32px rgba(201,168,76,0.12); }
-.featured-badge { display: inline-block; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 20px; white-space: nowrap; }
+.featured-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); display: inline-block; background: var(--card); border: 1px solid var(--gold); color: var(--gold); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 20px; white-space: nowrap; }
 .plan-name { font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--labels); margin-bottom: 0.75rem; }
-.pricing-card.featured .plan-name { color: var(--gold); }
 .plan-price { font-size: 2.8rem; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -2px; margin-bottom: 0.25rem; }
 .plan-price span { font-size: 1rem; font-weight: 500; color: var(--labels); letter-spacing: 0; }
 .plan-desc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.75rem; line-height: 1.5; }
@@ -70,9 +69,7 @@
         </div>
 
         <div class="pricing-card featured">
-            <div style="text-align:center; margin-bottom:0.75rem;">
-                <span class="featured-badge">MOST POPULAR</span>
-            </div>
+            <span class="featured-badge">MOST POPULAR</span>
             <div class="plan-name">Pro</div>
             <div class="plan-price">$79<span>/mo</span></div>
             <div class="plan-desc">For active agents who need more, faster.</div>
