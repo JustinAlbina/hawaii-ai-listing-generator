@@ -1,4 +1,9 @@
 from flask import Flask, render_template, request, session, redirect, url_for, abort, make_response, send_file, flash
+from urllib.parse import urlparse, urljoin
+import secrets as _secrets_mod
+from flask_wtf.csrf import CSRFProtect, CSRFError
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
@@ -20,13 +25,27 @@ load_dotenv()
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "alohaagent-secret-2024")
+_secret_key = os.getenv("SECRET_KEY")
+if not _secret_key:
+    raise RuntimeError("SECRET_KEY environment variable is not set")
+app.secret_key = _secret_key
+
+if not os.getenv("ADMIN_SECRET"):
+    raise RuntimeError("ADMIN_SECRET environment variable is not set")
 
 database_url = os.getenv("DATABASE_URL", "sqlite:///alohaagent.db")
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024  # 20 MB total per request
+
+csrf = CSRFProtect(app)
+limiter = Limiter(get_remote_address, app=app, default_limits=[])
+
+@app.errorhandler(CSRFError)
+def csrf_error(e):
+    return render_template("login.html", error="Your session expired. Please try again."), 400
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -144,9 +163,26 @@ def _process_photos():
         results.append((base64.b64encode(f.read()).decode("utf-8"), mt))
     return results
 
+# ─── Security headers ─────────────────────────────────────────────────────────
+
+@app.after_request
+def set_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    return response
+
+# ─── Helpers ──────────────────────────────────────────────────────────────────
+
+def _is_safe_redirect(url):
+    ref = urlparse(urljoin(request.host_url, url))
+    return ref.scheme in ("http", "https") and ref.netloc == urlparse(request.host_url).netloc
+
 # ─── Auth routes ──────────────────────────────────────────────────────────────
 
 @app.route("/register", methods=["GET", "POST"])
+@limiter.limit("10 per hour")
 def register():
     if current_user.is_authenticated:
         return redirect(url_for("dashboard"))
@@ -171,6 +207,7 @@ def register():
     return render_template("register.html", error=error)
 
 @app.route("/login", methods=["GET", "POST"])
+@limiter.limit("20 per hour; 5 per minute")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for("dashboard"))
@@ -184,7 +221,7 @@ def login():
         else:
             login_user(user)
             next_page = request.args.get("next")
-            return redirect(next_page or url_for("dashboard"))
+            return redirect(next_page if next_page and _is_safe_redirect(next_page) else url_for("dashboard"))
     return render_template("login.html", error=error)
 
 @app.route("/logout")
@@ -1277,35 +1314,18 @@ LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold proper
 
 # ─── Admin routes ─────────────────────────────────────────────────────────────
 
-@app.route("/admin/set-pro/<email>")
-def admin_set_pro(email):
-    secret = request.args.get("key")
-    if secret != os.getenv("ADMIN_SECRET", "changeme"):
-        return "Unauthorized", 403
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        return f"User {email} not found", 404
-    user.plan = "pro"
-    db.session.commit()
-    return f"✓ {email} set to pro", 200
-
-@app.route("/admin/set-free/<email>")
-def admin_set_free(email):
-    secret = request.args.get("key")
-    if secret != os.getenv("ADMIN_SECRET", "changeme"):
-        return "Unauthorized", 403
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        return f"User {email} not found", 404
-    user.plan = "free"
-    db.session.commit()
-    return f"✓ {email} set to free", 200
 
 @app.route("/admin")
 def admin_panel():
     secret = request.args.get("secret")
-    if not secret or secret != os.getenv("ADMIN_SECRET", "changeme"):
+    if not secret or secret != os.getenv("ADMIN_SECRET"):
         abort(403)
+
+    # Generate a random per-session token so the raw ADMIN_SECRET is never
+    # embedded in the page source. The JS uses this token; /admin/set-plan
+    # validates it against the session, not the raw secret.
+    admin_token = _secrets_mod.token_hex(32)
+    session["admin_token"] = admin_token
 
     users = User.query.order_by(User.created_at.desc()).all()
     waitlist = Waitlist.query.order_by(Waitlist.created_at.desc()).all()
@@ -1320,7 +1340,7 @@ def admin_panel():
     user_gen_counts = {u.id: Generation.query.filter_by(user_id=u.id).count() for u in users}
 
     return render_template("admin.html",
-        secret=secret,
+        secret=admin_token,
         users=users,
         waitlist=waitlist,
         total_users=total_users,
@@ -1330,10 +1350,12 @@ def admin_panel():
     )
 
 @app.route("/admin/set-plan", methods=["POST"])
+@csrf.exempt
 def admin_set_plan():
     data = request.get_json(force=True, silent=True) or {}
-    secret = data.get("secret")
-    if not secret or secret != os.getenv("ADMIN_SECRET", "changeme"):
+    token = data.get("secret")
+    expected = session.get("admin_token")
+    if not token or not expected or not _secrets_mod.compare_digest(token, expected):
         return {"ok": False, "error": "Unauthorized"}, 403
     user = db.session.get(User, data.get("user_id"))
     if not user:
@@ -1377,7 +1399,8 @@ def create_checkout_session():
         )
         return redirect(session.url, code=303)
     except Exception as e:
-        flash(f"Billing error: {str(e)}", "error")
+        app.logger.error(f"Stripe checkout error for {current_user.email}: {e}")
+        flash("Something went wrong with billing. Please try again or contact support.", "error")
         return redirect("/pricing")
 
 
@@ -1388,7 +1411,9 @@ def upgrade_success():
     if session_id:
         try:
             checkout_session = stripe.checkout.Session.retrieve(session_id)
-            if checkout_session.payment_status == "paid":
+            if (checkout_session.payment_status == "paid"
+                    and checkout_session.customer_email
+                    and checkout_session.customer_email.lower() == current_user.email.lower()):
                 current_user.plan = "pro"
                 db.session.commit()
                 flash("Welcome to AlohaAgent Pro! Unlimited generations are now active.", "success")
@@ -1398,6 +1423,7 @@ def upgrade_success():
 
 
 @app.route("/stripe-webhook", methods=["POST"])
+@csrf.exempt
 def stripe_webhook():
     payload = request.get_data(as_text=True)
     sig = request.headers.get("Stripe-Signature")
@@ -1408,21 +1434,32 @@ def stripe_webhook():
         return "", 400
 
     if event["type"] == "customer.subscription.deleted":
-        email = event["data"]["object"].get("customer_email") or \
-                event["data"]["object"].get("metadata", {}).get("email")
+        customer_id = event["data"]["object"].get("customer")
+        email = None
+        if customer_id:
+            try:
+                customer = stripe.Customer.retrieve(customer_id)
+                email = customer.get("email")
+            except Exception:
+                pass
         if email:
             user = User.query.filter_by(email=email).first()
             if user:
                 user.plan = "free"
                 db.session.commit()
     elif event["type"] == "invoice.payment_failed":
+        customer_id = event["data"]["object"].get("customer")
         email = event["data"]["object"].get("customer_email")
+        if not email and customer_id:
+            try:
+                customer = stripe.Customer.retrieve(customer_id)
+                email = customer.get("email")
+            except Exception:
+                pass
         app.logger.warning(f"Payment failed for {email}")
 
     return "", 200
 
 
 if __name__ == "__main__":
-    if not os.getenv("ADMIN_SECRET"):
-        print("WARNING: ADMIN_SECRET is not set — admin routes are using the default 'changeme' key")
-    app.run(debug=True)
+    app.run(debug=os.getenv("FLASK_DEBUG", "0") == "1")
