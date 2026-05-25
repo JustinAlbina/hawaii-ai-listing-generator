@@ -8,7 +8,7 @@
 .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 4rem; }
 .pricing-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 20px; padding: 2rem; position: relative; display: flex; flex-direction: column; }
 .pricing-card.featured { border: 1.5px solid var(--gold); background: linear-gradient(135deg, #162840, #1a3050); box-shadow: 0 0 32px rgba(201,168,76,0.12); }
-.featured-badge { display: inline-block; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 20px; white-space: nowrap; margin-bottom: 8px; }
+.featured-badge { display: inline-block; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 20px; white-space: nowrap; }
 .plan-name { font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--labels); margin-bottom: 0.75rem; }
 .pricing-card.featured .plan-name { color: var(--gold); }
 .plan-price { font-size: 2.8rem; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -2px; margin-bottom: 0.25rem; }
@@ -69,11 +69,10 @@
             <a href="/listing" class="plan-btn plan-btn-outline">Get Started Free</a>
         </div>
 
-        <div style="margin-top:2rem;">
-        <div style="text-align:center;">
-            <span class="featured-badge">MOST POPULAR</span>
-        </div>
         <div class="pricing-card featured">
+            <div style="text-align:center; margin-bottom:0.75rem;">
+                <span class="featured-badge">MOST POPULAR</span>
+            </div>
             <div class="plan-name">Pro</div>
             <div class="plan-price">$79<span>/mo</span></div>
             <div class="plan-desc">For active agents who need more, faster.</div>
@@ -111,7 +110,6 @@
             {% else %}
             <a href="/login" class="plan-btn plan-btn-gold" style="background:#d4a843; color:#000; font-weight:600;">Log in to upgrade</a>
             {% endif %}
-        </div>
         </div>
 
         <div class="pricing-card">
