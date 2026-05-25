@@ -18,11 +18,12 @@
 .plan-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.875rem; color: #c8d5e8; margin-bottom: 0.75rem; line-height: 1.5; }
 .plan-features li .check { width: 18px; height: 18px; border-radius: 50%; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.4); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
 .plan-features li .check svg { width: 10px; height: 10px; stroke: var(--gold); }
-.plan-btn { display: block; text-align: center; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; width: 100%; font-family: inherit; box-sizing: border-box; }
+.plan-btn { display: block; text-align: center; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; width: 100%; font-family: inherit; box-sizing: border-box; margin-top: auto; }
 .plan-btn-outline { background: transparent; color: var(--gold); border: 1.5px solid var(--gold); }
 .plan-btn-outline:hover { background: rgba(201,168,76,0.08); }
-.plan-btn-gold { background: var(--gold-btn); color: #000; font-weight: 600; }
+.plan-btn-gold { background: #d4a843; color: #000; font-weight: 600; }
 .plan-btn-gold:hover { filter: brightness(1.1); transform: scale(1.01); }
+.pricing-card form { margin-top: auto; width: 100%; }
 .faq-section { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 3rem; }
 .faq-heading { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 2rem; text-align: center; letter-spacing: -0.5px; }
 .faq-list { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
@@ -105,10 +106,10 @@
             {% if current_user.is_authenticated %}
             <form action="/create-checkout-session" method="POST" style="margin:0;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="plan-btn plan-btn-gold">Upgrade to Pro — $79/month</button>
+                <button type="submit" class="plan-btn plan-btn-gold" style="background:#d4a843; color:#000; font-weight:600;">Upgrade to Pro — $79/month</button>
             </form>
             {% else %}
-            <a href="/login" class="plan-btn plan-btn-gold">Log in to upgrade</a>
+            <a href="/login" class="plan-btn plan-btn-gold" style="background:#d4a843; color:#000; font-weight:600;">Log in to upgrade</a>
             {% endif %}
         </div>
         </div>
