@@ -1386,12 +1386,7 @@ def create_checkout_session():
             mode="subscription",
             customer_email=current_user.email,
             line_items=[{
-                "price_data": {
-                    "currency": "usd",
-                    "unit_amount": 7900,
-                    "recurring": {"interval": "month"},
-                    "product_data": {"name": "AlohaAgent Pro"},
-                },
+                "price": "price_1Tas4LCWSd0DHY3gVvJnUjgJ",
                 "quantity": 1,
             }],
             success_url="https://alohaagent.app/upgrade-success?session_id={CHECKOUT_SESSION_ID}",
