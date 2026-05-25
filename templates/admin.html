@@ -1,96 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel — AlohaAgent</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #ffffff; }
+{% extends 'base.html' %}
+{% block title %}Admin Panel — AlohaAgent{% endblock %}
 
-        .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .nav-left { display: flex; align-items: center; gap: 1.5rem; }
-        .nav-badge-admin { background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.5px; text-transform: uppercase; }
+{% block top_banner %}{% endblock %}
+{% block upgrade_banner %}{% endblock %}
 
-        .hero { background: #162840; padding: 48px 2rem 40px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .hero-inner { max-width: 1100px; margin: 0 auto; }
-        .hero-eyebrow { border: 1px solid #c9a84c; color: #c9a84c; border-radius: 999px; padding: 4px 16px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; display: inline-block; margin-bottom: 1rem; }
-        .hero h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.5px; }
-        .hero h1 span { color: #c9a84c; }
-
-        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; max-width: 1100px; margin: 1.5rem auto 0; padding: 0 2rem; }
-        .stat-card { background: #162840; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.25rem 1.5rem; }
-        .stat-label { font-size: 11px; color: #8892a4; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.35rem; }
-        .stat-value { font-size: 2rem; font-weight: 700; color: #c9a84c; }
-        .stat-sub { font-size: 12px; color: #8892a4; margin-top: 2px; }
-
-        .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
-
-        .section-title { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.6rem; }
-        .section-title span { font-size: 12px; color: #8892a4; font-weight: 400; }
-
-        .card { background: #162840; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 2rem; overflow: hidden; }
-        .card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: space-between; }
-        .card-title { font-size: 0.95rem; font-weight: 700; color: #fff; }
-        .card-count { font-size: 12px; color: #8892a4; background: rgba(255,255,255,0.06); padding: 3px 10px; border-radius: 999px; }
-
-        .table-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { text-align: left; font-size: 11px; font-weight: 700; color: #4a5a70; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.85rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); white-space: nowrap; }
-        td { padding: 0.85rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); color: #a8b8cc; vertical-align: middle; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: rgba(255,255,255,0.02); }
-
-        .plan-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: 0.5px; text-transform: uppercase; transition: all 0.2s; }
-        .plan-free { background: rgba(255,255,255,0.08); color: #8892a4; }
-        .plan-pro { background: rgba(201,168,76,0.2); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); }
-
-        .btn-set { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 7px; cursor: pointer; border: none; transition: all 0.18s; letter-spacing: 0.3px; text-transform: uppercase; }
-        .btn-set-pro { background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); }
-        .btn-set-pro:hover { background: rgba(201,168,76,0.28); }
-        .btn-set-free { background: rgba(255,255,255,0.06); color: #8892a4; border: 1px solid rgba(255,255,255,0.1); }
-        .btn-set-free:hover { background: rgba(255,255,255,0.1); color: #fff; }
-
-        .user-email { color: #fff; font-weight: 500; }
-        .user-id { color: #4a5a70; font-size: 12px; }
-        .gen-count { color: #e8c97a; font-weight: 600; }
-
-        .tool-bar-row { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
-        .tool-bar-row:last-child { border-bottom: none; }
-        .tool-name { font-size: 13px; color: #a8b8cc; min-width: 220px; flex-shrink: 0; }
-        .tool-bar-wrap { flex: 1; background: rgba(255,255,255,0.06); border-radius: 999px; height: 6px; overflow: hidden; }
-        .tool-bar-fill { height: 6px; background: #c9a84c; border-radius: 999px; transition: width 0.4s; }
-        .tool-count { font-size: 13px; font-weight: 700; color: #c9a84c; min-width: 36px; text-align: right; }
-
-        .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 1.25rem; font-size: 12px; margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.06); }
-        .footer strong { color: #c9a84c; }
-
-        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #162840; border: 1px solid rgba(201,168,76,0.3); color: #e8c97a; padding: 0.75rem 1.25rem; border-radius: 10px; font-size: 13px; font-weight: 600; opacity: 0; transform: translateY(8px); transition: all 0.25s; pointer-events: none; z-index: 9999; }
-        .toast.show { opacity: 1; transform: translateY(0); }
-
-        @media (max-width: 768px) {
-            .stats-row { grid-template-columns: 1fr 1fr; padding: 0 1rem; }
-            .container { padding: 1.25rem 1rem; }
-            td, th { padding: 0.75rem 1rem; }
-            .tool-name { min-width: 140px; font-size: 12px; }
-        }
-    </style>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌺</text></svg>">
-</head>
-<body>
-
-<nav class="nav">
-    <div class="nav-left">
+{% block nav %}
+<nav class="nav" style="position:sticky;top:0;z-index:200;">
+    <div class="nav-left" style="gap:1.5rem;">
         <a href="/" style="text-decoration:none; display:flex; align-items:center; gap:10px;">
+            <img src="/static/logo-icon.svg" style="height:40px; width:40px;" alt="">
             <span style="font-size:20px; font-weight:700; letter-spacing:0.3px;">
                 <span style="color:#ffffff;">Aloha</span><span style="color:#c9a84c;">Agent</span>
             </span>
         </a>
-        <span class="nav-badge-admin">Admin</span>
+        <span style="background:rgba(201,168,76,0.15);color:#c9a84c;border:1px solid rgba(201,168,76,0.3);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:0.5px;text-transform:uppercase;">Admin</span>
     </div>
-    <a href="/?admin=1" style="color:#8892a4; text-decoration:none; font-size:13px;">← Back to site</a>
+    <a href="/" style="color:#8892a4;text-decoration:none;font-size:13px;">← Back to site</a>
 </nav>
+{% endblock %}
 
+{% block styles %}
+.hero { background: #162840; padding: 48px 2rem 40px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.hero-inner { max-width: 1100px; margin: 0 auto; }
+.hero h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.5px; }
+.hero h1 span { color: var(--gold); }
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; max-width: 1100px; margin: 1.5rem auto 0; padding: 0 2rem; }
+.stat-card { background: #162840; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.25rem 1.5rem; }
+.stat-label { font-size: 11px; color: var(--labels); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.35rem; }
+.stat-value { font-size: 2rem; font-weight: 700; color: var(--gold); }
+.stat-sub { font-size: 12px; color: var(--labels); margin-top: 2px; }
+.container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+.card { background: #162840; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 2rem; overflow: hidden; }
+.card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 0.95rem; font-weight: 700; color: #fff; }
+.card-count { font-size: 12px; color: var(--labels); background: rgba(255,255,255,0.06); padding: 3px 10px; border-radius: 999px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-size: 11px; font-weight: 700; color: #4a5a70; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.85rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); white-space: nowrap; }
+td { padding: 0.85rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); color: #a8b8cc; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.plan-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: 0.5px; text-transform: uppercase; }
+.plan-free { background: rgba(255,255,255,0.08); color: var(--labels); }
+.plan-pro { background: rgba(201,168,76,0.2); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+.btn-set { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 7px; cursor: pointer; border: none; transition: all 0.18s; letter-spacing: 0.3px; text-transform: uppercase; font-family: inherit; }
+.btn-set-pro { background: rgba(201,168,76,0.15); color: var(--gold); border: 1px solid rgba(201,168,76,0.25); }
+.btn-set-pro:hover { background: rgba(201,168,76,0.28); }
+.btn-set-free { background: rgba(255,255,255,0.06); color: var(--labels); border: 1px solid rgba(255,255,255,0.1); }
+.btn-set-free:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.user-email { color: #fff; font-weight: 500; }
+.user-id { color: #4a5a70; font-size: 12px; }
+.gen-count { color: #e8c97a; font-weight: 600; }
+.tool-bar-row { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.tool-bar-row:last-child { border-bottom: none; }
+.tool-name { font-size: 13px; color: #a8b8cc; min-width: 220px; flex-shrink: 0; }
+.tool-bar-wrap { flex: 1; background: rgba(255,255,255,0.06); border-radius: 999px; height: 6px; overflow: hidden; }
+.tool-bar-fill { height: 6px; background: var(--gold); border-radius: 999px; transition: width 0.4s; }
+.tool-count { font-size: 13px; font-weight: 700; color: var(--gold); min-width: 36px; text-align: right; }
+.toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #162840; border: 1px solid rgba(201,168,76,0.3); color: #e8c97a; padding: 0.75rem 1.25rem; border-radius: 10px; font-size: 13px; font-weight: 600; opacity: 0; transform: translateY(8px); transition: all 0.25s; pointer-events: none; z-index: 9999; }
+.toast.show { opacity: 1; transform: translateY(0); }
+@media (max-width: 768px) { .stats-row { grid-template-columns: 1fr 1fr; padding: 0 1rem; } .container { padding: 1.25rem 1rem; } td, th { padding: 0.75rem 1rem; } .tool-name { min-width: 140px; font-size: 12px; } }
+{% endblock %}
+
+{% block footer %}
+<footer style="background:#060f1e;color:#8892a4;text-align:center;padding:1.25rem;font-size:12px;margin-top:2rem;border-top:1px solid rgba(255,255,255,0.06);">
+    <strong style="color:#c9a84c;">AlohaAgent</strong> Admin Panel &nbsp;·&nbsp; Restricted access
+</footer>
+{% endblock %}
+
+{% block content %}
 <div class="hero">
     <div class="hero-inner">
         <div class="hero-eyebrow">Control Panel</div>
@@ -137,7 +115,7 @@
             <div class="tool-count">{{ cnt }}</div>
         </div>
         {% else %}
-        <div style="padding:2rem; text-align:center; color:#4a5a70;">No generations yet.</div>
+        <div style="padding:2rem;text-align:center;color:#4a5a70;">No generations yet.</div>
         {% endfor %}
     </div>
 
@@ -171,7 +149,7 @@
                         </td>
                         <td><span class="gen-count">{{ user_gen_counts[user.id] }}</span></td>
                         <td>{{ user.created_at.strftime('%b %d, %Y') }}</td>
-                        <td style="display:flex; gap:0.5rem; align-items:center;">
+                        <td style="display:flex;gap:0.5rem;align-items:center;">
                             <button class="btn-set btn-set-pro" onclick="setPlan({{ user.id }}, 'pro')">Set Pro</button>
                             <button class="btn-set btn-set-free" onclick="setPlan({{ user.id }}, 'free')">Set Free</button>
                         </td>
@@ -216,13 +194,10 @@
 
 </div>
 
-<div class="footer">
-    <strong>AlohaAgent</strong> Admin Panel &nbsp;·&nbsp; Restricted access
-</div>
-
 <div class="toast" id="toast"></div>
+{% endblock %}
 
-<script>
+{% block scripts %}
 var ADMIN_SECRET = {{ secret | tojson }};
 
 function showToast(msg, ok) {
@@ -257,7 +232,4 @@ async function setPlan(userId, plan) {
         showToast('Request failed', false);
     }
 }
-</script>
-
-</body>
-</html>
+{% endblock %}

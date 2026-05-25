@@ -1,176 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Pricing — AlohaAgent</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #ffffff; overflow-x: hidden; }
+{% extends 'base.html' %}
+{% block title %}Pricing — AlohaAgent{% endblock %}
+{% block styles %}
+.hero { background: #0d1f35; padding: 4rem 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.hero h1 { font-size: clamp(1.9rem, 4vw, 2.8rem); font-weight: 800; margin-bottom: 0.6rem; letter-spacing: -1px; }
+.hero p { color: #8892a4; font-size: 1rem; max-width: 500px; margin: 0 auto; }
+.container { max-width: 1000px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 4rem; }
+.pricing-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 20px; padding: 2rem; position: relative; display: flex; flex-direction: column; }
+.pricing-card.featured { border-color: var(--gold); background: linear-gradient(135deg, #162840, #1a3050); box-shadow: 0 0 40px rgba(201,168,76,0.15); }
+.featured-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--gold-btn); color: #000; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 999px; letter-spacing: 0.5px; white-space: nowrap; }
+.plan-name { font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--labels); margin-bottom: 0.75rem; }
+.pricing-card.featured .plan-name { color: var(--gold); }
+.plan-price { font-size: 2.8rem; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -2px; margin-bottom: 0.25rem; }
+.plan-price span { font-size: 1rem; font-weight: 500; color: var(--labels); letter-spacing: 0; }
+.plan-desc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.75rem; line-height: 1.5; }
+.plan-features { list-style: none; margin-bottom: 2rem; flex: 1; }
+.plan-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.875rem; color: #c8d5e8; margin-bottom: 0.75rem; line-height: 1.5; }
+.plan-features li .check { width: 18px; height: 18px; border-radius: 50%; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.4); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.plan-features li .check svg { width: 10px; height: 10px; stroke: var(--gold); }
+.plan-btn { display: block; text-align: center; padding: 0.85rem 1rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; width: 100%; font-family: inherit; }
+.plan-btn-outline { background: transparent; color: var(--gold); border: 1.5px solid rgba(201,168,76,0.5); }
+.plan-btn-outline:hover { background: rgba(201,168,76,0.08); border-color: var(--gold); }
+.plan-btn-gold { background: var(--gold-btn); color: #000; }
+.plan-btn-gold:hover { filter: brightness(1.1); transform: scale(1.01); }
+.plan-btn-dark { background: rgba(255,255,255,0.06); color: var(--labels); border: 1px solid rgba(255,255,255,0.1); }
+.plan-btn-dark:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.faq-section { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 3rem; }
+.faq-heading { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 2rem; text-align: center; letter-spacing: -0.5px; }
+.faq-list { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
+.faq-item { background: #162840; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; overflow: hidden; }
+.faq-question { width: 100%; background: none; border: none; color: #fff; font-size: 0.95rem; font-weight: 600; padding: 1.25rem 1.5rem; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-family: inherit; gap: 1rem; }
+.faq-question:hover { color: var(--gold); }
+.faq-question svg { flex-shrink: 0; transition: transform 0.2s; color: var(--labels); }
+.faq-question.open svg { transform: rotate(180deg); color: var(--gold); }
+.faq-answer { padding: 0 1.5rem 1.25rem; font-size: 0.875rem; color: var(--labels); line-height: 1.75; display: none; }
+.faq-answer.open { display: block; }
+@media (max-width: 800px) { .pricing-grid { grid-template-columns: 1fr; max-width: 420px; margin-left: auto; margin-right: auto; } }
+{% endblock %}
 
-        .top-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.6rem 1rem; font-size: 13px; font-weight: 600; }
-
-        .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .nav-left { display: flex; align-items: center; gap: 2rem; }
-        .nav-link { color: #8892a4; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; white-space: nowrap; }
-        .nav-link:hover { color: #c9a84c; }
-        .nav-dropdown { position: relative; }
-        .nav-dropdown-btn { background: none; border: none; color: #8892a4; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 0; transition: color 0.2s; font-family: inherit; }
-        .nav-dropdown-btn:hover, .nav-dropdown:hover .nav-dropdown-btn { color: #c9a84c; }
-        .nav-dropdown:hover .nav-dropdown-btn svg { transform: rotate(180deg); }
-        .nav-dropdown-btn svg { transition: transform 0.2s; }
-        .nav-dropdown-menu { position: absolute; top: calc(100% + 14px); left: 0; background: #0d1f35; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 0.5rem; min-width: 265px; opacity: 0; pointer-events: none; transform: translateY(-6px); transition: all 0.18s ease; z-index: 300; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
-        .nav-dropdown-menu::before { content: ''; position: absolute; top: -14px; left: 0; right: 0; height: 14px; }
-        .nav-dropdown:hover .nav-dropdown-menu { opacity: 1; pointer-events: all; transform: translateY(0); }
-        .nav-dropdown-menu a { display: flex; align-items: center; gap: 10px; color: #8892a4; text-decoration: none; font-size: 13px; padding: 0.55rem 0.75rem; border-radius: 8px; transition: all 0.15s; }
-        .nav-dropdown-menu a:hover { background: rgba(201,168,76,0.1); color: #c9a84c; }
-        .nav-dropdown-menu a .menu-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9a84c; opacity: 0.6; flex-shrink: 0; }
-        .nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.35rem 0.75rem; }
-        .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px; }
-
-        .hero { background: #0d1f35; padding: 4rem 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .hero-eyebrow { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem; }
-        .hero h1 { font-size: clamp(1.9rem, 4vw, 2.8rem); font-weight: 800; margin-bottom: 0.6rem; letter-spacing: -1px; }
-        .hero p { color: #8892a4; font-size: 1rem; max-width: 500px; margin: 0 auto; }
-
-        .container { max-width: 1000px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
-
-        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 4rem; }
-
-        .pricing-card { background: #162840; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 2rem; position: relative; display: flex; flex-direction: column; }
-        .pricing-card.featured { border-color: #c9a84c; background: linear-gradient(135deg, #162840, #1a3050); box-shadow: 0 0 40px rgba(201,168,76,0.15); }
-        .featured-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 999px; letter-spacing: 0.5px; white-space: nowrap; }
-
-        .plan-name { font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8892a4; margin-bottom: 0.75rem; }
-        .pricing-card.featured .plan-name { color: #c9a84c; }
-        .plan-price { font-size: 2.8rem; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -2px; margin-bottom: 0.25rem; }
-        .plan-price span { font-size: 1rem; font-weight: 500; color: #8892a4; letter-spacing: 0; }
-        .plan-desc { font-size: 0.85rem; color: #8892a4; margin-bottom: 1.75rem; line-height: 1.5; }
-
-        .plan-features { list-style: none; margin-bottom: 2rem; flex: 1; }
-        .plan-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.875rem; color: #c8d5e8; margin-bottom: 0.75rem; line-height: 1.5; }
-        .plan-features li .check { width: 18px; height: 18px; border-radius: 50%; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.4); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-        .plan-features li .check svg { width: 10px; height: 10px; stroke: #c9a84c; }
-        .plan-features li.dim { color: #4a5a70; }
-        .plan-features li.dim .check { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
-        .plan-features li.dim .check svg { stroke: #4a5a70; }
-
-        .plan-btn { display: block; text-align: center; padding: 0.85rem 1rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; width: 100%; }
-        .plan-btn-outline { background: transparent; color: #c9a84c; border: 1.5px solid rgba(201,168,76,0.5); }
-        .plan-btn-outline:hover { background: rgba(201,168,76,0.08); border-color: #c9a84c; }
-        .plan-btn-gold { background: #c9a84c; color: #0a1628; }
-        .plan-btn-gold:hover { background: #e8c97a; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.4); }
-        .plan-btn-dark { background: rgba(255,255,255,0.06); color: #8892a4; border: 1px solid rgba(255,255,255,0.1); }
-        .plan-btn-dark:hover { background: rgba(255,255,255,0.1); color: #fff; }
-
-        .faq-section { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 3rem; }
-        .faq-heading { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 2rem; text-align: center; letter-spacing: -0.5px; }
-        .faq-list { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
-        .faq-item { background: #162840; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; overflow: hidden; }
-        .faq-question { width: 100%; background: none; border: none; color: #fff; font-size: 0.95rem; font-weight: 600; padding: 1.25rem 1.5rem; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-family: inherit; gap: 1rem; }
-        .faq-question:hover { color: #c9a84c; }
-        .faq-question svg { flex-shrink: 0; transition: transform 0.2s; color: #8892a4; }
-        .faq-question.open svg { transform: rotate(180deg); color: #c9a84c; }
-        .faq-answer { padding: 0 1.5rem 1.25rem; font-size: 0.875rem; color: #8892a4; line-height: 1.75; display: none; }
-        .faq-answer.open { display: block; }
-
-        .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.06); }
-        .footer strong { color: #c9a84c; }
-
-        @media (max-width: 800px) { .pricing-grid { grid-template-columns: 1fr; max-width: 420px; margin-left: auto; margin-right: auto; } }
-                .nav-right { display: flex; align-items: center; gap: 0.75rem; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 1.5rem; margin-left: 1rem; }
-        .nav-btn { background: transparent; color: #c9a84c; border: 1.5px solid #c9a84c; padding: 0.45rem 1.1rem; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s; white-space: nowrap; }
-        .nav-btn:hover { background: #c9a84c; color: #0a1628; }
-        .nav-hamburger { display: none; flex-direction: column; gap: 4px; cursor: pointer; padding: 4px; }
-        .nav-hamburger span { display: block; width: 22px; height: 2px; background: #8892a4; border-radius: 2px; }
-        #mobile-menu { display: none; }
-        @media (max-width: 768px) {
-            .nav { padding: 0.75rem 1rem; }
-            .nav-dropdown { display: none; }
-            .nav-link { display: none; }
-            .nav-btn { display: none; }
-            .nav-right { border-left: none; padding-left: 0; margin-left: 0; }
-            .nav-hamburger { display: flex; }
-            #mobile-menu { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; overflow-y: auto; z-index: 9999; background: #0a1628; padding: 1.5rem; box-sizing: border-box; }
-            #mobile-menu-close { display: block; width: 100%; background: none; border: none; color: #c9a84c; font-size: 1.5rem; cursor: pointer; text-align: right; padding: 0 0 1.25rem 0; font-family: inherit; }
-            #mobile-menu a { display: block; color: #8892a4; text-decoration: none; padding: 0.75rem 0; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-            #mobile-menu a:last-child { border-bottom: none; }
-            #mobile-menu a:hover { color: #c9a84c; }
-            .nav-dropdown { display: none;
-        } .nav-link { display: none; } }
-    </style>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌺</text></svg>">
-</head>
-<body>
-
-{% if not (current_user.is_authenticated and current_user.plan == "pro") %}
-<div class="top-banner">🌺 Free tier — 3 generations per month. No credit card required.</div>
-{% endif %}
-
-<nav class="nav">
-    <div class="nav-left">
-        <a href="/" style="text-decoration:none; display:flex; align-items:center; gap:10px;">
-  <img src="/static/logo-icon.svg" style="height:40px; width:40px;" alt="">
-  <span style="font-size:22px; font-weight:700; letter-spacing:0.3px;">
-    <span style="color:#ffffff;">Aloha</span><span style="color:#c9a84c;">Agent</span>
-  </span>
-</a>
-        <div class="nav-dropdown">
-            <button class="nav-dropdown-btn">Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="nav-dropdown-menu">
-                <div class="nav-dropdown-group-label">Listing Tools</div>
-                <a href="/listing"><span class="menu-dot"></span>Listing Generator</a>
-                <a href="/open-house"><span class="menu-dot"></span>Open House Announcer</a>
-                <a href="/offer-letter"><span class="menu-dot"></span>Offer Letter Assistant</a>
-                <a href="/market-report"><span class="menu-dot"></span>Market Report Generator</a>
-                <a href="/property-comparison"><span class="menu-dot"></span>Property Comparison</a>
-                <div class="nav-dropdown-divider"></div>
-                <div class="nav-dropdown-group-label">Marketing Tools</div>
-                <a href="/social-media"><span class="menu-dot"></span>Social Media Generator</a>
-                <a href="/client-emails"><span class="menu-dot"></span>Client Email Templates</a>
-                <a href="/bio-generator"><span class="menu-dot"></span>Bio Generator</a>
-            </div>
-        </div>
-        <a href="/pricing" class="nav-link">Pricing</a>
-        <a href="/#how-it-works" class="nav-link">How It Works</a>
-    </div>
-    <div class="nav-right">
-        {% if current_user.is_authenticated %}
-            <a href="/dashboard" class="nav-link">Dashboard</a>
-            <a href="/profile" class="nav-link">Profile</a>
-            <a href="/logout" class="nav-btn">Log Out</a>
-        {% else %}
-            <a href="/login" class="nav-link">Log In</a>
-            <a href="/register" class="nav-btn">Get Started Free</a>
-        {% endif %}
-        <div class="nav-hamburger" onclick="toggleMenu()">
-            <span></span><span></span><span></span>
-        </div>
-    </div>
-</nav>
-
-<div id="mobile-menu">
-    <button id="mobile-menu-close" onclick="toggleMenu()">✕</button>
-    <a href="/listing">Listing Generator</a>
-    <a href="/open-house">Open House Announcer</a>
-    <a href="/social-media">Social Media Generator</a>
-    <a href="/offer-letter">Offer Letter Assistant</a>
-    <a href="/market-report">Market Report Generator</a>
-    <a href="/client-emails">Client Email Templates</a>
-    <a href="/bio-generator">Bio Generator</a>
-    <a href="/property-comparison">Property Comparison</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/#how-it-works">How It Works</a>
-    {% if current_user.is_authenticated %}
-        <a href="/dashboard">Dashboard</a>
-        <a href="/profile">Profile</a>
-        <a href="/logout">Log Out</a>
-    {% else %}
-        <a href="/login">Log In</a>
-        <a href="/register">Get Started Free</a>
-    {% endif %}
-</div>
-
+{% block content %}
 <div class="hero">
     <div class="hero-eyebrow">Pricing</div>
     <h1>Start free. Upgrade when you're ready.</h1>
@@ -218,7 +86,7 @@
                 </li>
                 <li>
                     <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-                    Saved history & PDF exports
+                    Saved history &amp; PDF exports
                 </li>
                 <li>
                     <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
@@ -235,7 +103,7 @@
             </ul>
             {% if current_user.is_authenticated %}
             <form action="/create-checkout-session" method="POST" style="margin:0;">
-                <button type="submit" class="plan-btn plan-btn-gold" style="width:100%;cursor:pointer;border:none;font-family:inherit;">Upgrade to Pro — $79/month</button>
+                <button type="submit" class="plan-btn plan-btn-gold">Upgrade to Pro — $79/month</button>
             </form>
             {% else %}
             <a href="/login" class="plan-btn plan-btn-gold">Log in to upgrade</a>
@@ -257,7 +125,7 @@
                 </li>
                 <li>
                     <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-                    Brokerage branding & white-label
+                    Brokerage branding &amp; white-label
                 </li>
                 <li>
                     <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
@@ -272,7 +140,7 @@
                     SLA &amp; priority support
                 </li>
             </ul>
-            <a href="mailto:hello@alohaagent.com" class="plan-btn plan-btn-dark">Contact Us</a>
+            <a href="mailto:justin@alohaagent.app" class="plan-btn plan-btn-dark">Contact Us</a>
         </div>
 
     </div>
@@ -317,13 +185,9 @@
     </div>
 
 </div>
+{% endblock %}
 
-<div class="footer">
-    <strong>AlohaAgent</strong> by AlohaForge · AI tools built for Hawaii real estate professionals<br>
-    <a href="/terms" style="color:#8892a4;text-decoration:none;">Terms of Service</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="/privacy" style="color:#8892a4;text-decoration:none;">Privacy Policy</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="mailto:justin@alohaagent.app" style="color:#8892a4;text-decoration:none;">Contact</a>
-</div>
-
-<script>
+{% block scripts %}
 function toggleFaq(btn) {
     const answer = btn.nextElementSibling;
     const isOpen = answer.classList.contains('open');
@@ -334,7 +198,4 @@ function toggleFaq(btn) {
         btn.classList.add('open');
     }
 }
-</script>
-
-</body>
-</html>
+{% endblock %}

@@ -1,196 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Property Comparison Report — AlohaAgent</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #ffffff; overflow-x: hidden; }
+{% extends 'base.html' %}
+{% block title %}Property Comparison Report — AlohaAgent{% endblock %}
+{% block styles %}
+.hero { background: #162840; color: white; padding: 60px 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.hero h1 { font-size: 1.75rem; font-weight: 700; line-height: 1.25; margin-bottom: 0.25rem; letter-spacing: -0.5px; }
+.hero-addresses { display: flex; align-items: center; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.75rem; }
+.hero-addr { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 4px 12px; font-size: 13px; color: #c8d5e8; }
+.hero-vs { color: #c9a84c; font-weight: 700; font-size: 12px; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; color: #8892a4; text-decoration: none; font-size: 13px; font-weight: 500; margin: 1.5rem 0 0; transition: color 0.2s; }
+.back-link:hover { color: #c9a84c; }
+.container { max-width: 860px; margin: 0 auto; padding: 0 1rem 3rem; }
+.card { background: #162840; border-radius: 16px; padding: 1.75rem; margin: 1.25rem 0; border: 1px solid rgba(255,255,255,0.08); }
+.card.gold-highlight { background: linear-gradient(135deg, #162840, #1c3050); border-color: rgba(201,168,76,0.35); }
+.card.gold-border { border: 2px solid #c9a84c; background: linear-gradient(135deg, #162840, #1c3050); }
+.card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.card-icon { width: 32px; height: 32px; background: rgba(201,168,76,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.card-title { font-size: 0.95rem; font-weight: 600; color: #fff; }
+.card-subtitle { font-size: 12px; color: #8892a4; margin-top: 1px; }
+.content-box { background: #0d1f35; border-radius: 10px; padding: 1.25rem; font-size: 0.9rem; line-height: 1.85; color: #c8d5e8; white-space: pre-wrap; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.06); }
+.compare-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.compare-table th { background: rgba(201,168,76,0.12); color: #c9a84c; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.compare-table th:first-child { color: #8892a4; font-size: 11px; }
+.compare-table td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #c8d5e8; vertical-align: top; }
+.compare-table td:first-child { color: #8892a4; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table tr:hover td { background: rgba(255,255,255,0.02); }
+.pros-cons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.pros-box { background: rgba(45,122,79,0.12); border: 1px solid rgba(45,122,79,0.25); border-radius: 10px; padding: 1rem; }
+.cons-box { background: rgba(180,60,60,0.1); border: 1px solid rgba(180,60,60,0.2); border-radius: 10px; padding: 1rem; }
+.pros-cons-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.6rem; }
+.pros-label { color: #4caf7d; }
+.cons-label { color: #e57373; }
+.pros-cons-text { font-size: 0.875rem; line-height: 1.8; color: #c8d5e8; white-space: pre-wrap; }
+.rec-box { background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.06)); border: 1px solid rgba(201,168,76,0.3); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+.rec-box-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c9a84c; margin-bottom: 0.5rem; }
+.rec-box p { font-size: 0.9rem; line-height: 1.75; color: #c8d5e8; white-space: pre-wrap; }
+.prop-addr-tag { display: inline-block; background: rgba(201,168,76,0.12); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; margin-bottom: 1rem; }
+.copy-btn { background: var(--gold-btn); color: #000; border: none; border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.copy-btn:hover { filter: brightness(1.1); }
+.btn-row { display: flex; gap: 1rem; }
+.btn { flex: 1; padding: 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; border: none; transition: all 0.2s; }
+.btn-primary { background: var(--gold-btn); color: #000; }
+.btn-primary:hover { filter: brightness(1.1); transform: scale(1.01); }
+.btn-outline { background: transparent; color: #c9a84c; border: 1.5px solid rgba(201,168,76,0.5); }
+.btn-outline:hover { background: rgba(201,168,76,0.08); }
+.disclaimer-box { background: rgba(201,168,76,0.05); border: 1px solid rgba(201,168,76,0.2); border-radius: 10px; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 12px; color: #8892a4; line-height: 1.7; }
+@media (max-width: 768px) { .pros-cons-grid { grid-template-columns: 1fr; } .btn-row { flex-direction: column; } }
+{% endblock %}
 
-        .top-banner { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #0a1628; text-align: center; padding: 0.6rem 1rem; font-size: 13px; font-weight: 600; }
-
-        .nav { background: #0a1628; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .nav-left { display: flex; align-items: center; gap: 2rem; }
-        .nav-link { color: #8892a4; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; white-space: nowrap; }
-        .nav-link:hover { color: #c9a84c; }
-        .nav-dropdown { position: relative; }
-        .nav-dropdown-btn { background: none; border: none; color: #8892a4; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 0; transition: color 0.2s; font-family: inherit; }
-        .nav-dropdown-btn:hover, .nav-dropdown:hover .nav-dropdown-btn { color: #c9a84c; }
-        .nav-dropdown:hover .nav-dropdown-btn svg { transform: rotate(180deg); }
-        .nav-dropdown-btn svg { transition: transform 0.2s; }
-        .nav-dropdown-menu { position: absolute; top: calc(100% + 14px); left: 0; background: #0d1f35; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 0.5rem; min-width: 265px; opacity: 0; pointer-events: none; transform: translateY(-6px); transition: all 0.18s ease; z-index: 300; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
-        .nav-dropdown-menu::before { content: ''; position: absolute; top: -14px; left: 0; right: 0; height: 14px; }
-        .nav-dropdown:hover .nav-dropdown-menu { opacity: 1; pointer-events: all; transform: translateY(0); }
-        .nav-dropdown-menu a { display: flex; align-items: center; gap: 10px; color: #8892a4; text-decoration: none; font-size: 13px; padding: 0.55rem 0.75rem; border-radius: 8px; transition: all 0.15s; }
-        .nav-dropdown-menu a:hover { background: rgba(201,168,76,0.1); color: #c9a84c; }
-        .nav-dropdown-menu a .menu-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9a84c; opacity: 0.6; flex-shrink: 0; }
-        .nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.35rem 0.75rem; }
-        .nav-dropdown-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4a5a70; padding: 0.5rem 0.75rem 0.2rem; }
-        .nav-badge { background: #c9a84c; color: #0a1628; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px; }
-
-        .hero { background: #162840; color: white; padding: 60px 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .hero-eyebrow { border: 1px solid #c9a84c; color: #c9a84c; border-radius: 999px; padding: 4px 16px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; display: inline-block; margin-bottom: 1rem; }
-        .hero h1 { font-size: 1.75rem; font-weight: 700; line-height: 1.25; margin-bottom: 0.25rem; letter-spacing: -0.5px; }
-        .hero-addresses { display: flex; align-items: center; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.75rem; }
-        .hero-addr { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 4px 12px; font-size: 13px; color: #c8d5e8; }
-        .hero-vs { color: #c9a84c; font-weight: 700; font-size: 12px; }
-
-        .back-link { display: inline-flex; align-items: center; gap: 6px; color: #8892a4; text-decoration: none; font-size: 13px; font-weight: 500; margin: 1.25rem 0 0; transition: color 0.2s; }
-        .back-link:hover { color: #c9a84c; }
-
-        .container { max-width: 860px; margin: 0 auto; padding: 0 1rem 3rem; }
-
-        .card { background: #162840; border-radius: 16px; padding: 1.75rem; margin: 1.25rem 0; border: 1px solid rgba(255,255,255,0.08); }
-        .card.gold-highlight { background: linear-gradient(135deg, #162840, #1c3050); border-color: rgba(201,168,76,0.35); }
-        .card.gold-border { border: 2px solid #c9a84c; background: linear-gradient(135deg, #162840, #1c3050); }
-        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
-        .card-icon { width: 32px; height: 32px; background: rgba(201,168,76,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .card-title { font-size: 0.95rem; font-weight: 600; color: #fff; }
-        .card-subtitle { font-size: 12px; color: #8892a4; margin-top: 1px; }
-        .card-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c9a84c; margin-bottom: 0.5rem; }
-
-        .content-box { background: #0d1f35; border-radius: 10px; padding: 1.25rem; font-size: 0.9rem; line-height: 1.85; color: #c8d5e8; white-space: pre-wrap; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.06); }
-
-        /* Comparison table */
-        .compare-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-        .compare-table th { background: rgba(201,168,76,0.12); color: #c9a84c; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .compare-table th:first-child { color: #8892a4; font-size: 11px; }
-        .compare-table td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #c8d5e8; vertical-align: top; }
-        .compare-table td:first-child { color: #8892a4; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
-        .compare-table tr:last-child td { border-bottom: none; }
-        .compare-table tr:hover td { background: rgba(255,255,255,0.02); }
-        .best-val { color: #c9a84c; font-weight: 600; }
-
-        /* Pros/cons columns */
-        .pros-cons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .pros-box { background: rgba(45,122,79,0.12); border: 1px solid rgba(45,122,79,0.25); border-radius: 10px; padding: 1rem; }
-        .cons-box { background: rgba(180,60,60,0.1); border: 1px solid rgba(180,60,60,0.2); border-radius: 10px; padding: 1rem; }
-        .pros-cons-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.6rem; }
-        .pros-label { color: #4caf7d; }
-        .cons-label { color: #e57373; }
-        .pros-cons-text { font-size: 0.875rem; line-height: 1.8; color: #c8d5e8; white-space: pre-wrap; }
-
-        /* Rec box */
-        .rec-box { background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.06)); border: 1px solid rgba(201,168,76,0.3); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
-        .rec-box-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c9a84c; margin-bottom: 0.5rem; }
-        .rec-box p { font-size: 0.9rem; line-height: 1.75; color: #c8d5e8; white-space: pre-wrap; }
-
-        .prop-addr-tag { display: inline-block; background: rgba(201,168,76,0.12); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; margin-bottom: 1rem; }
-
-        .btn-row { display: flex; gap: 1rem; }
-        .btn { flex: 1; padding: 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; border: none; transition: all 0.2s; }
-        .btn-primary { background: #c9a84c; color: #0a1628; }
-        .btn-primary:hover { background: #e8c97a; }
-        .btn-outline { background: transparent; color: #c9a84c; border: 1.5px solid rgba(201,168,76,0.5); }
-        .btn-outline:hover { background: rgba(201,168,76,0.08); }
-
-        .disclaimer-box { background: rgba(201,168,76,0.05); border: 1px solid rgba(201,168,76,0.2); border-radius: 10px; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 12px; color: #8892a4; line-height: 1.7; }
-
-        .footer { background: #060f1e; color: #8892a4; text-align: center; padding: 1.5rem; font-size: 12px; margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.06); }
-        .footer strong { color: #c9a84c; }
-
-                .nav-right { display: flex; align-items: center; gap: 0.75rem; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 1.5rem; margin-left: 1rem; }
-        .nav-btn { background: transparent; color: #c9a84c; border: 1.5px solid #c9a84c; padding: 0.45rem 1.1rem; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s; white-space: nowrap; }
-        .nav-btn:hover { background: #c9a84c; color: #0a1628; }
-        .nav-hamburger { display: none; flex-direction: column; gap: 4px; cursor: pointer; padding: 4px; }
-        .nav-hamburger span { display: block; width: 22px; height: 2px; background: #8892a4; border-radius: 2px; }
-        #mobile-menu { display: none; }
-        @media (max-width: 768px) {
-            .nav { padding: 0.75rem 1rem; }
-            .nav-dropdown { display: none; }
-            .nav-link { display: none; }
-            .nav-btn { display: none; }
-            .nav-right { border-left: none; padding-left: 0; margin-left: 0; }
-            .nav-hamburger { display: flex; }
-            #mobile-menu { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; overflow-y: auto; z-index: 9999; background: #0a1628; padding: 1.5rem; box-sizing: border-box; }
-            #mobile-menu-close { display: block; width: 100%; background: none; border: none; color: #c9a84c; font-size: 1.5rem; cursor: pointer; text-align: right; padding: 0 0 1.25rem 0; font-family: inherit; }
-            #mobile-menu a { display: block; color: #8892a4; text-decoration: none; padding: 0.75rem 0; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-            #mobile-menu a:last-child { border-bottom: none; }
-            #mobile-menu a:hover { color: #c9a84c; }
-            .nav-dropdown { display: none;
-        } .nav-link { display: none; } .pros-cons-grid { grid-template-columns: 1fr; } }
-    </style>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌺</text></svg>">
-</head>
-<body>
-
-{% if not (current_user.is_authenticated and current_user.plan == "pro") %}
-<div class="top-banner">🌺 Free tier — 3 generations per month. No credit card required.</div>
-{% endif %}
-
-<nav class="nav">
-    <div class="nav-left">
-        <a href="/" style="text-decoration:none; display:flex; align-items:center; gap:10px;">
-  <img src="/static/logo-icon.svg" style="height:40px; width:40px;" alt="">
-  <span style="font-size:22px; font-weight:700; letter-spacing:0.3px;">
-    <span style="color:#ffffff;">Aloha</span><span style="color:#c9a84c;">Agent</span>
-  </span>
-</a>
-        <div class="nav-dropdown">
-            <button class="nav-dropdown-btn">Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="nav-dropdown-menu">
-                <div class="nav-dropdown-group-label">Listing Tools</div>
-                <a href="/listing"><span class="menu-dot"></span>Listing Generator</a>
-                <a href="/open-house"><span class="menu-dot"></span>Open House Announcer</a>
-                <a href="/offer-letter"><span class="menu-dot"></span>Offer Letter Assistant</a>
-                <a href="/property-comparison"><span class="menu-dot"></span>Property Comparison</a>
-                <div class="nav-dropdown-divider"></div>
-                <div class="nav-dropdown-group-label">Marketing Tools</div>
-                <a href="/social-media"><span class="menu-dot"></span>Social Media Generator</a>
-                <a href="/market-report"><span class="menu-dot"></span>Market Report Generator</a>
-                <a href="/client-emails"><span class="menu-dot"></span>Client Email Templates</a>
-                <a href="/bio-generator"><span class="menu-dot"></span>Bio Generator</a>
-            </div>
-        </div>
-        <a href="/pricing" class="nav-link">Pricing</a>
-        <a href="/#how-it-works" class="nav-link">How It Works</a>
-    </div>
-    <div class="nav-right">
-        {% if current_user.is_authenticated %}
-            <a href="/dashboard" class="nav-link">Dashboard</a>
-            <a href="/profile" class="nav-link">Profile</a>
-            <a href="/logout" class="nav-btn">Log Out</a>
-        {% else %}
-            <a href="/login" class="nav-link">Log In</a>
-            <a href="/register" class="nav-btn">Get Started Free</a>
-        {% endif %}
-        <div class="nav-hamburger" onclick="toggleMenu()">
-            <span></span><span></span><span></span>
-        </div>
-    </div>
-</nav>
-
-<div id="mobile-menu">
-    <button id="mobile-menu-close" onclick="toggleMenu()">✕</button>
-    <a href="/listing">Listing Generator</a>
-    <a href="/open-house">Open House Announcer</a>
-    <a href="/social-media">Social Media Generator</a>
-    <a href="/offer-letter">Offer Letter Assistant</a>
-    <a href="/market-report">Market Report Generator</a>
-    <a href="/client-emails">Client Email Templates</a>
-    <a href="/bio-generator">Bio Generator</a>
-    <a href="/property-comparison">Property Comparison</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/#how-it-works">How It Works</a>
-    {% if current_user.is_authenticated %}
-        <a href="/dashboard">Dashboard</a>
-        <a href="/profile">Profile</a>
-        <a href="/logout">Log Out</a>
-    {% else %}
-        <a href="/login">Log In</a>
-        <a href="/register">Get Started Free</a>
-    {% endif %}
-</div>
-{% if current_user.is_authenticated and current_user.plan == 'free' and (monthly_count|default(0)) >= 3 %}
-<div style="background:#c9a84c;color:#0a1628;text-align:center;padding:0.75rem 1rem;font-size:14px;font-weight:600;">
-    You've used all 3 free generations this month.
-    <a href="/pricing" style="color:#0a1628;text-decoration:underline;margin-left:0.5rem;">Upgrade to Pro for unlimited access →</a>
-</div>
-{% endif %}
-
-
-
+{% block content %}
 <div class="hero">
     <div class="hero-eyebrow">Comparison Report Ready</div>
     <h1>Property Comparison Report</h1>
@@ -220,7 +77,7 @@
                 <div class="card-title">Executive Summary</div>
                 <div class="card-subtitle">High-level overview of the comparison</div>
             </div>
-            <button class="copy-section-btn" onclick="copySection(this)" data-target="output-main" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
+            <button class="copy-btn" onclick="copySection(this)" data-target="output-main" style="margin-left:auto;">📋 Copy</button>
         </div>
         <div class="content-box" id="output-main">{{ executive_summary | safe }}</div>
         <p style="font-size:11px;color:#8892a4;margin-top:16px;padding-top:12px;border-top:1px solid rgba(201,168,76,0.15);">AI-generated content. Review before use. Not affiliated with HAR. Verify all outputs with a licensed Hawaii real estate professional.</p>
@@ -299,7 +156,7 @@
                 <div class="card-title">Property 1 Analysis</div>
                 <div class="card-subtitle">{{ p1_address }}</div>
             </div>
-            <button class="copy-section-btn" onclick="copySection(this)" data-target="p1-analysis" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
+            <button class="copy-btn" onclick="copySection(this)" data-target="p1-analysis" style="margin-left:auto;">📋 Copy</button>
         </div>
         <div class="prop-addr-tag">{{ p1_neighborhood }}, {{ p1_island }} · ${{ p1_price }}</div>
         <div id="p1-analysis" class="pros-cons-grid">
@@ -326,7 +183,7 @@
                 <div class="card-title">Property 2 Analysis</div>
                 <div class="card-subtitle">{{ p2_address }}</div>
             </div>
-            <button class="copy-section-btn" onclick="copySection(this)" data-target="p2-analysis" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
+            <button class="copy-btn" onclick="copySection(this)" data-target="p2-analysis" style="margin-left:auto;">📋 Copy</button>
         </div>
         <div class="prop-addr-tag">{{ p2_neighborhood }}, {{ p2_island }} · ${{ p2_price }}</div>
         <div id="p2-analysis" class="pros-cons-grid">
@@ -354,7 +211,7 @@
                 <div class="card-title">Property 3 Analysis</div>
                 <div class="card-subtitle">{{ p3_address }}</div>
             </div>
-            <button class="copy-section-btn" onclick="copySection(this)" data-target="p3-analysis" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
+            <button class="copy-btn" onclick="copySection(this)" data-target="p3-analysis" style="margin-left:auto;">📋 Copy</button>
         </div>
         <div class="prop-addr-tag">{{ p3_neighborhood }}, {{ p3_island }} · ${{ p3_price }}</div>
         <div id="p3-analysis" class="pros-cons-grid">
@@ -382,7 +239,7 @@
                 <div class="card-title">Best Value Pick</div>
                 <div class="card-subtitle">Best dollar-for-dollar value</div>
             </div>
-            <button class="copy-section-btn" onclick="copySection(this)" data-target="best-value" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
+            <button class="copy-btn" onclick="copySection(this)" data-target="best-value" style="margin-left:auto;">📋 Copy</button>
         </div>
         <div class="rec-box">
             <div class="rec-box-label">Value Analysis</div>
@@ -402,7 +259,7 @@
                 <div class="card-title">Best Fit for Buyer</div>
                 <div class="card-subtitle">Matched to stated priorities</div>
             </div>
-            <button class="copy-section-btn" onclick="copySection(this)" data-target="best-fit" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
+            <button class="copy-btn" onclick="copySection(this)" data-target="best-fit" style="margin-left:auto;">📋 Copy</button>
         </div>
         <div class="rec-box">
             <div class="rec-box-label">Buyer Match</div>
@@ -422,7 +279,7 @@
                 <div class="card-title">Recommendation</div>
                 <div class="card-subtitle">Ready to share with your buyer</div>
             </div>
-            <button class="copy-section-btn" onclick="copySection(this)" data-target="recommendation" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
+            <button class="copy-btn" onclick="copySection(this)" data-target="recommendation" style="margin-left:auto;">📋 Copy</button>
         </div>
         <div class="rec-box">
             <div class="rec-box-label">Our Take</div>
@@ -442,13 +299,9 @@
     </div>
 
 </div>
+{% endblock %}
 
-<div class="footer">
-    <strong>AlohaAgent</strong> by AlohaForge · AI tools built for Hawaii real estate professionals<br>
-    <a href="/terms" style="color:#8892a4;text-decoration:none;">Terms of Service</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="/privacy" style="color:#8892a4;text-decoration:none;">Privacy Policy</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="mailto:justin@alohaagent.app" style="color:#8892a4;text-decoration:none;">Contact</a>
-</div>
-
-<script>
+{% block scripts %}
 function copySection(btn) {
     var el = document.getElementById(btn.getAttribute('data-target'));
     if (!el) return;
@@ -458,12 +311,9 @@ function copySection(btn) {
         btn.style.color = '#fff';
         setTimeout(function() {
             btn.textContent = '📋 Copy';
-            btn.style.background = '#c9a84c';
-            btn.style.color = '#0a1628';
+            btn.style.background = 'var(--gold-btn)';
+            btn.style.color = '#000';
         }, 2000);
     });
 }
-</script>
-
-</body>
-</html>
+{% endblock %}
