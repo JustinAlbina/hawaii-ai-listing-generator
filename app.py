@@ -728,11 +728,25 @@ def open_house_generate():
     agent_line = f"Agent: {agent_name}" if agent_name else ""
     sign_off_instruction = f" Sign off all posts and the email from {agent_name}." if agent_name else ""
 
+    _oh_templates = [
+        "Lead with the experience — open by describing what guests will feel, see, and discover the moment they step through the door. Make the reader feel already there before mentioning logistics.",
+        "Lead with the neighborhood or location — open by anchoring readers in the specific place on the island. Why does this address matter? What does the setting add to the visit? Then bring them to the property.",
+        "Lead with the property's single most impressive feature as the invitation hook. Open on that one thing vividly and specifically, then expand to the full open house invitation.",
+        "Lead with the social and community angle — frame this open house as a genuine Hawaii gathering moment. Capture the vibe, the aloha spirit, what makes showing up feel worthwhile beyond just the property.",
+        "Lead with honest, specific urgency — open by making a fact-based case for why this property won't last. Then invite readers to the open house as their real chance to act.",
+    ]
+    _oh_template_instruction = random.choice(_oh_templates)
+    _oh_generation_id = hashlib.md5(f"{address}{time.time()}".encode()).hexdigest()[:8]
+
     response = client.messages.create(
         model="claude-sonnet-4-5",
         max_tokens=1500,
-        messages=[{"role": "user", "content": f"""You are a Hawaii real estate marketing expert. Generate three open house announcements for this property:
+        temperature=0.9,
+        messages=[{"role": "user", "content": f"""You are a Hawaii real estate marketing expert writing for local Hawaii agents and their clients. Generate three open house announcements for this property.
 
+STRUCTURAL APPROACH: {_oh_template_instruction}
+
+Property Details:
 Address: {address}
 Neighborhood: {neighborhood}
 Island: {island}
@@ -743,6 +757,18 @@ Open House Date: {date}
 Time: {time_start} to {time_end}
 Highlight: {extra}
 {agent_line}
+
+Generation ID: {_oh_generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+HAWAII VOICE RULES:
+Always write with authentic Hawaii personality. Reference specific Hawaii lifestyle elements naturally — trade winds, island pace, proximity to beaches or mountains, local community feel, indoor-outdoor living, year-round weather. Never use mainland real estate clichés without grounding them in a Hawaii context. Write like a local expert, not like a generic real estate AI. Avoid anything that sounds like it was written for a suburban open house in Phoenix or Dallas.
+
+CRAFT RULES:
+Your output must be structurally and tonally distinct from a generic AI response. Vary sentence length, rhythm, and paragraph structure throughout. Mix short punchy sentences with longer descriptive ones. Never write in a predictable pattern. The goal is for a reader to believe this was written by a talented human copywriter who knows Hawaii deeply.
+
+Open with the single most compelling and specific thing about this property and open house as the hook. Then naturally expand to cover the full picture. Do not build the entire output around just one thing.
+
+Avoid leaning on overused real estate clichés as filler. If you use common descriptors like spacious, cozy, or stunning — always follow immediately with a specific detail that earns the word. Never let a descriptor stand alone without evidence backing it up.
 
 Format your response EXACTLY like this:
 
@@ -790,6 +816,25 @@ EMAIL BODY:
         email_subject=sections.get("EMAIL SUBJECT", ""),
         email_body=to_html(sections.get("EMAIL BODY", ""))
     )
+
+@app.route("/refine-open-house", methods=["POST"])
+def refine_open_house():
+    post_text = request.form.get("post_text", "").strip()
+    if not post_text:
+        return {"error": "No post text provided"}, 400
+
+    refine_prompt = f"""Review this open house Instagram post. Identify any sentences that sound generic, could apply to any property anywhere, or feel like filler. Rewrite only those specific sentences to be more vivid, specific, and grounded in this exact property's details and Hawaii location. Return ONLY the improved post — no commentary, no explanations, no headers.
+
+Current post:
+{post_text}"""
+
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=512,
+        temperature=0.9,
+        messages=[{"role": "user", "content": refine_prompt}]
+    )
+    return {"refined": response.content[0].text}
 
 @app.route("/social-media")
 def social_media():
