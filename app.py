@@ -14,6 +14,9 @@ import json
 import datetime
 import io
 import base64
+import random
+import hashlib
+import time
 import markdown as md_lib
 import bleach
 import stripe
@@ -532,7 +535,21 @@ def generate():
     year_built_line = f"Year built: {year_built}" if year_built else ""
     parking_line = f"Parking: {parking}" if parking else ""
 
-    listing_prompt = f"""Write a professional MLS real estate listing for a Hawaii property with these details:
+    _listing_templates = [
+        "Lead with lifestyle — paint a picture of how this home feels to live in day to day. Start with the daily rhythms, routines, and sensory details of life in this specific home before introducing the property facts.",
+        "Lead with location — open by anchoring the reader in the specific place this home sits. What surrounds it, what you can access, what the setting means for daily life in Hawaii. Then bring them inside.",
+        "Lead with the home's single most standout physical feature. Open on that one thing specifically and vividly, then let it naturally expand outward to the full property and lifestyle.",
+        "Lead with a vivid sensory scene — what you see, hear, and feel when you first arrive at this property. Make the reader feel like they're standing there. Then unfold the full picture of the home.",
+        "Lead with the story of the home — its character, its history if known, or what makes it feel lived in and loved. Start with soul, then bring in the facts.",
+    ]
+    _template_instruction = random.choice(_listing_templates)
+    generation_id = hashlib.md5(f"{address}{time.time()}".encode()).hexdigest()[:8]
+
+    listing_prompt = f"""You are a Hawaii real estate expert writing for a local Hawaii audience. Write a professional MLS listing description for a Hawaii property.
+
+STRUCTURAL APPROACH: {_template_instruction}
+
+Property Details:
 Address: {address}
 Neighborhood: {neighborhood}
 Island: {island}
@@ -548,7 +565,19 @@ Land tenure: {land_tenure}
 {year_built_line}
 {parking_line}
 
-Write 2 paragraphs, around 150 words total. Make it warm, compelling, and specific to Hawaii. End with a one-line call to action."""
+Generation ID: {generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+HAWAII VOICE RULES:
+Always write with authentic Hawaii personality. Reference specific Hawaii lifestyle elements naturally — trade winds, island pace, proximity to beaches or mountains, local community feel, indoor-outdoor living, year-round weather. Never use mainland real estate clichés without grounding them in a Hawaii context. Write like a local expert, not like a generic real estate AI. Avoid anything that sounds like it was written for a suburban home in Phoenix or Dallas.
+
+CRAFT RULES:
+Your output must be structurally and tonally distinct from a generic AI response. Vary sentence length, rhythm, and paragraph structure throughout. Mix short punchy sentences with longer descriptive ones. Never write in a predictable pattern. The goal is for a reader to believe this was written by a talented human copywriter who knows Hawaii deeply.
+
+Open with the single most compelling and specific thing about this property as the hook. Then naturally expand to cover the full picture of the home and lifestyle. Do not build the entire output around just one thing.
+
+Avoid leaning on overused real estate clichés as filler. If you use common descriptors like spacious, cozy, or stunning — always follow immediately with a specific detail that earns the word. Never let a descriptor stand alone without evidence backing it up.
+
+Write 2 paragraphs, around 150 words total. End with a one-line call to action."""
 
     photo_list = _process_photos()
     if photo_list:
@@ -570,6 +599,7 @@ Write 2 paragraphs, around 150 words total. Make it warm, compelling, and specif
     listing_response = client.messages.create(
         model="claude-sonnet-4-5",
         max_tokens=1024,
+        temperature=0.9,
         messages=listing_messages
     )
 
@@ -642,6 +672,25 @@ NEIGHBORHOOD VIBE:
         analysis=to_html(analysis_text),
         neighborhood_report=to_html(neighborhood_text)
     )
+
+@app.route("/refine-listing", methods=["POST"])
+def refine_listing():
+    listing_text = request.form.get("listing_text", "").strip()
+    if not listing_text:
+        return {"error": "No listing text provided"}, 400
+
+    refine_prompt = f"""Review this listing description. Identify any sentences that sound generic, could apply to any property anywhere, or feel like filler. Rewrite only those specific sentences to be more vivid, specific, and grounded in this exact property's details. Return ONLY the improved description — no commentary, no explanations, no headers.
+
+Current listing description:
+{listing_text}"""
+
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1024,
+        temperature=0.9,
+        messages=[{"role": "user", "content": refine_prompt}]
+    )
+    return {"refined": response.content[0].text}
 
 @app.route("/waitlist", methods=["POST"])
 def waitlist():
@@ -763,9 +812,12 @@ def social_media_generate():
     extra = request.form["extra"]
     tone = request.form["tone"]
 
+    _sm_generation_id = hashlib.md5(f"{address}{time.time()}".encode()).hexdigest()[:8]
+
     response = client.messages.create(
         model="claude-sonnet-4-5",
         max_tokens=1500,
+        temperature=0.9,
         messages=[{"role": "user", "content": f"""You are a Hawaii real estate social media expert. Generate social media posts for this property listing.
 
 Property Details:
@@ -780,6 +832,18 @@ Ocean view: {ocean_view}
 Pool: {pool}
 Standout feature: {extra}
 Tone: {tone}
+
+Generation ID: {_sm_generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+HAWAII VOICE RULES:
+Always write with authentic Hawaii personality. Reference specific Hawaii lifestyle elements naturally — trade winds, island pace, proximity to beaches or mountains, local community feel, indoor-outdoor living, year-round weather. Never use mainland real estate clichés without grounding them in a Hawaii context. Write like a local expert, not like a generic real estate AI. Avoid anything that sounds like it was written for a suburban home in Phoenix or Dallas.
+
+CRAFT RULES:
+Your output must be structurally and tonally distinct from a generic AI response. Vary sentence length, rhythm, and paragraph structure throughout. Mix short punchy sentences with longer descriptive ones. Never write in a predictable pattern. The goal is for a reader to believe this was written by a talented human copywriter who knows Hawaii deeply.
+
+Open with the single most compelling and specific thing about this property as the hook. Then naturally expand to cover the full picture of the home and lifestyle. Do not build the entire output around just one thing.
+
+Avoid leaning on overused real estate clichés as filler. If you use common descriptors like spacious, cozy, or stunning — always follow immediately with a specific detail that earns the word. Never let a descriptor stand alone without evidence backing it up.
 
 Format your response EXACTLY like this:
 
