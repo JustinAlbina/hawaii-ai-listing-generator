@@ -1037,9 +1037,12 @@ def market_report_generate():
     price_range = request.form["price_range"]
     property_type = request.form["property_type"]
 
+    _mr_generation_id = hashlib.md5(f"{neighborhood}{island}{time.time()}".encode()).hexdigest()[:8]
+
     response = client.messages.create(
         model="claude-sonnet-4-5",
         max_tokens=2000,
+        temperature=0.8,
         messages=[{"role": "user", "content": f"""You are a Hawaii real estate market expert. Generate a detailed market report for a client.
 
 Neighborhood: {neighborhood}
@@ -1047,6 +1050,17 @@ Island: {island}
 Report Type: {report_type}
 Price Range: {price_range}
 Property Type: {property_type}
+
+Generation ID: {_mr_generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+HAWAII VOICE RULES:
+You are a Hawaii real estate market expert. Write with local authority and Hawaii-specific insight. Reference Hawaii market dynamics, island-specific trends, seasonal patterns, and local economic factors naturally. Never produce generic market commentary that could apply to any US market.
+
+CRAFT RULES:
+Vary sentence length and rhythm throughout. Mix data-driven sentences with human context. The goal is for this to read like analysis from a Hawaii market insider, not a generic AI report.
+
+CLICHÉ GUARDRAIL:
+Avoid generic market report filler phrases like: the market is heating up, now is a great time to buy, inventory remains tight. Always back every market claim with a specific detail, trend, or local context.
 
 Format your response EXACTLY like this:
 
@@ -1200,11 +1214,25 @@ def bio_generator_generate():
     specialties_str = ", ".join(specialties) if specialties else "General real estate"
     designations_line = f"Designations/Certifications: {designations}" if designations else ""
 
+    _bio_templates = [
+        "Lead with the agent's personal connection to Hawaii and why they chose real estate. Open on what brought them here — or what kept them — and draw a direct line between that story and the work they do now.",
+        "Lead with a specific client success story or defining moment that captures their approach. Open on a real scenario that shows, not tells, what it's like to work with this agent.",
+        "Lead with their deep local knowledge of their specific island or neighborhood. Open on what they know about this place that an outsider wouldn't — and why that knowledge changes outcomes for buyers and sellers.",
+        "Lead with their personality and what makes working with them feel different. Open on the human behind the license — their energy, their communication style, what clients actually feel in their presence.",
+        "Lead with their background before real estate and how it shapes their work today. Open on where they came from and draw a clear, specific line between that experience and how they serve clients now.",
+    ]
+    _bio_template_instruction = random.choice(_bio_templates)
+    _bio_generation_id = hashlib.md5(f"{full_name}{time.time()}".encode()).hexdigest()[:8]
+
     response = client.messages.create(
         model="claude-sonnet-4-5",
         max_tokens=1500,
-        messages=[{"role": "user", "content": f"""You are a professional copywriter specializing in real estate agent bios. Generate a complete bio package for this Hawaii realtor.
+        temperature=0.9,
+        messages=[{"role": "user", "content": f"""You are a professional copywriter specializing in Hawaii real estate agent bios. Generate a complete bio package for this Hawaii realtor.
 
+STRUCTURAL APPROACH: {_bio_template_instruction}
+
+Agent Details:
 Full Name: {full_name}
 Years of Experience: {years_experience}
 Primary Area: {primary_island}
@@ -1216,10 +1244,24 @@ Tone: {tone}
 Target Length: {length}
 {designations_line}
 
+Generation ID: {_bio_generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+HAWAII VOICE RULES:
+You are a Hawaii real estate expert writing for a local Hawaii audience. Always write with authentic Hawaii personality. Reference specific Hawaii lifestyle elements naturally — island roots, community connections, local market knowledge, aloha spirit. Write like a local expert, not like a generic real estate AI. Avoid anything that sounds like it was written for an agent in Phoenix or Dallas.
+
+CRAFT RULES:
+Your output must be structurally and tonally distinct from a generic AI response. Vary sentence length, rhythm, and paragraph structure throughout. Mix short punchy sentences with longer descriptive ones. Never write in a predictable pattern. The goal is for a reader to believe this was written by a talented human copywriter who knows Hawaii deeply.
+
+CLICHÉ GUARDRAIL:
+Avoid overused real estate bio clichés as filler. Never use: passionate about real estate, dedicated to clients, goes above and beyond, trusted advisor, results-driven, proven track record. If you use common descriptors always follow immediately with a specific detail that earns the word.
+
+HOOK INSTRUCTION:
+Open with the single most compelling and specific thing about this agent. Use it as the hook, then naturally expand to cover their full background, expertise, and personality.
+
 Format your response EXACTLY like this:
 
 FULL BIO:
-[A {tone} bio approximately {length}. Weave in their Hawaii connection, specialties, experience, and personality. Make it feel authentic and specific to Hawaii real estate. Do not use generic phrases like "passionate about real estate." Include the fun fact naturally.]
+[A {tone} bio approximately {length}. Weave in their Hawaii connection, specialties, experience, and personality. Make it feel authentic and specific to Hawaii real estate. Include the fun fact naturally.]
 
 ELEVATOR PITCH:
 [2-3 compelling sentences that capture who {full_name} is and why clients should work with them. Punchy and memorable.]
@@ -1253,6 +1295,25 @@ SOCIAL MEDIA BIO:
         elevator_pitch=to_html(sections.get("ELEVATOR PITCH", "")),
         social_bio=to_html(sections.get("SOCIAL MEDIA BIO", ""))
     )
+
+@app.route("/refine-bio", methods=["POST"])
+def refine_bio():
+    bio_text = request.form.get("bio_text", "").strip()
+    if not bio_text:
+        return {"error": "No bio text provided"}, 400
+
+    refine_prompt = f"""Review this agent bio. Identify any sentences that sound generic, could apply to any agent anywhere, or feel like filler. Rewrite only those specific sentences to be more vivid, specific, and authentic. Return ONLY the improved bio — no commentary, no explanations, no headers.
+
+Current bio:
+{bio_text}"""
+
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1024,
+        temperature=0.9,
+        messages=[{"role": "user", "content": refine_prompt}]
+    )
+    return {"refined": response.content[0].text}
 
 @app.route("/property-comparison")
 def property_comparison():
