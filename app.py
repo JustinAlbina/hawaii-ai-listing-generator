@@ -965,9 +965,12 @@ def offer_letter_generate():
     except Exception:
         price_relationship = "at or near asking price"
 
+    _offer_generation_id = hashlib.md5(f"{buyer_name}{time.time()}".encode()).hexdigest()[:8]
+
     response = client.messages.create(
         model="claude-sonnet-4-5",
         max_tokens=2000,
+        temperature=0.7,
         messages=[{"role": "user", "content": f"""You are a Hawaii real estate expert. Generate a complete offer letter package for this property transaction.
 
 Property: {address}, {neighborhood}, {island}
@@ -979,6 +982,17 @@ Contingencies: {contingencies_str}
 Personal Message from Buyer: {personal_message}
 Tone: {tone}
 Land Tenure: {land_tenure}
+
+Generation ID: {_offer_generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+HAWAII VOICE RULES:
+You are a Hawaii real estate expert writing a personal offer letter from a buyer to a seller. Write with authentic Hawaii warmth, aloha spirit, and genuine human connection. Reference specific Hawaii lifestyle and community values naturally. Make the letter feel like it was written by a real person who loves Hawaii, not a generic template.
+
+CRAFT RULES:
+Write with natural warmth and varied sentence structure. The letter should feel sincere and personal — not like a form letter. Every sentence should feel intentional.
+
+CLICHÉ GUARDRAIL:
+Never use: dream home, fell in love, forever home, raise our family, good stewards. These are the most overused phrases in offer letters. Find more specific and genuine ways to express the same emotions based on the details provided.
 
 Format your response EXACTLY like this:
 
@@ -1137,10 +1151,13 @@ def client_emails_generate():
     agent_name = request.form["agent_name"]
     tone = request.form["tone"]
 
+    _email_generation_id = hashlib.md5(f"{client_name}{time.time()}".encode()).hexdigest()[:8]
+
     response = client.messages.create(
         model="claude-sonnet-4-5",
         max_tokens=1800,
-        messages=[{"role": "user", "content": f"""You are a Hawaii real estate professional. Generate a complete client email package.
+        temperature=0.85,
+        messages=[{"role": "user", "content": f"""You are a Hawaii real estate expert writing professional client emails. Generate a complete client email package.
 
 Email Type: {email_type}
 Client Name: {client_name}
@@ -1150,6 +1167,17 @@ Island: {island}
 Key Detail: {key_detail}
 Agent Name: {agent_name}
 Tone: {tone}
+
+Generation ID: {_email_generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+HAWAII VOICE RULES:
+Always write with authentic Hawaii warmth and personality. Reference Hawaii lifestyle, local context, and community feel naturally where appropriate. Write like a local agent, not a generic real estate AI.
+
+CRAFT RULES:
+Write with natural rhythm and varied sentence structure. Emails should feel personal and human — not like a template was filled in. Avoid predictable email patterns like starting with "I hope this email finds you well" or ending with "Please don't hesitate to reach out."
+
+CLICHÉ GUARDRAIL:
+Never use: I hope this finds you well, as per our conversation, please don't hesitate, touching base, circling back, just checking in, at your earliest convenience. Write like a real person reaching out, not a corporate email template.
 
 Format your response EXACTLY like this:
 
@@ -1382,6 +1410,12 @@ Property 3: {p3_address}, {p3_neighborhood}, {p3_island}
 
     prompt = f"""You are a Hawaii real estate expert helping a buyer compare properties.
 
+HAWAII VOICE RULES:
+Write with local authority and Hawaii-specific insight. Reference Hawaii-specific factors naturally — proximity to beaches, island lifestyle, trade winds, flood zones, leasehold vs fee simple, HOA culture in Hawaii. Never produce generic comparison commentary that ignores Hawaii context.
+
+CRAFT RULES:
+Write the analysis sections with varied sentence rhythm. Avoid robotic bullet-point thinking even if the output is structured. Each property's summary should read like a local expert's genuine assessment, not a checklist.
+
 PROPERTIES TO COMPARE:
 
 Property 1: {p1_address}, {p1_neighborhood}, {p1_island}
@@ -1431,6 +1465,7 @@ LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold proper
     message = client.messages.create(
         model="claude-sonnet-4-5",
         max_tokens=1500,
+        temperature=0.8,
         messages=[{"role": "user", "content": prompt}]
     )
     content = message.content[0].text
