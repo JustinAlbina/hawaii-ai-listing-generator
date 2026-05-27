@@ -127,7 +127,7 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
                 <div class="card-icon">📷</div>
                 <div>
                     <div class="card-title">Property 1 Photos</div>
-                    <div class="card-subtitle">Property 1 Photos (optional) — Claude will analyze these for the comparison</div>
+                    <div class="card-subtitle">Property 1 Photos (optional) — AlohaAgent will analyze these for the comparison</div>
                 </div>
             </div>
             <div id="p1-photo-drop-zone" class="photo-drop-zone" role="button" tabindex="0">
@@ -211,7 +211,7 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
                 <div class="card-icon">📷</div>
                 <div>
                     <div class="card-title">Property 2 Photos</div>
-                    <div class="card-subtitle">Property 2 Photos (optional) — Claude will analyze these for the comparison</div>
+                    <div class="card-subtitle">Property 2 Photos (optional) — AlohaAgent will analyze these for the comparison</div>
                 </div>
             </div>
             <div id="p2-photo-drop-zone" class="photo-drop-zone" role="button" tabindex="0">
@@ -335,7 +335,7 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
     var loader = document.createElement('p');
     loader.id = 'gen-loader';
     loader.style.cssText = 'text-align:center;color:#c9a84c;font-size:13px;font-weight:600;margin-top:0.75rem;display:none;';
-    loader.innerHTML = '<span style="animation:aloha-pulse 1.2s ease-in-out infinite;display:inline-block;">AI is working on it…</span>';
+    loader.innerHTML = '<span style="animation:aloha-pulse 1.2s ease-in-out infinite;display:inline-block;">AlohaAgent is working on it…</span>';
     btn.parentNode.insertBefore(loader, btn.nextSibling);
     var s = document.createElement('style');
     s.textContent = '@keyframes aloha-pulse{0%,100%{opacity:1}50%{opacity:0.35}}';
@@ -360,7 +360,7 @@ function initPhotoCarousel(dropZoneId, inputId, thumbsId, countLabelId) {
     function updateCountLabel() {
         if (!countLabel) return;
         if (selectedFiles.length === 0) { countLabel.style.display = 'none'; countLabel.textContent = ''; }
-        else { countLabel.style.display = 'block'; countLabel.textContent = selectedFiles.length + ' photo' + (selectedFiles.length !== 1 ? 's' : '') + ' selected — Claude will analyze all of them'; }
+        else { countLabel.style.display = 'block'; countLabel.textContent = selectedFiles.length + ' photo' + (selectedFiles.length !== 1 ? 's' : '') + ' selected — AlohaAgent will analyze all of them'; }
     }
     function renderThumbs() {
         thumbsContainer.innerHTML = '';

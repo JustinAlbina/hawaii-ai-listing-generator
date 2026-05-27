@@ -132,7 +132,7 @@ select option { background: #1a2f45; color: #fff; }
                 <div class="card-icon">📷</div>
                 <div>
                     <div class="card-title">Property Photos</div>
-                    <div class="card-subtitle">Property Photos (optional) — Claude will analyze your actual photos for more specific captions</div>
+                    <div class="card-subtitle">Property Photos (optional) — AlohaAgent will analyze your actual photos for more specific captions</div>
                 </div>
             </div>
             <div id="photo-drop-zone" class="photo-drop-zone" role="button" tabindex="0" aria-label="Upload photos">
@@ -206,7 +206,7 @@ select option { background: #1a2f45; color: #fff; }
     var loader = document.createElement('p');
     loader.id = 'gen-loader';
     loader.style.cssText = 'text-align:center;color:#c9a84c;font-size:13px;font-weight:600;margin-top:0.75rem;display:none;';
-    loader.innerHTML = '<span style="animation:aloha-pulse 1.2s ease-in-out infinite;display:inline-block;">AI is working on it…</span>';
+    loader.innerHTML = '<span style="animation:aloha-pulse 1.2s ease-in-out infinite;display:inline-block;">AlohaAgent is working on it…</span>';
     btn.parentNode.insertBefore(loader, btn.nextSibling);
     var s = document.createElement('style');
     s.textContent = '@keyframes aloha-pulse{0%,100%{opacity:1}50%{opacity:0.35}}';
@@ -235,7 +235,7 @@ select option { background: #1a2f45; color: #fff; }
     function updateCountLabel() {
         if (!countLabel) return;
         if (selectedFiles.length === 0) { countLabel.style.display = 'none'; countLabel.textContent = ''; }
-        else { countLabel.style.display = 'block'; countLabel.textContent = selectedFiles.length + ' photo' + (selectedFiles.length !== 1 ? 's' : '') + ' selected — Claude will analyze all of them'; }
+        else { countLabel.style.display = 'block'; countLabel.textContent = selectedFiles.length + ' photo' + (selectedFiles.length !== 1 ? 's' : '') + ' selected — AlohaAgent will analyze all of them'; }
     }
     function renderThumbs() {
         thumbsContainer.innerHTML = '';
