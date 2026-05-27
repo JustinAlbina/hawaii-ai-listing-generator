@@ -531,12 +531,16 @@ def _generate_inner():
     price = request.form["price"]
     neighborhood = request.form["neighborhood"]
     island = request.form["island"]
-    ocean_view = request.form["ocean_view"]
+    view = request.form.get("view", "").strip()
     pool = request.form["pool"]
     extra = request.form["extra"]
     year_built = request.form.get("year_built", "").strip()
     parking = request.form.get("parking", "").strip()
     land_tenure = request.form.get("land_tenure", "Fee Simple")
+    solar = request.form.get("solar", "")
+    ohana = request.form.get("ohana", "")
+    renovation_year = request.form.get("renovation_year", "").strip()
+    flood_zone = request.form.get("flood_zone", "").strip()
 
     try:
         sqft_num = float(sqft.replace(",", ""))
@@ -547,6 +551,11 @@ def _generate_inner():
 
     year_built_line = f"Year built: {year_built}" if year_built else ""
     parking_line = f"Parking: {parking}" if parking else ""
+    solar_line = "Solar/PV system: Yes" if solar else ""
+    ohana_line = "Ohana unit / ADU: Yes" if ohana else ""
+    renovation_year_line = f"Renovation year: {renovation_year}" if renovation_year else ""
+    flood_zone_line = f"Flood zone: {flood_zone}" if flood_zone else ""
+    view_line = f"View: {view}" if view else ""
 
     # Neighborhood context injection
     _nb_data = get_neighborhood_context(neighborhood, island)
@@ -575,12 +584,16 @@ Bathrooms: {bathrooms}
 Square footage: {sqft}
 Price: {price}
 Price per sqft: ${price_per_sqft}
-Ocean view: {ocean_view}
+{view_line}
 Pool: {pool}
 Standout feature: {extra}
 Land tenure: {land_tenure}
 {year_built_line}
 {parking_line}
+{solar_line}
+{ohana_line}
+{renovation_year_line}
+{flood_zone_line}
 
 Generation ID: {generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
 
@@ -594,9 +607,14 @@ Your output must be structurally and tonally distinct from a generic AI response
 
 Open with the single most compelling and specific thing about this property as the hook. Then naturally expand to cover the full picture of the home and lifestyle. Do not build the entire output around just one thing.
 
-Avoid leaning on overused real estate clichés as filler. If you use common descriptors like spacious, cozy, or stunning — always follow immediately with a specific detail that earns the word. Never let a descriptor stand alone without evidence backing it up.
+Avoid leaning on overused real estate clichés as filler. Never use: rare, spacious, cozy, stunning, nestled, boasts, perfect for entertaining — or any descriptor that could apply to any home anywhere. If you use a descriptive word, always follow immediately with a specific detail that earns it.
 
-Write 2 paragraphs, around 150 words total. End with a one-line call to action."""
+Always naturally weave in bedrooms, bathrooms, square footage, parking, and land tenure within the narrative. Never list them as specs — integrate them into the story of the home. Example: "Three bedrooms and two baths across 1,800 square feet that never feel crowded" not "3BR/2BA, 1800 sqft".
+
+HAWAII-SPECIFIC RULES:
+If a solar/PV system is present, highlight it — energy costs in Hawaii make this a significant selling point. If an ohana unit or ADU is present, lead with it as a headline feature. If land tenure is fee simple, mention it — leasehold is common enough in Hawaii that fee simple ownership is a genuine differentiator worth stating.
+
+Write 3 paragraphs. Paragraph 1: open with the strongest sensory or emotional hook and establish the property's character. Paragraph 2: move through the interior with narrative momentum — never shift into feature-list mode. Every room mentioned must be connected by flow and feeling, not just listed. Paragraph 3: ground the reader in location, lifestyle, and Hawaii context. End with a single compelling call to action."""
 
     photo_list = _process_photos()
     photo_count = len(photo_list)
@@ -622,7 +640,8 @@ Address: {address}, {neighborhood}, {island}
 Bedrooms: {bedrooms}, Bathrooms: {bathrooms}
 Square footage: {sqft}, Price: {price}
 Price per sqft: ${price_per_sqft}
-Ocean view: {ocean_view}, Pool: {pool}
+{view_line}
+Pool: {pool}
 Standout feature: {extra}
 Land tenure: {land_tenure}
 
@@ -654,7 +673,7 @@ NEIGHBORHOOD VIBE:
 
     def _call_listing():
         return client.messages.create(
-            model="claude-sonnet-4-5", max_tokens=1024, temperature=0.9, messages=listing_messages)
+            model="claude-sonnet-4-5", max_tokens=1500, temperature=0.9, messages=listing_messages)
 
     def _call_analysis():
         return client.messages.create(
@@ -692,7 +711,7 @@ NEIGHBORHOOD VIBE:
         price=price,
         neighborhood=neighborhood,
         island=island,
-        ocean_view=ocean_view,
+        view=view,
         pool=pool,
         price_per_sqft=price_per_sqft,
         listing=to_html(listing_text),

@@ -56,8 +56,8 @@
         </div>
         <div class="badges">
             <span class="badge badge-gold">{{ sqft }} sq ft</span>
-            {% if ocean_view == 'yes' %}
-            <span class="badge badge-gold">Ocean View</span>
+            {% if view %}
+            <span class="badge badge-gold">{{ view }}</span>
             {% endif %}
             {% if pool == 'yes' %}
             <span class="badge badge-gold">Pool</span>

@@ -157,10 +157,17 @@ select option { background: #1a2f45; color: #fff; }
             </div>
             <div class="row">
                 <div class="form-group">
-                    <label>Ocean View</label>
-                    <select name="ocean_view">
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
+                    <label>View</label>
+                    <select name="view">
+                        <option value=""></option>
+                        <option value="Ocean / Makai">Ocean / Makai</option>
+                        <option value="Mountain / Mauka">Mountain / Mauka</option>
+                        <option value="Ocean and Mountain">Ocean and Mountain</option>
+                        <option value="Garden / Tropical">Garden / Tropical</option>
+                        <option value="Golf Course">Golf Course</option>
+                        <option value="City / Skyline">City / Skyline</option>
+                        <option value="Partial Ocean">Partial Ocean</option>
+                        <option value="Sunset">Sunset</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -171,16 +178,47 @@ select option { background: #1a2f45; color: #fff; }
                     </select>
                 </div>
             </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Land Tenure</label>
+                    <select name="land_tenure">
+                        <option value="Fee Simple">Fee Simple</option>
+                        <option value="Leasehold">Leasehold</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Flood Zone</label>
+                    <select name="flood_zone">
+                        <option value=""></option>
+                        <option value="Zone X (no flood insurance required)">Zone X (no flood insurance required)</option>
+                        <option value="Zone AE">Zone AE</option>
+                        <option value="Zone VE">Zone VE</option>
+                        <option value="Unknown">Unknown</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>Renovation Year</label>
+                    <input type="text" name="renovation_year" placeholder="e.g. 2022">
+                </div>
+                <div class="form-group" style="display:flex;flex-direction:column;justify-content:flex-end;">
+                </div>
+            </div>
+            <div class="form-group" style="display:flex;flex-direction:column;gap:0.6rem;padding:0.75rem 0.9rem;background:#1a2f45;border-radius:10px;border:1.5px solid rgba(255,255,255,0.1);">
+                <label style="margin-bottom:0;">Additional Features</label>
+                <label style="display:flex;align-items:center;gap:0.6rem;font-size:0.9rem;color:#c8d5e8;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer;">
+                    <input type="checkbox" name="solar" value="yes" style="width:auto;accent-color:#c9a84c;">
+                    Property has solar / PV system
+                </label>
+                <label style="display:flex;align-items:center;gap:0.6rem;font-size:0.9rem;color:#c8d5e8;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer;">
+                    <input type="checkbox" name="ohana" value="yes" style="width:auto;accent-color:#c9a84c;">
+                    Property has ohana unit or ADU
+                </label>
+            </div>
             <div class="form-group">
                 <label>Standout Feature</label>
                 <input type="text" name="extra" placeholder="e.g. chef's kitchen, pool waterfalls, newly renovated" required>
-            </div>
-            <div class="form-group">
-                <label>Land Tenure</label>
-                <select name="land_tenure">
-                    <option value="Fee Simple">Fee Simple</option>
-                    <option value="Leasehold">Leasehold</option>
-                </select>
             </div>
             <button type="submit" class="btn-submit">Generate Listing with AlohaAgent →</button>
             {% if not (current_user.is_authenticated and current_user.plan == "pro") %}
