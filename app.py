@@ -14,6 +14,7 @@ import json
 import datetime
 import io
 import base64
+from PIL import Image
 import random
 import hashlib
 import time
@@ -42,7 +43,7 @@ if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024  # 20 MB total per request
+app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024  # 32 MB — handles up to 8 large photos
 
 csrf = CSRFProtect(app)
 limiter = Limiter(get_remote_address, app=app, default_limits=[])
@@ -151,7 +152,7 @@ def save_generation(tool_name, input_data, output_text):
         db.session.commit()
 
 def _process_photos(field_name="photos"):
-    """Read uploaded photos from request, return list of (base64_data, media_type). Max 8. In-memory only."""
+    """Read uploaded photos, compress to max 1024px / JPEG q75, return list of (base64_data, media_type). Max 8. In-memory only."""
     results = []
     allowed_types = {"image/jpeg", "image/png"}
     ext_map = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png"}
@@ -164,7 +165,13 @@ def _process_photos(field_name="photos"):
             mt = ext_map.get(ext)
             if not mt:
                 continue
-        results.append((base64.b64encode(f.read()).decode("utf-8"), mt))
+        img = Image.open(f.stream)
+        if img.mode not in ("RGB", "L"):
+            img = img.convert("RGB")
+        img.thumbnail((1024, 1024), Image.LANCZOS)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=75, optimize=True)
+        results.append((base64.b64encode(buf.getvalue()).decode("utf-8"), "image/jpeg"))
     return results
 
 # ─── Security headers ─────────────────────────────────────────────────────────
