@@ -18,6 +18,8 @@ from PIL import Image
 import random
 import hashlib
 import time
+import traceback
+from concurrent.futures import ThreadPoolExecutor
 import markdown as md_lib
 import bleach
 import stripe
@@ -516,6 +518,9 @@ def pricing():
 
 @app.route("/generate", methods=["POST"])
 def generate():
+    return _generate_inner()
+
+def _generate_inner():
     limit = generation_limit_response()
     if limit:
         return limit
@@ -611,17 +616,7 @@ Write 2 paragraphs, around 150 words total. End with a one-line call to action."
     else:
         listing_messages = [{"role": "user", "content": listing_prompt}]
 
-    listing_response = client.messages.create(
-        model="claude-sonnet-4-5",
-        max_tokens=1024,
-        temperature=0.9,
-        messages=listing_messages
-    )
-
-    analysis_response = client.messages.create(
-        model="claude-sonnet-4-5",
-        max_tokens=512,
-        messages=[{"role": "user", "content": f"""You are a Hawaii real estate expert. Analyze this property:
+    _analysis_prompt = f"""You are a Hawaii real estate expert. Analyze this property:
 
 Address: {address}, {neighborhood}, {island}
 Bedrooms: {bedrooms}, Bathrooms: {bathrooms}
@@ -639,13 +634,9 @@ PRICE ANALYSIS:
 [2-3 sentence explanation]
 
 If land tenure is Leasehold, you MUST include a prominent warning in the PRICE ANALYSIS section:
-LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold properties in Hawaii typically sell at a significant discount (20-40%) vs fee simple. Many lenders will not finance leasehold properties with fewer than 30 years remaining on the lease. Buyers should verify lease expiration, rent renegotiation terms, and financing eligibility before making an offer."""}]
-    )
+LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold properties in Hawaii typically sell at a significant discount (20-40%) vs fee simple. Many lenders will not finance leasehold properties with fewer than 30 years remaining on the lease. Buyers should verify lease expiration, rent renegotiation terms, and financing eligibility before making an offer."""
 
-    neighborhood_response = client.messages.create(
-        model="claude-sonnet-4-5",
-        max_tokens=512,
-        messages=[{"role": "user", "content": f"""You are a Hawaii local expert. Provide a neighborhood report for {neighborhood} on {island}, Hawaii.
+    _neighborhood_prompt = f"""You are a Hawaii local expert. Provide a neighborhood report for {neighborhood} on {island}, Hawaii.
 
 Format exactly like this:
 WALKABILITY SCORE: X/10
@@ -659,8 +650,29 @@ NEARBY ATTRACTIONS:
 - [Attraction 5 and brief description]
 
 NEIGHBORHOOD VIBE:
-[2-3 sentences]"""}]
-    )
+[2-3 sentences]"""
+
+    def _call_listing():
+        return client.messages.create(
+            model="claude-sonnet-4-5", max_tokens=1024, temperature=0.9, messages=listing_messages)
+
+    def _call_analysis():
+        return client.messages.create(
+            model="claude-sonnet-4-5", max_tokens=512,
+            messages=[{"role": "user", "content": _analysis_prompt}])
+
+    def _call_neighborhood():
+        return client.messages.create(
+            model="claude-sonnet-4-5", max_tokens=512,
+            messages=[{"role": "user", "content": _neighborhood_prompt}])
+
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        f_listing = pool.submit(_call_listing)
+        f_analysis = pool.submit(_call_analysis)
+        f_neighborhood = pool.submit(_call_neighborhood)
+        listing_response = f_listing.result()
+        analysis_response = f_analysis.result()
+        neighborhood_response = f_neighborhood.result()
 
     listing_text = listing_response.content[0].text
     analysis_text = analysis_response.content[0].text
