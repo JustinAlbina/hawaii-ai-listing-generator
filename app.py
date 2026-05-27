@@ -22,6 +22,7 @@ import bleach
 import stripe
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
+from neighborhoods import get_neighborhood_context, format_neighborhood_for_prompt
 
 load_dotenv()
 
@@ -535,6 +536,10 @@ def generate():
     year_built_line = f"Year built: {year_built}" if year_built else ""
     parking_line = f"Parking: {parking}" if parking else ""
 
+    # Neighborhood context injection
+    _nb_data = get_neighborhood_context(neighborhood, island)
+    _nb_context = format_neighborhood_for_prompt(_nb_data, neighborhood) if _nb_data else ""
+
     _listing_templates = [
         "Lead with lifestyle — paint a picture of how this home feels to live in day to day. Start with the daily rhythms, routines, and sensory details of life in this specific home before introducing the property facts.",
         "Lead with location — open by anchoring the reader in the specific place this home sits. What surrounds it, what you can access, what the setting means for daily life in Hawaii. Then bring them inside.",
@@ -566,6 +571,8 @@ Land tenure: {land_tenure}
 {parking_line}
 
 Generation ID: {generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+{_nb_context}
 
 HAWAII VOICE RULES:
 Always write with authentic Hawaii personality. Reference specific Hawaii lifestyle elements naturally — trade winds, island pace, proximity to beaches or mountains, local community feel, indoor-outdoor living, year-round weather. Never use mainland real estate clichés without grounding them in a Hawaii context. Write like a local expert, not like a generic real estate AI. Avoid anything that sounds like it was written for a suburban home in Phoenix or Dallas.
@@ -728,6 +735,10 @@ def open_house_generate():
     agent_line = f"Agent: {agent_name}" if agent_name else ""
     sign_off_instruction = f" Sign off all posts and the email from {agent_name}." if agent_name else ""
 
+    # Neighborhood context injection
+    _nb_data = get_neighborhood_context(neighborhood, island)
+    _nb_context = format_neighborhood_for_prompt(_nb_data, neighborhood) if _nb_data else ""
+
     _oh_templates = [
         "Lead with the experience — open by describing what guests will feel, see, and discover the moment they step through the door. Make the reader feel already there before mentioning logistics.",
         "Lead with the neighborhood or location — open by anchoring readers in the specific place on the island. Why does this address matter? What does the setting add to the visit? Then bring them to the property.",
@@ -759,6 +770,8 @@ Highlight: {extra}
 {agent_line}
 
 Generation ID: {_oh_generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+{_nb_context}
 
 HAWAII VOICE RULES:
 Always write with authentic Hawaii personality. Reference specific Hawaii lifestyle elements naturally — trade winds, island pace, proximity to beaches or mountains, local community feel, indoor-outdoor living, year-round weather. Never use mainland real estate clichés without grounding them in a Hawaii context. Write like a local expert, not like a generic real estate AI. Avoid anything that sounds like it was written for a suburban open house in Phoenix or Dallas.
@@ -857,6 +870,10 @@ def social_media_generate():
     extra = request.form["extra"]
     tone = request.form["tone"]
 
+    # Neighborhood context injection
+    _nb_data = get_neighborhood_context(neighborhood, island)
+    _nb_context = format_neighborhood_for_prompt(_nb_data, neighborhood) if _nb_data else ""
+
     _sm_generation_id = hashlib.md5(f"{address}{time.time()}".encode()).hexdigest()[:8]
 
     response = client.messages.create(
@@ -879,6 +896,8 @@ Standout feature: {extra}
 Tone: {tone}
 
 Generation ID: {_sm_generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+{_nb_context}
 
 HAWAII VOICE RULES:
 Always write with authentic Hawaii personality. Reference specific Hawaii lifestyle elements naturally — trade winds, island pace, proximity to beaches or mountains, local community feel, indoor-outdoor living, year-round weather. Never use mainland real estate clichés without grounding them in a Hawaii context. Write like a local expert, not like a generic real estate AI. Avoid anything that sounds like it was written for a suburban home in Phoenix or Dallas.
@@ -957,6 +976,10 @@ def offer_letter_generate():
 
     contingencies_str = ", ".join(contingencies) if contingencies else "None"
 
+    # Neighborhood context injection
+    _nb_data = get_neighborhood_context(neighborhood, island)
+    _nb_context = format_neighborhood_for_prompt(_nb_data, neighborhood) if _nb_data else ""
+
     try:
         offer_num = float(offer_price.replace(",", "").replace("$", ""))
         list_num = float(listing_price.replace(",", "").replace("$", ""))
@@ -984,6 +1007,8 @@ Tone: {tone}
 Land Tenure: {land_tenure}
 
 Generation ID: {_offer_generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+{_nb_context}
 
 HAWAII VOICE RULES:
 You are a Hawaii real estate expert writing a personal offer letter from a buyer to a seller. Write with authentic Hawaii warmth, aloha spirit, and genuine human connection. Reference specific Hawaii lifestyle and community values naturally. Make the letter feel like it was written by a real person who loves Hawaii, not a generic template.
@@ -1051,6 +1076,10 @@ def market_report_generate():
     price_range = request.form["price_range"]
     property_type = request.form["property_type"]
 
+    # Neighborhood context injection
+    _nb_data = get_neighborhood_context(neighborhood, island)
+    _nb_context = format_neighborhood_for_prompt(_nb_data, neighborhood) if _nb_data else ""
+
     _mr_generation_id = hashlib.md5(f"{neighborhood}{island}{time.time()}".encode()).hexdigest()[:8]
 
     response = client.messages.create(
@@ -1066,6 +1095,8 @@ Price Range: {price_range}
 Property Type: {property_type}
 
 Generation ID: {_mr_generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+{_nb_context}
 
 HAWAII VOICE RULES:
 You are a Hawaii real estate market expert. Write with local authority and Hawaii-specific insight. Reference Hawaii market dynamics, island-specific trends, seasonal patterns, and local economic factors naturally. Never produce generic market commentary that could apply to any US market.
@@ -1151,6 +1182,10 @@ def client_emails_generate():
     agent_name = request.form["agent_name"]
     tone = request.form["tone"]
 
+    # Neighborhood context injection
+    _nb_data = get_neighborhood_context(neighborhood, island)
+    _nb_context = format_neighborhood_for_prompt(_nb_data, neighborhood) if _nb_data else ""
+
     _email_generation_id = hashlib.md5(f"{client_name}{time.time()}".encode()).hexdigest()[:8]
 
     response = client.messages.create(
@@ -1169,6 +1204,8 @@ Agent Name: {agent_name}
 Tone: {tone}
 
 Generation ID: {_email_generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+{_nb_context}
 
 HAWAII VOICE RULES:
 Always write with authentic Hawaii warmth and personality. Reference Hawaii lifestyle, local context, and community feel naturally where appropriate. Write like a local agent, not a generic real estate AI.
@@ -1242,6 +1279,10 @@ def bio_generator_generate():
     specialties_str = ", ".join(specialties) if specialties else "General real estate"
     designations_line = f"Designations/Certifications: {designations}" if designations else ""
 
+    # Neighborhood context injection — bio uses primary_island as location anchor
+    _nb_data = get_neighborhood_context(primary_island)
+    _nb_context = format_neighborhood_for_prompt(_nb_data, primary_island) if _nb_data else ""
+
     _bio_templates = [
         "Lead with the agent's personal connection to Hawaii and why they chose real estate. Open on what brought them here — or what kept them — and draw a direct line between that story and the work they do now.",
         "Lead with a specific client success story or defining moment that captures their approach. Open on a real scenario that shows, not tells, what it's like to work with this agent.",
@@ -1273,6 +1314,8 @@ Target Length: {length}
 {designations_line}
 
 Generation ID: {_bio_generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+
+{_nb_context}
 
 HAWAII VOICE RULES:
 You are a Hawaii real estate expert writing for a local Hawaii audience. Always write with authentic Hawaii personality. Reference specific Hawaii lifestyle elements naturally — island roots, community connections, local market knowledge, aloha spirit. Write like a local expert, not like a generic real estate AI. Avoid anything that sounds like it was written for an agent in Phoenix or Dallas.
@@ -1399,6 +1442,27 @@ def property_comparison_generate():
     p2_ppsf = calc_ppsf(p2_price, p2_sqft)
     p3_ppsf = calc_ppsf(p3_price, p3_sqft) if has_p3 else ""
 
+    # Neighborhood context injection — dual property
+    _nb1_data = get_neighborhood_context(p1_neighborhood, p1_island)
+    _nb1_ctx = format_neighborhood_for_prompt(_nb1_data, p1_neighborhood) if _nb1_data else ""
+    _nb2_data = get_neighborhood_context(p2_neighborhood, p2_island)
+    _nb2_ctx = format_neighborhood_for_prompt(_nb2_data, p2_neighborhood) if _nb2_data else ""
+    _nb3_ctx = ""
+    if has_p3:
+        _nb3_data = get_neighborhood_context(p3_neighborhood, p3_island)
+        _nb3_ctx = format_neighborhood_for_prompt(_nb3_data, p3_neighborhood) if _nb3_data else ""
+
+    def _label_nb_context(ctx, label):
+        if not ctx:
+            return ""
+        return ctx.replace("NEIGHBORHOOD CONTEXT:", f"{label} NEIGHBORHOOD CONTEXT:", 1)
+
+    _combined_nb_context = "\n\n".join(filter(None, [
+        _label_nb_context(_nb1_ctx, "PROPERTY 1"),
+        _label_nb_context(_nb2_ctx, "PROPERTY 2"),
+        _label_nb_context(_nb3_ctx, "PROPERTY 3") if has_p3 else "",
+    ]))
+
     p3_block = ""
     if has_p3:
         p3_block = f"""
@@ -1409,6 +1473,8 @@ Property 3: {p3_address}, {p3_neighborhood}, {p3_island}
 """
 
     prompt = f"""You are a Hawaii real estate expert helping a buyer compare properties.
+
+{_combined_nb_context}
 
 HAWAII VOICE RULES:
 Write with local authority and Hawaii-specific insight. Reference Hawaii-specific factors naturally — proximity to beaches, island lifestyle, trade winds, flood zones, leasehold vs fee simple, HOA culture in Hawaii. Never produce generic comparison commentary that ignores Hawaii context.
