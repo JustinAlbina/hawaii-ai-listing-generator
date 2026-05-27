@@ -73,6 +73,9 @@
             <button class="copy-section-btn" onclick="copySection(this)" data-target="output-main" style="margin-left:auto;background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">📋 Copy</button>
         </div>
         <div class="content-box" id="output-main">{{ listing | safe }}</div>
+        {% if photo_count %}
+        <div style="margin-top:8px;font-size:12px;color:#c9a84c;">✓ {{ photo_count }} photo{{ 's' if photo_count != 1 else '' }} analyzed</div>
+        {% endif %}
         <div style="margin-top:12px;display:flex;align-items:center;gap:12px;">
             <button id="refine-btn" onclick="refineListing()" style="background:transparent;color:var(--gold);border:1.5px solid rgba(201,168,76,0.5);border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;">✦ Refine Output</button>
             <span id="refine-status" style="font-size:12px;color:#8892a4;display:none;"></span>

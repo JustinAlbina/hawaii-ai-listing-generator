@@ -22,6 +22,17 @@ select option { background: #1a2f45; color: #fff; }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .btn { width: 100%; padding: 1rem; background: #c9a84c; color: #0a1628; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.75rem; transition: all 0.2s; letter-spacing: 0.3px; }
 .btn:hover { background: #e8c97a; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.35); }
+.photo-drop-zone { border: 2px dashed rgba(201,168,76,0.35); border-radius: 12px; padding: 1.75rem 1rem; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(201,168,76,0.03); color: #8892a4; font-size: 13px; user-select: none; }
+.photo-drop-zone:hover, .photo-drop-zone.drag-over { border-color: #c9a84c; background: rgba(201,168,76,0.07); color: #e8c97a; }
+.photo-drop-zone .drop-icon { font-size: 1.75rem; margin-bottom: 0.5rem; display: block; opacity: 0.65; }
+.photo-drop-zone strong { color: #c9a84c; }
+.photo-count-label { font-size: 12px; color: #8892a4; margin-top: 0.9rem; display: none; }
+.photo-thumbs { display: flex; gap: 0.75rem; flex-wrap: nowrap; overflow-x: auto; margin-top: 0.5rem; padding-bottom: 4px; }
+.photo-thumbs::-webkit-scrollbar { height: 4px; } .photo-thumbs::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 2px; } .photo-thumbs::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.35); border-radius: 2px; }
+.photo-thumb { position: relative; width: 100px; height: 100px; border-radius: 8px; overflow: hidden; border: 1.5px solid rgba(201,168,76,0.4); flex-shrink: 0; }
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb-remove { position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,0.72); color: #fff; border: none; border-radius: 50%; width: 19px; height: 19px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; transition: background 0.15s; }
+.thumb-remove:hover { background: rgba(200,40,40,0.85); }
 @media (max-width: 768px) { .row { grid-template-columns: 1fr; } }
 {% endblock %}
 {% block content %}
@@ -34,7 +45,7 @@ select option { background: #1a2f45; color: #fff; }
 <div class="container">
     <a href="/" class="back-link">← Back to home</a>
 
-    <form action="/open-house/generate" method="POST">
+    <form action="/open-house/generate" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="card">
             <div class="card-header">
@@ -88,6 +99,24 @@ select option { background: #1a2f45; color: #fff; }
 
         <div class="card">
             <div class="card-header">
+                <div class="card-icon">📷</div>
+                <div>
+                    <div class="card-title">Property Photos</div>
+                    <div class="card-subtitle">Property Photos (optional) — Claude will reference your actual photos for the announcement</div>
+                </div>
+            </div>
+            <div id="photo-drop-zone" class="photo-drop-zone" role="button" tabindex="0" aria-label="Upload photos">
+                <span class="drop-icon">🖼️</span>
+                <div>Drop photos here or <strong>click to browse</strong></div>
+                <div style="margin-top:4px;font-size:12px;color:#4a5a70;">JPEG · PNG &nbsp;·&nbsp; up to 8 images</div>
+            </div>
+            <div id="photo-count-label" class="photo-count-label"></div>
+            <div id="photo-thumbs" class="photo-thumbs"></div>
+            <input type="file" id="photo-input" name="photos" accept="image/jpeg,image/png,image/jpg" multiple style="display:none">
+        </div>
+
+        <div class="card">
+            <div class="card-header">
                 <div class="card-icon">📅</div>
                 <div>
                     <div class="card-title">Open House Details</div>
@@ -137,5 +166,55 @@ select option { background: #1a2f45; color: #fff; }
         btn.style.cursor = 'default';
         loader.style.display = 'block';
     });
+})();
+
+(function(){
+    var dropZone = document.getElementById('photo-drop-zone');
+    var photoInput = document.getElementById('photo-input');
+    var thumbsContainer = document.getElementById('photo-thumbs');
+    var countLabel = document.getElementById('photo-count-label');
+    if (!dropZone || !photoInput) return;
+    var selectedFiles = [];
+    function syncToInput() {
+        var dt = new DataTransfer();
+        selectedFiles.forEach(function(f) { dt.items.add(f); });
+        photoInput.files = dt.files;
+    }
+    function updateCountLabel() {
+        if (!countLabel) return;
+        if (selectedFiles.length === 0) { countLabel.style.display = 'none'; countLabel.textContent = ''; }
+        else { countLabel.style.display = 'block'; countLabel.textContent = selectedFiles.length + ' photo' + (selectedFiles.length !== 1 ? 's' : '') + ' selected — Claude will analyze all of them'; }
+    }
+    function renderThumbs() {
+        thumbsContainer.innerHTML = '';
+        selectedFiles.forEach(function(file, idx) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var thumb = document.createElement('div'); thumb.className = 'photo-thumb';
+                var img = document.createElement('img'); img.src = e.target.result; img.alt = 'Photo ' + (idx + 1);
+                var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'thumb-remove'; btn.title = 'Remove'; btn.textContent = '✕';
+                btn.onclick = function() { selectedFiles.splice(idx, 1); syncToInput(); updateCountLabel(); renderThumbs(); };
+                thumb.appendChild(img); thumb.appendChild(btn); thumbsContainer.appendChild(thumb);
+            };
+            reader.readAsDataURL(file);
+        });
+        updateCountLabel();
+    }
+    function setFiles(fileList, replace) {
+        var allowed = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (replace) selectedFiles = [];
+        for (var i = 0; i < fileList.length; i++) {
+            if (selectedFiles.length >= 8) break;
+            var f = fileList[i];
+            if (allowed.indexOf(f.type) !== -1) selectedFiles.push(f);
+        }
+        syncToInput(); renderThumbs();
+    }
+    dropZone.addEventListener('click', function() { photoInput.click(); });
+    dropZone.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') photoInput.click(); });
+    dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('drag-over'); });
+    dropZone.addEventListener('drop', function(e) { e.preventDefault(); dropZone.classList.remove('drag-over'); setFiles(e.dataTransfer.files, true); });
+    photoInput.addEventListener('change', function() { setFiles(photoInput.files, true); });
 })();
 {% endblock %}

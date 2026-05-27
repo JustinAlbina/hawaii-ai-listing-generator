@@ -150,12 +150,12 @@ def save_generation(tool_name, input_data, output_text):
         db.session.add(gen)
         db.session.commit()
 
-def _process_photos():
-    """Read uploaded photos from request, return list of (base64_data, media_type). Max 5. In-memory only."""
+def _process_photos(field_name="photos"):
+    """Read uploaded photos from request, return list of (base64_data, media_type). Max 8. In-memory only."""
     results = []
     allowed_types = {"image/jpeg", "image/png"}
     ext_map = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png"}
-    for f in request.files.getlist("photos")[:5]:
+    for f in request.files.getlist(field_name)[:8]:
         if not f or not f.filename:
             continue
         mt = (f.content_type or "").split(";")[0].strip().lower()
@@ -587,6 +587,7 @@ Avoid leaning on overused real estate clichés as filler. If you use common desc
 Write 2 paragraphs, around 150 words total. End with a one-line call to action."""
 
     photo_list = _process_photos()
+    photo_count = len(photo_list)
     if photo_list:
         photo_prefix = (
             f"You have been provided {len(photo_list)} property photo(s). Analyze them carefully.\n"
@@ -677,7 +678,8 @@ NEIGHBORHOOD VIBE:
         price_per_sqft=price_per_sqft,
         listing=to_html(listing_text),
         analysis=to_html(analysis_text),
-        neighborhood_report=to_html(neighborhood_text)
+        neighborhood_report=to_html(neighborhood_text),
+        photo_count=photo_count
     )
 
 @app.route("/refine-listing", methods=["POST"])
@@ -749,11 +751,10 @@ def open_house_generate():
     _oh_template_instruction = random.choice(_oh_templates)
     _oh_generation_id = hashlib.md5(f"{address}{time.time()}".encode()).hexdigest()[:8]
 
-    response = client.messages.create(
-        model="claude-sonnet-4-5",
-        max_tokens=1500,
-        temperature=0.9,
-        messages=[{"role": "user", "content": f"""You are a Hawaii real estate marketing expert writing for local Hawaii agents and their clients. Generate three open house announcements for this property.
+    photo_list = _process_photos()
+    photo_count = len(photo_list)
+
+    _oh_prompt = f"""You are a Hawaii real estate marketing expert writing for local Hawaii agents and their clients. Generate three open house announcements for this property.
 
 STRUCTURAL APPROACH: {_oh_template_instruction}
 
@@ -795,7 +796,28 @@ EMAIL SUBJECT:
 [Compelling email subject line]
 
 EMAIL BODY:
-[Professional 3-4 sentence email announcing the open house, suitable to send to a client list{sign_off_instruction}]"""}]
+[Professional 3-4 sentence email announcing the open house, suitable to send to a client list{sign_off_instruction}]"""
+
+    if photo_list:
+        _oh_photo_prefix = (
+            f"You have been provided {photo_count} property photo(s). Analyze them carefully.\n"
+            "Incorporate specific visual details you observe — finishes, fixtures, views, layout, natural light, condition — into the announcements.\n"
+            "Be specific, not generic.\n\n"
+        )
+        _oh_content = [
+            *[{"type": "image", "source": {"type": "base64", "media_type": mt, "data": img_data}}
+              for img_data, mt in photo_list],
+            {"type": "text", "text": _oh_photo_prefix + _oh_prompt}
+        ]
+        _oh_messages = [{"role": "user", "content": _oh_content}]
+    else:
+        _oh_messages = [{"role": "user", "content": _oh_prompt}]
+
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1500,
+        temperature=0.9,
+        messages=_oh_messages
     )
 
     content = response.content[0].text
@@ -827,7 +849,8 @@ EMAIL BODY:
         instagram=to_html(sections.get("INSTAGRAM POST", "")),
         facebook=to_html(sections.get("FACEBOOK POST", "")),
         email_subject=sections.get("EMAIL SUBJECT", ""),
-        email_body=to_html(sections.get("EMAIL BODY", ""))
+        email_body=to_html(sections.get("EMAIL BODY", "")),
+        photo_count=photo_count
     )
 
 @app.route("/refine-open-house", methods=["POST"])
@@ -874,13 +897,12 @@ def social_media_generate():
     _nb_data = get_neighborhood_context(neighborhood, island)
     _nb_context = format_neighborhood_for_prompt(_nb_data, neighborhood) if _nb_data else ""
 
+    photo_list = _process_photos()
+    photo_count = len(photo_list)
+
     _sm_generation_id = hashlib.md5(f"{address}{time.time()}".encode()).hexdigest()[:8]
 
-    response = client.messages.create(
-        model="claude-sonnet-4-5",
-        max_tokens=1500,
-        temperature=0.9,
-        messages=[{"role": "user", "content": f"""You are a Hawaii real estate social media expert. Generate social media posts for this property listing.
+    _sm_prompt = f"""You are a Hawaii real estate social media expert. Generate social media posts for this property listing.
 
 Property Details:
 Address: {address}
@@ -921,7 +943,28 @@ X POST:
 [MUST be 280 characters or fewer — count carefully. Punchy and attention grabbing, include price. No hashtags here.]
 
 HASHTAGS:
-[20-25 relevant hashtags including Hawaii specific ones, real estate ones, and neighborhood specific ones]"""}]
+[20-25 relevant hashtags including Hawaii specific ones, real estate ones, and neighborhood specific ones]"""
+
+    if photo_list:
+        _sm_photo_prefix = (
+            f"You have been provided {photo_count} property photo(s). Analyze them carefully.\n"
+            "Incorporate specific visual details you observe — finishes, fixtures, views, layout, natural light, condition — into the social media posts.\n"
+            "Be specific, not generic.\n\n"
+        )
+        _sm_content = [
+            *[{"type": "image", "source": {"type": "base64", "media_type": mt, "data": img_data}}
+              for img_data, mt in photo_list],
+            {"type": "text", "text": _sm_photo_prefix + _sm_prompt}
+        ]
+        _sm_messages = [{"role": "user", "content": _sm_content}]
+    else:
+        _sm_messages = [{"role": "user", "content": _sm_prompt}]
+
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1500,
+        temperature=0.9,
+        messages=_sm_messages
     )
 
     content = response.content[0].text
@@ -950,7 +993,8 @@ HASHTAGS:
         instagram=to_html(sections.get("INSTAGRAM CAPTION", "")),
         facebook=to_html(sections.get("FACEBOOK POST", "")),
         x_post=to_html(sections.get("X POST", "")),
-        hashtags=to_html(sections.get("HASHTAGS", ""))
+        hashtags=to_html(sections.get("HASHTAGS", "")),
+        photo_count=photo_count
     )
 
 @app.route("/offer-letter")
@@ -1463,6 +1507,11 @@ def property_comparison_generate():
         _label_nb_context(_nb3_ctx, "PROPERTY 3") if has_p3 else "",
     ]))
 
+    p1_photos = _process_photos("p1_photos")
+    p2_photos = _process_photos("p2_photos")
+    p1_photo_count = len(p1_photos)
+    p2_photo_count = len(p2_photos)
+
     p3_block = ""
     if has_p3:
         p3_block = f"""
@@ -1528,11 +1577,27 @@ RECOMMENDATION:
 If any property has Leasehold land tenure, you MUST include a prominent warning in the RECOMMENDATION section:
 LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold properties in Hawaii typically sell at a significant discount (20-40%) vs fee simple. Many lenders will not finance leasehold properties with fewer than 30 years remaining on the lease. Buyers should verify lease expiration, rent renegotiation terms, and financing eligibility before making an offer."""
 
+    if p1_photos or p2_photos:
+        _pc_photo_prefix_parts = []
+        if p1_photos:
+            _pc_photo_prefix_parts.append(f"Property 1 photos ({p1_photo_count} provided): analyze these images for Property 1's condition, finishes, and features.")
+        if p2_photos:
+            _pc_photo_prefix_parts.append(f"Property 2 photos ({p2_photo_count} provided): analyze these images for Property 2's condition, finishes, and features.")
+        _pc_photo_prefix = "PHOTO ANALYSIS INSTRUCTIONS:\n" + "\n".join(_pc_photo_prefix_parts) + "\nBe specific about what you observe in each set — do not apply observations from one property's photos to the other.\n\n"
+        _pc_image_blocks = [
+            *[{"type": "image", "source": {"type": "base64", "media_type": mt, "data": img_data}} for img_data, mt in p1_photos],
+            *[{"type": "image", "source": {"type": "base64", "media_type": mt, "data": img_data}} for img_data, mt in p2_photos],
+            {"type": "text", "text": _pc_photo_prefix + prompt}
+        ]
+        _pc_messages = [{"role": "user", "content": _pc_image_blocks}]
+    else:
+        _pc_messages = [{"role": "user", "content": prompt}]
+
     message = client.messages.create(
         model="claude-sonnet-4-5",
         max_tokens=1500,
         temperature=0.8,
-        messages=[{"role": "user", "content": prompt}]
+        messages=_pc_messages
     )
     content = message.content[0].text
 
@@ -1580,7 +1645,9 @@ LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold proper
         p3_cons=to_html(sections.get("PROPERTY 3 CONS", "")),
         best_value=to_html(sections.get("BEST VALUE PICK", "")),
         best_fit=to_html(sections.get("BEST FIT FOR BUYER", "")),
-        recommendation=to_html(sections.get("RECOMMENDATION", ""))
+        recommendation=to_html(sections.get("RECOMMENDATION", "")),
+        p1_photo_count=p1_photo_count,
+        p2_photo_count=p2_photo_count
     )
 
 # ─── Admin routes ─────────────────────────────────────────────────────────────

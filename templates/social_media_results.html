@@ -41,6 +41,9 @@
         </div>
         <div class="platform-badge">📸 Instagram</div>
         <div class="content-box" id="output-main">{{ instagram | safe }}</div>
+        {% if photo_count %}
+        <div style="margin-top:8px;font-size:12px;color:#c9a84c;">✓ {{ photo_count }} photo{{ 's' if photo_count != 1 else '' }} analyzed</div>
+        {% endif %}
         <p style="font-size:11px;color:#8892a4;margin-top:16px;padding-top:12px;border-top:1px solid rgba(201,168,76,0.15);">AI-generated content. Review before use. Not affiliated with HAR. Verify all outputs with a licensed Hawaii real estate professional.</p>
     </div>
 
