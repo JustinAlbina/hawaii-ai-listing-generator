@@ -38,24 +38,24 @@
 .hero-slide:nth-child(1)  { background-position: center top; }
 .hero-slide:nth-child(2)  { background-position: center 30%; }
 .hero-slide:nth-child(3)  { background-position: center center; }
-.hero-slide:nth-child(4)  { background-position: center top; }
+.hero-slide:nth-child(4)  { background-position: center 20%; }
 .hero-slide:nth-child(5)  { background-position: center top; }
 .hero-slide:nth-child(6)  { background-position: center top; }
 .hero-slide:nth-child(7)  { background-position: center center; }
-.hero-slide:nth-child(8)  { background-position: center center; }
+.hero-slide:nth-child(8)  { background-position: center 30%; }
 .hero-slide:nth-child(9)  { background-position: center bottom; }
 .hero-slide:nth-child(10) { background-position: center 30%; }
 .hero-slide:nth-child(11) { background-position: center 20%; }
-.hero-slide:nth-child(12) { background-position: center 40%; }
+.hero-slide:nth-child(12) { background-position: center 30%; }
 .hero-slide:nth-child(13) { background-position: center center; }
 .hero-slide:nth-child(14) { background-position: center 20%; }
 .hero-slide:nth-child(15) { background-position: center center; }
 .hero-slide:nth-child(16) { background-position: center center; }
-.hero-slide:nth-child(17) { background-position: center center; }
+.hero-slide:nth-child(17) { background-position: center 30%; }
 .hero-slide:nth-child(18) { background-position: center 20%; }
-.hero-slide:nth-child(19) { background-position: center top; }
+.hero-slide:nth-child(19) { background-position: center 20%; }
 .hero-slide:nth-child(20) { background-position: center top; }
-.hero-overlay { position: absolute; inset: 0; background: rgba(6,19,38,0.52); z-index: 1; }
+.hero-overlay { position: absolute; inset: 0; background: rgba(6,19,38,0.38); z-index: 1; }
 @keyframes heroFade {
     0%    { opacity: 0; }
     1.5%  { opacity: 1; }   /* 2.5s: fade-in done */
@@ -63,7 +63,7 @@
     8%    { opacity: 0; }   /* 13s: fully gone */
     100%  { opacity: 0; }
 }
-.hero-inner { max-width: 800px; margin: 0 auto; position: relative; z-index: 2; }
+.hero-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 2; padding-left: 4rem; }
 .hero-content { position: relative; z-index: 2; }
 .hero h1 { font-size: clamp(2.8rem, 5vw, 4.2rem); font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 1.25rem; }
 .hero h1 .gold { color: #c9a84c; }
@@ -146,6 +146,7 @@
 }
 @media (max-width: 600px) {
     .hero { padding: 3rem 1.25rem; }
+    .hero-inner { padding-left: 0; }
     .hero h1 { font-size: 2.4rem; }
     .tools-grid { grid-template-columns: 1fr; }
     .steps-grid { grid-template-columns: 1fr; gap: 2.5rem; }
@@ -238,9 +239,9 @@
                     </div>
                     <span class="tw-badge-listing">Listing Description</span>
                 </div>
-                <p class="tw-para">The address alone earns attention — Mokulua Drive runs along the back edge of Kailua's most sought-after residential stretch, and at 456, the upstairs primary suite frames the Mokulua islands directly. Four bedrooms, three baths, 1,820 square feet organized around the water view and the trade wind cross-breeze that moves through this block off the channel.</p>
-                <p class="tw-para">The kitchen renovation went all the way: waterfall quartz island, Bosch appliances, a wide pass-through that opens onto the dining lanai without a hard threshold. Hardwood floors run from the living room straight through the sliding glass and across the covered lanai. Three bedrooms sit on the main floor, each with plantation shutters and ceiling fans. Upstairs, the primary suite carries its own bath, a walk-in shower, and that view. A solar PV system handles the HECO bill — monthly charges in the mid-thirties.</p>
-                <p class="tw-para">Kailua Beach is a four-minute bike ride. The Saturday farmers market, the coffee shops on Kailua Road, kayak launches for Moku Nui and Moku Iki — all within reach without the car. The Pali Highway puts central Honolulu thirty-five minutes away. MCBH Kaneohe Bay borders the neighborhood and keeps this price point tightly demanded. Fee simple ownership on a block that hasn't changed in the ways that matter. Contact to arrange a showing.</p>
+                <p class="tw-para">From the upstairs primary suite, the Mokulua Islands clear the tree line — two dark peaks above flat Pacific blue. 456 Mokulua Drive holds four bedrooms and three baths across 1,820 square feet, organized around an open lanai and the trade wind that comes off the Ko'olau ridge and moves through on schedule. Kailua Beach is ten minutes on foot. Fee simple.</p>
+                <p class="tw-para">The kitchen renovation went all the way down and back up: quartz waterfall island, Bosch appliances, a wide pass-through that opens directly to the covered dining lanai with no step down. Hardwood floors carry from the living room to the outside without interruption. Three bedrooms run along the main floor, each with plantation shutters and ceiling fans. The primary suite upstairs holds its own bath, a walk-in shower, and that view. A solar PV system keeps the HECO bill in the low thirties.</p>
+                <p class="tw-para">Kailua Beach is ten minutes on foot, five by bike. The Saturday farmers market, kayak launches for Moku Nui and Moku Iki, the coffee shops and restaurants on Kailua Road — all within reach without the car. Honolulu is over the Pali, thirty-five minutes in light traffic. MCBH Kaneohe Bay anchors demand from the east, and fee simple inventory on this stretch of Mokulua Drive turns over slowly. Contact to arrange a showing.</p>
             </div>
         </div>
         <div class="tw-label">✦ Real AlohaAgent output — no edits</div>
@@ -347,7 +348,7 @@
                         pResult.style.transition = 'opacity 0.4s';
                         pResult.style.opacity    = '0';
                         setTimeout(phase1, 450);
-                    }, 13000);
+                    }, 20000);
                 }, 500);
             }, 500);
         }, 300);
