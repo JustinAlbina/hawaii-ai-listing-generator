@@ -19,7 +19,7 @@
     padding: 0;
 }
 /* ── Crossfade Carousel — 20 slides, 8s hold + 2.5s dissolve = 160s cycle ── */
-.hero-slides { position: absolute; inset: 0; z-index: 0; will-change: transform; transform-origin: center center; }
+.hero-slides { position: absolute; inset: 0; z-index: 0; transform-origin: center center; }
 .hero-slide {
     position: absolute; inset: 0;
     background-size: cover; background-position: center;
@@ -66,7 +66,6 @@
 .hero-slide:nth-child(18) { background-position: center 20%; }
 .hero-slide:nth-child(19) { background-position: center 20%; }
 .hero-slide:nth-child(20) { background-position: center top; }
-.hero-overlay { position: absolute; inset: 0; background: rgba(6,19,38,0.38); z-index: 1; }
 @keyframes heroFade {
     0%    { opacity: 0; }
     1.5%  { opacity: 1; }
@@ -198,7 +197,6 @@
         <div class="hero-slide" data-bg="/static/images/hero/hero19.jpg"></div>
         <div class="hero-slide" data-bg="/static/images/hero/hero20.jpg"></div>
     </div>
-    <div class="hero-overlay"></div>
     <div class="hero-nav-gradient"></div>
     <div class="hero-inner">
         <div class="hero-content">
