@@ -3,8 +3,8 @@
 {% block top_banner %}{% endblock %}
 {% block styles %}
 /* ── Nav: transparent on hero, solid on scroll ── */
-.nav { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; background: transparent !important; border-bottom: none !important; transition: background 0.3s, border-color 0.3s; }
-.nav.nav-scrolled { background: rgba(6,19,38,0.95) !important; border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
+.nav { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; background: transparent !important; border-bottom: 1px solid transparent !important; outline: none; box-shadow: none; transition: background 0.3s ease, border-color 0.3s ease !important; }
+.nav.nav-scrolled { background: rgba(6,19,38,0.95) !important; border-color: rgba(255,255,255,0.06) !important; }
 
 /* ── Hero: full viewport ── */
 .hero {
@@ -19,7 +19,7 @@
     padding: 0;
 }
 /* ── Crossfade Carousel — 20 slides, 8s hold + 2.5s dissolve = 160s cycle ── */
-.hero-slides { position: absolute; inset: 0; z-index: 0; will-change: opacity, transform; transform-origin: center center; }
+.hero-slides { position: absolute; inset: 0; z-index: 0; will-change: transform; transform-origin: center center; }
 .hero-slide {
     position: absolute; inset: 0;
     background-size: cover; background-position: center;
@@ -126,9 +126,9 @@
 @keyframes twSpin { to { transform: rotate(360deg); } }
 .tw-gen-msg { font-size: 0.9rem; color: #8892a4; }
 .tw-result-hdr { margin-bottom: 1rem; padding-bottom: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
-.tw-para { font-size: 0.875rem; line-height: 1.9; color: #c8d5e8; margin-top: 1rem; opacity: 0; transform: translateY(8px); transition: opacity 0.5s, transform 0.5s; }
+.tw-para { font-size: 0.875rem; line-height: 1.9; color: #c8d5e8; margin-top: 1rem; opacity: 0; transition: opacity 0.5s; }
 .tw-para:first-child { margin-top: 0; }
-.tw-para.show { opacity: 1; transform: none; }
+.tw-para.show { opacity: 1; }
 
 /* ── Tools Section ── */
 .tools-section { background: #0d1f35; padding: 5rem 2rem; }
@@ -390,7 +390,7 @@
     setTimeout(phase1, 2000);
 })();
 
-// Task 4: measure Phase 3 height and lock card min-height to prevent reflow
+// FIX 3+4: measure Phase 3 height, lock card min-height; debounced + correct state restoration
 (function () {
     function setCardMinHeight() {
         var card    = document.getElementById('tw-card');
@@ -399,42 +399,70 @@
         var pResult = document.getElementById('tw-phase-result');
         if (!card || !pResult) return;
 
-        var formDisplay = pForm ? pForm.style.display : '';
-        var genDisplay  = pGen  ? pGen.style.display  : 'none';
+        // Save ALL current display states — restore exactly, never hardcode 'none'
+        var formDisplay   = pForm   ? pForm.style.display   : '';
+        var genDisplay    = pGen    ? pGen.style.display     : 'none';
+        var resultDisplay = pResult.style.display;
 
+        // Save which paras are already .show so we can restore them
+        var paras = pResult.querySelectorAll('.tw-para');
+        var parasWereShown = [];
+        paras.forEach(function (p) {
+            parasWereShown.push(p.classList.contains('show'));
+            p.classList.add('show');
+        });
+
+        // Hide form/gen, show result invisibly to measure full Phase 3 height
         if (pForm) pForm.style.display = 'none';
         if (pGen)  pGen.style.display  = 'none';
         pResult.style.visibility = 'hidden';
         pResult.style.display    = 'block';
-        pResult.querySelectorAll('.tw-para').forEach(function (p) { p.classList.add('show'); });
 
         var h = card.offsetHeight;
 
-        pResult.style.display    = 'none';
+        // Restore everything exactly as it was
+        pResult.style.display    = resultDisplay;
         pResult.style.visibility = '';
-        pResult.querySelectorAll('.tw-para').forEach(function (p) { p.classList.remove('show'); });
-        if (pForm) pForm.style.display = formDisplay !== null ? formDisplay : '';
+        paras.forEach(function (p, i) {
+            if (!parasWereShown[i]) p.classList.remove('show');
+        });
+        if (pForm) pForm.style.display = formDisplay;
         if (pGen)  pGen.style.display  = genDisplay;
 
-        if (h > 300) card.style.minHeight = h + 'px';
+        if (h > 100) card.style.minHeight = h + 'px';
     }
 
     setCardMinHeight();
-    window.addEventListener('resize', setCardMinHeight, { passive: true });
+
+    // Debounce resize — prevents browser-chrome resize events (triggered by mobile scroll)
+    // from firing setCardMinHeight mid-Phase-3 and clobbering display state
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(setCardMinHeight, 150);
+    }, { passive: true });
 })();
 
-// Task 1 + 3: parallax fade on scroll + nav solid-on-scroll
+// FIX 1: parallax fades entire hero section as one unit (no layer desync flash)
+// nav becomes solid past 60% scroll depth
 (function () {
-    var heroSlides = document.getElementById('hero-slides');
-    var nav        = document.querySelector('.nav');
+    var heroSection = document.querySelector('section.hero');
+    var heroSlides  = document.getElementById('hero-slides');
+    var nav         = document.querySelector('.nav');
 
     function onScroll() {
         var y  = window.scrollY;
         var vh = window.innerHeight;
+        var progress = Math.min(y / vh, 1);
 
+        // Fade the whole hero section — background-color: var(--navy) on .hero ensures
+        // no color flash as opacity drops; all layers (slides, overlay, text) fade together
+        if (heroSection) {
+            heroSection.style.opacity = (1 - progress).toFixed(3);
+        }
+
+        // Scale only the slides layer for the cinematic zoom
         if (heroSlides) {
-            var progress = Math.min(y / vh, 1);
-            heroSlides.style.opacity   = (1 - progress).toFixed(3);
             heroSlides.style.transform = 'scale(' + (1 + progress * 0.04).toFixed(4) + ')';
         }
 
