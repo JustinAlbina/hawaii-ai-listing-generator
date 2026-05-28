@@ -103,6 +103,7 @@
         {% block styles %}{% endblock %}
     </style>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌺</text></svg>">
+    <link rel="stylesheet" href="/static/css/shared.css">
     {% block head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -229,6 +230,7 @@
 </footer>
 {% endblock %}
 
+<script src="/static/js/shared.js"></script>
 <script>
 function toggleMenu() {
     var menu = document.getElementById('mobile-menu');

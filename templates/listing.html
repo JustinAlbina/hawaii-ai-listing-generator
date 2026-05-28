@@ -65,7 +65,7 @@ select option { background: #1a2f45; color: #fff; }
     </div>
     {% endif %}
 
-    <form action="/generate" method="POST" enctype="multipart/form-data">
+    <form action="/generate" method="POST" enctype="multipart/form-data" class="aloha-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="card">
             <div class="card-header">
@@ -280,8 +280,10 @@ select option { background: #1a2f45; color: #fff; }
         selectedFiles.forEach(function(file, idx) {
             var reader = new FileReader();
             reader.onload = function(e) {
+                var kb = Math.round(file.size / 1024);
                 var thumb = document.createElement('div');
                 thumb.className = 'photo-thumb';
+                thumb.dataset.kb = kb;
                 var img = document.createElement('img');
                 img.src = e.target.result;
                 img.alt = 'Photo ' + (idx + 1);
@@ -294,6 +296,7 @@ select option { background: #1a2f45; color: #fff; }
                 thumb.appendChild(img);
                 thumb.appendChild(btn);
                 thumbsContainer.appendChild(thumb);
+                // Size label added by shared.js MutationObserver
             };
             reader.readAsDataURL(file);
         });

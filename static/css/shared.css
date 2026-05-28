@@ -1,0 +1,115 @@
+/* ── AlohaAgent Shared Styles ── */
+
+/* ── Task 4: Cinematic Results Reveal ── */
+.reveal-section {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal-section.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (max-width: 480px) {
+  .reveal-section { transform: translateY(10px); }
+}
+
+/* ── Task 5: Form Field Fade-in (active only when JS ready) ── */
+body.aa-anim .aloha-form .form-group {
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+body.aa-anim .aloha-form .form-group.field-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Task 5: Gold Checkmark on Valid Fields ── */
+.aloha-form .form-group {
+  position: relative;
+}
+.field-checkmark {
+  position: absolute;
+  right: 13px;
+  bottom: 12px;
+  color: #c9a84c;
+  font-size: 13px;
+  font-weight: 700;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  line-height: 1;
+}
+.form-group.field-valid .field-checkmark {
+  opacity: 1;
+}
+.form-group.field-valid input:not([type='hidden']):not([type='file']):not([type='checkbox']):not([type='radio']),
+.form-group.field-valid textarea {
+  border-color: rgba(201, 168, 76, 0.45);
+  padding-right: 2.25rem;
+}
+.form-group.field-valid select {
+  border-color: rgba(201, 168, 76, 0.45);
+}
+
+/* ── Task 5: Generate Button Pulse when all fields filled ── */
+.btn-submit.btn-ready {
+  animation: aaBtnPulse 2.2s ease-out infinite;
+}
+@keyframes aaBtnPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(201,168,76,0.5); }
+  60%  { box-shadow: 0 0 0 10px rgba(201,168,76,0); }
+  100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
+}
+
+/* ── Task 5: Loading State During Generation ── */
+.btn-submit.btn-loading {
+  opacity: 0.75;
+  pointer-events: none;
+  color: transparent !important;
+  position: relative;
+}
+.btn-submit.btn-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(10, 22, 40, 0.25);
+  border-top-color: #061326;
+  border-radius: 50%;
+  animation: aaBtnSpin 0.75s linear infinite;
+}
+@keyframes aaBtnSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+/* ── Task 5: Photo Thumbnail Entrance Animation ── */
+.photo-thumb.thumb-enter {
+  animation: aaThumbIn 0.35s ease forwards;
+}
+@keyframes aaThumbIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Task 5: Photo Drop Zone Drag-over Gold Glow ── */
+.photo-drop-zone.drag-over {
+  border-color: #c9a84c !important;
+  background: rgba(201, 168, 76, 0.08) !important;
+  color: #e8c97a !important;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
+}
+
+/* ── Task 5: File size label under photo thumb ── */
+.thumb-size {
+  font-size: 9px;
+  color: #8892a4;
+  text-align: center;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}

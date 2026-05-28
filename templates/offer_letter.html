@@ -40,7 +40,7 @@ input::placeholder, textarea::placeholder { color: #4a5a70; }
 <div class="container">
     <a href="/" class="back-link">← Back to all tools</a>
 
-    <form action="/offer-letter/generate" method="POST" style="margin-top:1.25rem;">
+    <form action="/offer-letter/generate" method="POST" class="aloha-form" style="margin-top:1.25rem;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <div class="card">

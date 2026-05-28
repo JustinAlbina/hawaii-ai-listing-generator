@@ -5,18 +5,65 @@
     position: relative;
     padding: 5rem 2rem 4rem;
     overflow: hidden;
-    background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80');
-    background-size: cover;
-    background-position: center;
+    background: #061326;
 }
-.hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(10, 22, 40, 0.78);
-    z-index: 1;
+/* ── Crossfade Carousel — 20 slides, 8s hold + 2.5s dissolve = 160s cycle ── */
+.hero-slides { position: absolute; inset: 0; z-index: 0; }
+.hero-slide {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    opacity: 0; animation: heroFade 160s infinite; will-change: opacity;
 }
-.hero-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 420px; gap: 4rem; align-items: center; position: relative; z-index: 2; }
+.hero-slide:nth-child(1)  { animation-delay: -2.5s; }
+.hero-slide:nth-child(2)  { animation-delay: 8s; }
+.hero-slide:nth-child(3)  { animation-delay: 16s; }
+.hero-slide:nth-child(4)  { animation-delay: 24s; }
+.hero-slide:nth-child(5)  { animation-delay: 32s; }
+.hero-slide:nth-child(6)  { animation-delay: 40s; }
+.hero-slide:nth-child(7)  { animation-delay: 48s; }
+.hero-slide:nth-child(8)  { animation-delay: 56s; }
+.hero-slide:nth-child(9)  { animation-delay: 64s; }
+.hero-slide:nth-child(10) { animation-delay: 72s; }
+.hero-slide:nth-child(11) { animation-delay: 80s; }
+.hero-slide:nth-child(12) { animation-delay: 88s; }
+.hero-slide:nth-child(13) { animation-delay: 96s; }
+.hero-slide:nth-child(14) { animation-delay: 104s; }
+.hero-slide:nth-child(15) { animation-delay: 112s; }
+.hero-slide:nth-child(16) { animation-delay: 120s; }
+.hero-slide:nth-child(17) { animation-delay: 128s; }
+.hero-slide:nth-child(18) { animation-delay: 136s; }
+.hero-slide:nth-child(19) { animation-delay: 144s; }
+.hero-slide:nth-child(20) { animation-delay: 152s; }
+/* per-slide focal points */
+.hero-slide:nth-child(1)  { background-position: center top; }
+.hero-slide:nth-child(2)  { background-position: center 30%; }
+.hero-slide:nth-child(3)  { background-position: center center; }
+.hero-slide:nth-child(4)  { background-position: center top; }
+.hero-slide:nth-child(5)  { background-position: center top; }
+.hero-slide:nth-child(6)  { background-position: center top; }
+.hero-slide:nth-child(7)  { background-position: center center; }
+.hero-slide:nth-child(8)  { background-position: center center; }
+.hero-slide:nth-child(9)  { background-position: center bottom; }
+.hero-slide:nth-child(10) { background-position: center 30%; }
+.hero-slide:nth-child(11) { background-position: center 20%; }
+.hero-slide:nth-child(12) { background-position: center 40%; }
+.hero-slide:nth-child(13) { background-position: center center; }
+.hero-slide:nth-child(14) { background-position: center 20%; }
+.hero-slide:nth-child(15) { background-position: center center; }
+.hero-slide:nth-child(16) { background-position: center center; }
+.hero-slide:nth-child(17) { background-position: center center; }
+.hero-slide:nth-child(18) { background-position: center 20%; }
+.hero-slide:nth-child(19) { background-position: center top; }
+.hero-slide:nth-child(20) { background-position: center top; }
+.hero-overlay { position: absolute; inset: 0; background: rgba(6,19,38,0.52); z-index: 1; }
+@keyframes heroFade {
+    0%    { opacity: 0; }
+    1.5%  { opacity: 1; }   /* 2.5s: fade-in done */
+    6.5%  { opacity: 1; }   /* 10.5s: hold ends, fade-out starts */
+    8%    { opacity: 0; }   /* 13s: fully gone */
+    100%  { opacity: 0; }
+}
+.hero-inner { max-width: 800px; margin: 0 auto; position: relative; z-index: 2; }
 .hero-content { position: relative; z-index: 2; }
 .hero h1 { font-size: clamp(2.8rem, 5vw, 4.2rem); font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 1.25rem; }
 .hero h1 .gold { color: #c9a84c; }
@@ -27,18 +74,38 @@
 .hero-ctas { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
 .btn-text-link { color: #a8b8cc; font-size: 0.9rem; font-weight: 500; text-decoration: none; transition: color 0.2s; }
 .btn-text-link:hover { color: #c9a84c; }
-.hero-visual { position: relative; display: flex; align-items: center; justify-content: center; }
-.hero-card-mock { background: rgba(255,255,255,0.06); border: 1px solid rgba(201,168,76,0.3); border-radius: 20px; padding: 2rem; width: 100%; max-width: 380px; backdrop-filter: blur(16px); }
-.hero-card-mock-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
-.mock-icon { width: 36px; height: 36px; background: rgba(201,168,76,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.mock-title { font-size: 0.9rem; font-weight: 600; color: #fff; }
-.mock-sub { font-size: 11px; color: #8892a4; }
-.mock-lines { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem; }
-.mock-line { height: 10px; background: rgba(255,255,255,0.07); border-radius: 6px; }
-.mock-line.short { width: 60%; }
-.mock-line.medium { width: 80%; }
-.mock-badge-row { display: flex; gap: 8px; margin-top: 0.5rem; }
-.mock-badge { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); }
+/* ── Typewriter Demo ── */
+.typewriter-section { background: #040e1f; padding: 4.5rem 2rem; border-top: 1px solid rgba(255,255,255,0.05); }
+.typewriter-inner { max-width: 780px; margin: 0 auto; text-align: center; }
+.typewriter-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #c9a84c; margin-bottom: 1rem; }
+.typewriter-heading { font-size: clamp(1.4rem,2.5vw,2rem); font-weight: 700; color: #fff; margin-bottom: 2rem; letter-spacing: -0.5px; }
+.typewriter-card { background: #0d1b34; border: 1px solid rgba(201,168,76,0.2); border-radius: 16px; padding: 1.75rem 2rem; text-align: left; }
+.tw-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); flex-wrap: wrap; }
+.tw-address { font-size: 0.85rem; font-weight: 700; color: #c9a84c; }
+.tw-meta { font-size: 12px; color: #8892a4; margin-top: 2px; }
+.tw-badge-listing { background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.tw-output { font-size: 0.875rem; line-height: 1.9; color: #c8d5e8; min-height: 200px; }
+.tw-cursor { display: inline-block; width: 2px; height: 1.05em; background: #c9a84c; margin-left: 1px; vertical-align: text-bottom; animation: twBlink 0.85s step-start infinite; }
+@keyframes twBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.tw-label { margin-top: 1.25rem; font-size: 11px; color: #c9a84c; font-weight: 600; letter-spacing: 0.08em; text-align: center; }
+/* ── Typewriter 3-phase demo ── */
+.tw-form-fields { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem; }
+.tw-field-row { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.04); border-radius: 8px; padding: 9px 12px; border: 1px solid rgba(255,255,255,0.06); }
+.tw-field-lbl { font-size: 11px; color: #8892a4; width: 90px; flex-shrink: 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.tw-field-val { flex: 1; font-size: 0.875rem; color: #fff; min-height: 1.1em; }
+.tw-chk { width: 18px; height: 18px; border-radius: 50%; background: rgba(201,168,76,0.15); color: #c9a84c; font-size: 11px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; flex-shrink: 0; }
+.tw-chk.show { opacity: 1; }
+.tw-gen-btn { width: 100%; padding: 0.8rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; background: #d4a843; color: #000; border: none; cursor: pointer; transition: transform 0.15s; margin-top: 0.25rem; }
+.tw-gen-btn.pulse { animation: twBtnPulse 1.1s ease-in-out infinite; }
+@keyframes twBtnPulse { 0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.4)} 50%{box-shadow:0 0 0 8px rgba(201,168,76,0)} }
+.tw-spinner-wrap { padding: 2.5rem 0; text-align: center; }
+.tw-spin { width: 30px; height: 30px; border: 3px solid rgba(201,168,76,0.2); border-top-color: #c9a84c; border-radius: 50%; animation: twSpin 0.8s linear infinite; margin: 0 auto 1rem; }
+@keyframes twSpin { to { transform: rotate(360deg); } }
+.tw-gen-msg { font-size: 0.9rem; color: #8892a4; }
+.tw-result-hdr { margin-bottom: 1rem; padding-bottom: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+.tw-para { font-size: 0.875rem; line-height: 1.9; color: #c8d5e8; margin-top: 1rem; opacity: 0; transform: translateY(8px); transition: opacity 0.5s, transform 0.5s; }
+.tw-para:first-child { margin-top: 0; }
+.tw-para.show { opacity: 1; transform: none; }
 
 .tools-section { background: #0d1f35; padding: 5rem 2rem; }
 .tools-inner { max-width: 1100px; margin: 0 auto; }
@@ -75,8 +142,6 @@
 .waitlist-form .btn-gold { white-space: nowrap; }
 
 @media (max-width: 1100px) {
-    .hero-inner { grid-template-columns: 1fr; }
-    .hero-visual { display: none; }
     .tools-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 600px) {
@@ -90,6 +155,29 @@
 
 {% block content %}
 <section class="hero">
+    <div class="hero-slides">
+        <div class="hero-slide" style="background-image:url('/static/images/hero/hero1.jpg')"></div>
+        <div class="hero-slide" style="background-image:url('/static/images/hero/hero2.jpg')"></div>
+        <div class="hero-slide" style="background-image:url('/static/images/hero/hero3.jpg')"></div>
+        <div class="hero-slide" style="background-image:url('/static/images/hero/hero4.jpg')"></div>
+        <div class="hero-slide" style="background-image:url('/static/images/hero/hero5.jpg')"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero6.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero7.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero8.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero9.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero10.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero11.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero12.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero13.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero14.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero15.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero16.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero17.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero18.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero19.jpg"></div>
+        <div class="hero-slide" data-bg="/static/images/hero/hero20.jpg"></div>
+    </div>
+    <div class="hero-overlay"></div>
     <div class="hero-inner">
         <div class="hero-content">
             <h1>List smarter.<br><span class="gold">Sell faster.</span></h1>
@@ -113,35 +201,168 @@
                 <a href="#tools" class="btn-text-link">See all tools</a>
             </div>
         </div>
-        <div class="hero-visual">
-            <div class="hero-card-mock">
-                <div class="hero-card-mock-header">
-                    <div class="mock-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="mock-title">5332 Makalea St</div>
-                        <div class="mock-sub">Poipu, Kauai · AlohaAgent Listing Ready</div>
-                    </div>
-                </div>
-                <div class="mock-lines">
-                    <div class="mock-line medium"></div>
-                    <div class="mock-line"></div>
-                    <div class="mock-line short"></div>
-                    <div class="mock-line medium"></div>
-                    <div class="mock-line"></div>
-                </div>
-                <div class="mock-badge-row">
-                    <span class="mock-badge">4 BD</span>
-                    <span class="mock-badge">3 BA</span>
-                    <span class="mock-badge">Ocean View</span>
-                </div>
-            </div>
-        </div>
     </div>
 </section>
+
+<section class="typewriter-section">
+    <div class="typewriter-inner">
+        <div class="typewriter-eyebrow">LIVE DEMO</div>
+        <h2 class="typewriter-heading">Watch AlohaAgent write in real time</h2>
+        <div class="typewriter-card" id="tw-card">
+            <!-- Phase 1: form fill -->
+            <div id="tw-phase-form">
+                <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#8892a4;margin-bottom:1rem;">New Listing &nbsp;·&nbsp; Kailua, Oahu</div>
+                <div class="tw-form-fields">
+                    <div class="tw-field-row"><span class="tw-field-lbl">Address</span><span class="tw-field-val" id="tf-0"></span><span class="tw-chk" id="tc-0">✓</span></div>
+                    <div class="tw-field-row"><span class="tw-field-lbl">Beds / Baths</span><span class="tw-field-val" id="tf-1"></span><span class="tw-chk" id="tc-1">✓</span></div>
+                    <div class="tw-field-row"><span class="tw-field-lbl">Price</span><span class="tw-field-val" id="tf-2"></span><span class="tw-chk" id="tc-2">✓</span></div>
+                    <div class="tw-field-row"><span class="tw-field-lbl">Type</span><span class="tw-field-val" id="tf-3"></span><span class="tw-chk" id="tc-3">✓</span></div>
+                    <div class="tw-field-row"><span class="tw-field-lbl">View</span><span class="tw-field-val" id="tf-4"></span><span class="tw-chk" id="tc-4">✓</span></div>
+                    <div class="tw-field-row"><span class="tw-field-lbl">Features</span><span class="tw-field-val" id="tf-5"></span><span class="tw-chk" id="tc-5">✓</span></div>
+                </div>
+                <button class="tw-gen-btn" id="tw-gen-btn">Generate Listing →</button>
+            </div>
+            <!-- Phase 2: generating -->
+            <div id="tw-phase-gen" style="display:none">
+                <div class="tw-spinner-wrap">
+                    <div class="tw-spin"></div>
+                    <div class="tw-gen-msg">Generating your listing…</div>
+                </div>
+            </div>
+            <!-- Phase 3: result -->
+            <div id="tw-phase-result" style="display:none">
+                <div class="tw-result-hdr">
+                    <div>
+                        <div class="tw-address">456 Mokulua Drive, Kailua, HI 96734</div>
+                        <div class="tw-meta">Kailua, Oahu &nbsp;·&nbsp; 4BD / 3BA &nbsp;·&nbsp; $1,450,000 &nbsp;·&nbsp; Fee Simple</div>
+                    </div>
+                    <span class="tw-badge-listing">Listing Description</span>
+                </div>
+                <p class="tw-para">The address alone earns attention — Mokulua Drive runs along the back edge of Kailua's most sought-after residential stretch, and at 456, the upstairs primary suite frames the Mokulua islands directly. Four bedrooms, three baths, 1,820 square feet organized around the water view and the trade wind cross-breeze that moves through this block off the channel.</p>
+                <p class="tw-para">The kitchen renovation went all the way: waterfall quartz island, Bosch appliances, a wide pass-through that opens onto the dining lanai without a hard threshold. Hardwood floors run from the living room straight through the sliding glass and across the covered lanai. Three bedrooms sit on the main floor, each with plantation shutters and ceiling fans. Upstairs, the primary suite carries its own bath, a walk-in shower, and that view. A solar PV system handles the HECO bill — monthly charges in the mid-thirties.</p>
+                <p class="tw-para">Kailua Beach is a four-minute bike ride. The Saturday farmers market, the coffee shops on Kailua Road, kayak launches for Moku Nui and Moku Iki — all within reach without the car. The Pali Highway puts central Honolulu thirty-five minutes away. MCBH Kaneohe Bay borders the neighborhood and keeps this price point tightly demanded. Fee simple ownership on a block that hasn't changed in the ways that matter. Contact to arrange a showing.</p>
+            </div>
+        </div>
+        <div class="tw-label">✦ Real AlohaAgent output — no edits</div>
+    </div>
+</section>
+
+<script>
+(function () {
+    var FIELDS = [
+        { id: 'tf-0', val: '456 Mokulua Drive, Kailua, HI 96734', chk: 'tc-0' },
+        { id: 'tf-1', val: '4 BD / 3 BA',                          chk: 'tc-1' },
+        { id: 'tf-2', val: '$1,450,000',                            chk: 'tc-2' },
+        { id: 'tf-3', val: 'Single Family',                         chk: 'tc-3' },
+        { id: 'tf-4', val: 'Ocean & Mountain',                      chk: 'tc-4' },
+        { id: 'tf-5', val: 'Renovated kitchen, solar, open lanai, hardwood floors', chk: 'tc-5' }
+    ];
+
+    var pForm   = document.getElementById('tw-phase-form');
+    var pGen    = document.getElementById('tw-phase-gen');
+    var pResult = document.getElementById('tw-phase-result');
+    var genBtn  = document.getElementById('tw-gen-btn');
+    if (!pForm) return;
+
+    function show(el) { el.style.display = ''; }
+    function hide(el) { el.style.display = 'none'; }
+
+    function typeField(f, cb) {
+        var el  = document.getElementById(f.id);
+        var chk = document.getElementById(f.chk);
+        if (!el) { cb(); return; }
+        el.textContent = '';
+        var i = 0;
+        (function next() {
+            if (i >= f.val.length) {
+                if (chk) chk.classList.add('show');
+                setTimeout(cb, 300);
+                return;
+            }
+            var ch = f.val[i++];
+            el.textContent += ch;
+            var d = 25 + Math.random() * 10;
+            if (ch === ',') d += 80;
+            else if (ch === ' ' && i > 1) d += 15;
+            setTimeout(next, d);
+        })();
+    }
+
+    function resetFields() {
+        FIELDS.forEach(function (f) {
+            var el  = document.getElementById(f.id);
+            var chk = document.getElementById(f.chk);
+            if (el)  el.textContent = '';
+            if (chk) chk.classList.remove('show');
+        });
+        genBtn.classList.remove('pulse');
+        genBtn.style.transform = '';
+        pForm.style.opacity    = '1';
+        pForm.style.transition = '';
+    }
+
+    function phase1() {
+        show(pForm); hide(pGen); hide(pResult);
+        pResult.style.opacity = '';
+        resetFields();
+        var idx = 0;
+        (function nextField() {
+            if (idx >= FIELDS.length) {
+                genBtn.classList.add('pulse');
+                setTimeout(function () {
+                    genBtn.classList.remove('pulse');
+                    genBtn.style.transform = 'scale(0.95)';
+                    setTimeout(function () {
+                        genBtn.style.transform = '';
+                        phase2();
+                    }, 300);
+                }, 1500);
+                return;
+            }
+            typeField(FIELDS[idx++], nextField);
+        })();
+    }
+
+    function phase2() {
+        pForm.style.transition = 'opacity 0.3s';
+        pForm.style.opacity    = '0';
+        setTimeout(function () {
+            hide(pForm); show(pGen);
+            setTimeout(phase3, 1500);
+        }, 300);
+    }
+
+    function phase3() {
+        hide(pGen); show(pResult);
+        pResult.style.opacity = '1';
+        var paras = pResult.querySelectorAll('.tw-para');
+        paras.forEach(function (p) { p.classList.remove('show'); });
+        setTimeout(function () {
+            if (paras[0]) paras[0].classList.add('show');
+            setTimeout(function () {
+                if (paras[1]) paras[1].classList.add('show');
+                setTimeout(function () {
+                    if (paras[2]) paras[2].classList.add('show');
+                    setTimeout(function () {
+                        pResult.style.transition = 'opacity 0.4s';
+                        pResult.style.opacity    = '0';
+                        setTimeout(phase1, 450);
+                    }, 13000);
+                }, 500);
+            }, 500);
+        }, 300);
+    }
+
+    // Lazy-load hero slides 6-20 after a short delay
+    setTimeout(function () {
+        document.querySelectorAll('.hero-slide[data-bg]').forEach(function (el) {
+            el.style.backgroundImage = 'url(' + el.dataset.bg + ')';
+        });
+    }, 800);
+
+    setTimeout(phase1, 2000);
+})();
+</script>
 
 <section class="tools-section" id="tools">
     <div class="tools-inner">
@@ -250,27 +471,6 @@
     </div>
 </section>
 
-<section style="background:#0a1628;padding:5rem 2rem;border-top:1px solid rgba(255,255,255,0.06);">
-    <div style="max-width:800px;margin:0 auto;text-align:center;">
-        <span style="display:inline-block;background:rgba(201,168,76,0.15);color:#c9a84c;border:1px solid rgba(201,168,76,0.3);padding:5px 14px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.25rem;">Sample Output</span>
-        <h2 style="font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;color:#fff;margin-bottom:0.75rem;letter-spacing:-0.5px;">See What <span style="color:#ffffff;">Aloha</span><span style="color:#c9a84c;">Agent</span> Generates</h2>
-        <p style="color:#8892a4;font-size:0.95rem;margin-bottom:2.5rem;">Real AlohaAgent output for a fictional Oahu property — generated in seconds.</p>
-        <div style="background:#162840;border-left:3px solid #c9a84c;border-radius:16px;padding:2rem;text-align:left;border:1px solid rgba(255,255,255,0.08);border-left:3px solid #c9a84c;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
-                <div>
-                    <div style="font-size:0.85rem;font-weight:700;color:#c9a84c;">47 Kailua Shores Drive, Kailua, HI 96734</div>
-                </div>
-                <span style="background:rgba(201,168,76,0.15);color:#c9a84c;border:1px solid rgba(201,168,76,0.3);padding:4px 12px;border-radius:999px;font-size:11px;font-weight:600;">Listing Description</span>
-            </div>
-            <p style="font-size:0.9rem;line-height:1.85;color:#c8d5e8;">Welcome to this stunning oceanfront retreat nestled in the heart of Kailua, Oahu's most coveted coastal enclave. This immaculate 4-bedroom, 3-bath home offers 2,847 sq ft of thoughtfully designed living space with sweeping views of Kailua Bay from every room.</p>
-            <p style="font-size:0.9rem;line-height:1.85;color:#c8d5e8;margin-top:1rem;">Step inside to discover vaulted ceilings, wide-plank bamboo flooring, and a chef's kitchen appointed with quartz countertops and Thermador appliances. The open-concept great room flows seamlessly to an expansive lanai — ideal for indoor-outdoor island living at its finest.</p>
-            <p style="font-size:0.9rem;line-height:1.85;color:#c8d5e8;margin-top:1rem;">The primary suite is a private sanctuary featuring a spa-inspired en-suite bath with soaking tub, dual vanities, and direct lanai access. Listed at $3,495,000.</p>
-        </div>
-        <p style="margin-top:1.5rem;font-size:0.9rem;">
-            <a href="/register" style="color:#8892a4;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#8892a4'">Generate your own listing in 30 seconds →</a>
-        </p>
-    </div>
-</section>
 
 <section class="how-section" id="how-it-works">
     <div class="how-inner">
