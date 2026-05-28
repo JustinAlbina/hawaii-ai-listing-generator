@@ -1,14 +1,25 @@
 {% extends 'base.html' %}
 {% block title %}AlohaAgent — Tools for Hawaii Real Estate{% endblock %}
+{% block top_banner %}{% endblock %}
 {% block styles %}
+/* ── Nav: transparent on hero, solid on scroll ── */
+.nav { position: fixed !important; background: transparent !important; border-bottom: none !important; transition: background 0.3s, border-color 0.3s; }
+.nav.nav-scrolled { background: rgba(6,19,38,0.95) !important; border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
+
+/* ── Hero: full viewport ── */
 .hero {
     position: relative;
-    padding: 5rem 2rem 4rem;
+    height: 100vh;
+    min-height: 600px;
     overflow: hidden;
     background: #061326;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
 /* ── Crossfade Carousel — 20 slides, 8s hold + 2.5s dissolve = 160s cycle ── */
-.hero-slides { position: absolute; inset: 0; z-index: 0; }
+.hero-slides { position: absolute; inset: 0; z-index: 0; will-change: opacity, transform; transform-origin: center center; }
 .hero-slide {
     position: absolute; inset: 0;
     background-size: cover; background-position: center;
@@ -58,28 +69,40 @@
 .hero-overlay { position: absolute; inset: 0; background: rgba(6,19,38,0.38); z-index: 1; }
 @keyframes heroFade {
     0%    { opacity: 0; }
-    1.5%  { opacity: 1; }   /* 2.5s: fade-in done */
-    6.5%  { opacity: 1; }   /* 10.5s: hold ends, fade-out starts */
-    8%    { opacity: 0; }   /* 13s: fully gone */
+    1.5%  { opacity: 1; }
+    6.5%  { opacity: 1; }
+    8%    { opacity: 0; }
     100%  { opacity: 0; }
 }
-.hero-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 2; padding-left: 4rem; }
+/* Nav gradient: dark-to-transparent behind fixed nav */
+.hero-nav-gradient {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 120px;
+    background: linear-gradient(to bottom, rgba(6,19,38,0.85) 0%, transparent 100%);
+    z-index: 3; pointer-events: none;
+}
+/* Wave divider at hero bottom */
+.hero-wave { position: absolute; bottom: 0; left: 0; right: 0; z-index: 3; pointer-events: none; line-height: 0; }
+/* Hero content: centered */
+.hero-inner { max-width: 900px; margin: 0 auto; position: relative; z-index: 4; padding: 5rem 2rem 2rem; text-align: center; }
 .hero-content { position: relative; z-index: 2; }
-.hero h1 { font-size: clamp(2.8rem, 5vw, 4.2rem); font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 1.25rem; }
+.hero h1 { font-size: clamp(2.8rem, 5vw, 4.2rem); font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 1.25rem; text-shadow: 0 2px 12px rgba(0,0,0,0.5); }
 .hero h1 .gold { color: #c9a84c; }
-.hero-sub { font-size: 1.05rem; color: #a8b8cc; max-width: 480px; line-height: 1.75; margin-bottom: 2.5rem; }
-.hero-stats { display: flex; gap: 2.5rem; margin-bottom: 2.5rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); }
+.hero-sub { font-size: 1.05rem; color: #a8b8cc; max-width: 480px; line-height: 1.75; margin: 0 auto 2.5rem; text-shadow: 0 2px 12px rgba(0,0,0,0.5); }
+.hero-stats { display: flex; gap: 2.5rem; margin-bottom: 2.5rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); justify-content: center; }
 .hero-stat-num { font-size: 1.35rem; font-weight: 700; color: #c9a84c; }
 .hero-stat-label { font-size: 11px; color: #8892a4; margin-top: 2px; }
-.hero-ctas { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+.hero-ctas { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; justify-content: center; }
 .btn-text-link { color: #a8b8cc; font-size: 0.9rem; font-weight: 500; text-decoration: none; transition: color 0.2s; }
 .btn-text-link:hover { color: #c9a84c; }
+
 /* ── Typewriter Demo ── */
 .typewriter-section { background: #040e1f; padding: 4.5rem 2rem; border-top: 1px solid rgba(255,255,255,0.05); }
 .typewriter-inner { max-width: 780px; margin: 0 auto; text-align: center; }
 .typewriter-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #c9a84c; margin-bottom: 1rem; }
 .typewriter-heading { font-size: clamp(1.4rem,2.5vw,2rem); font-weight: 700; color: #fff; margin-bottom: 2rem; letter-spacing: -0.5px; }
-.typewriter-card { background: #0d1b34; border: 1px solid rgba(201,168,76,0.2); border-radius: 16px; padding: 1.75rem 2rem; text-align: left; }
+/* Fixed min-height prevents reflow between phases — JS sets exact value after measuring Phase 3 */
+.typewriter-card { background: #0d1b34; border: 1px solid rgba(201,168,76,0.2); border-radius: 16px; padding: 1.75rem 2rem; text-align: left; min-height: 560px; display: flex; flex-direction: column; justify-content: center; }
 .tw-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); flex-wrap: wrap; }
 .tw-address { font-size: 0.85rem; font-weight: 700; color: #c9a84c; }
 .tw-meta { font-size: 12px; color: #8892a4; margin-top: 2px; }
@@ -107,20 +130,20 @@
 .tw-para:first-child { margin-top: 0; }
 .tw-para.show { opacity: 1; transform: none; }
 
+/* ── Tools Section ── */
 .tools-section { background: #0d1f35; padding: 5rem 2rem; }
 .tools-inner { max-width: 1100px; margin: 0 auto; }
 .section-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #c9a84c; margin-bottom: 1rem; }
 .section-heading { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; color: #fff; max-width: 620px; line-height: 1.3; margin-bottom: 3rem; letter-spacing: -0.5px; }
 .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
 .tool-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.25rem; position: relative; transition: all 0.2s; display: flex; flex-direction: column; }
-.tool-card.live { border-color: rgba(201,168,76,0.25); }
-.tool-card.live:hover { background: rgba(201,168,76,0.06); border-color: rgba(201,168,76,0.45); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
-.tool-badge { position: absolute; top: 14px; right: 14px; }
+.tool-card:hover { background: rgba(201,168,76,0.06); border-color: rgba(201,168,76,0.45); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
 .tool-icon { width: 40px; height: 40px; margin-bottom: 1rem; color: #c9a84c; }
 .tool-name { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem; }
 .tool-desc { font-size: 13px; color: #8892a4; line-height: 1.6; flex: 1; }
 .tool-card .btn-gold { margin-top: 1rem; text-align: center; font-size: 13px; padding: 0.6rem 1rem; }
 
+/* ── How It Works ── */
 .how-section { background: #0d1f35; padding: 5rem 2rem; color: #ffffff; }
 .how-inner { max-width: 1000px; margin: 0 auto; text-align: center; }
 .how-section .section-eyebrow { color: #c9a84c; }
@@ -131,32 +154,29 @@
 .step-title { font-size: 1rem; font-weight: 700; color: #ffffff; margin-bottom: 0.5rem; }
 .step-desc { font-size: 0.9rem; color: #8892a4; line-height: 1.6; }
 
-.waitlist-section { background: #0a1628; padding: 5rem 2rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); }
-.waitlist-inner { max-width: 560px; margin: 0 auto; }
-.waitlist-section .section-heading { margin: 0 auto 0.75rem; }
-.waitlist-sub { color: #8892a4; font-size: 0.95rem; margin-bottom: 2rem; }
-.waitlist-form { display: flex; gap: 0.75rem; max-width: 420px; margin: 0 auto; }
-.waitlist-form input { flex: 1; padding: 0.8rem 1rem; border: 1.5px solid rgba(255,255,255,0.12); border-radius: 10px; font-size: 0.9rem; background: rgba(255,255,255,0.06); color: #fff; font-family: inherit; }
-.waitlist-form input::placeholder { color: #8892a4; }
-.waitlist-form input:focus { outline: none; border-color: #c9a84c; box-shadow: none; }
-.waitlist-form .btn-gold { white-space: nowrap; }
+/* ── Pro Section ── */
+.pro-section { background: #0a1628; padding: 5rem 2rem; text-align: center; border-top: 1px solid rgba(201,168,76,0.15); }
+.pro-inner { max-width: 560px; margin: 0 auto; }
+.pro-price { font-size: 3.5rem; font-weight: 800; color: #c9a84c; letter-spacing: -2px; line-height: 1; margin: 1.5rem 0 0; }
+.pro-price-period { display: block; font-size: 1rem; font-weight: 400; color: #8892a4; margin-top: 0.25rem; letter-spacing: 0; }
+.pro-sub { color: #8892a4; font-size: 0.95rem; margin: 1.25rem auto 2rem; line-height: 1.75; max-width: 420px; }
+.pro-secondary-link { display: inline-block; margin-top: 1rem; color: #8892a4; font-size: 0.9rem; text-decoration: none; transition: color 0.2s; }
+.pro-secondary-link:hover { color: #c9a84c; }
 
-@media (max-width: 1100px) {
-    .tools-grid { grid-template-columns: repeat(2, 1fr); }
-}
+/* ── Responsive ── */
+@media (max-width: 1100px) { .tools-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 600px) {
-    .hero { padding: 3rem 1.25rem; }
-    .hero-inner { padding-left: 0; }
+    .hero-inner { padding: 6rem 1.25rem 2rem; }
     .hero h1 { font-size: 2.4rem; }
+    .hero-stats { flex-direction: column; gap: 1rem; align-items: center; }
     .tools-grid { grid-template-columns: 1fr; }
     .steps-grid { grid-template-columns: 1fr; gap: 2.5rem; }
-    .waitlist-form { flex-direction: column; }
 }
 {% endblock %}
 
 {% block content %}
 <section class="hero">
-    <div class="hero-slides">
+    <div class="hero-slides" id="hero-slides">
         <div class="hero-slide" style="background-image:url('/static/images/hero/hero1.jpg')"></div>
         <div class="hero-slide" style="background-image:url('/static/images/hero/hero2.jpg')"></div>
         <div class="hero-slide" style="background-image:url('/static/images/hero/hero3.jpg')"></div>
@@ -179,22 +199,23 @@
         <div class="hero-slide" data-bg="/static/images/hero/hero20.jpg"></div>
     </div>
     <div class="hero-overlay"></div>
+    <div class="hero-nav-gradient"></div>
     <div class="hero-inner">
         <div class="hero-content">
             <h1>List smarter.<br><span class="gold">Sell faster.</span></h1>
-            <p class="hero-sub">Professional MLS listings, market analysis, and neighborhood reports — generated by AlohaAgent in seconds.</p>
+            <p class="hero-sub">Built exclusively for Hawaii agents.</p>
             <div class="hero-stats">
                 <div>
                     <div class="hero-stat-num">~15s</div>
                     <div class="hero-stat-label">Generation time</div>
                 </div>
                 <div>
-                    <div class="hero-stat-num">150+</div>
+                    <div class="hero-stat-num">500+</div>
                     <div class="hero-stat-label">Words per listing</div>
                 </div>
                 <div>
-                    <div class="hero-stat-num">Free</div>
-                    <div class="hero-stat-label">To get started</div>
+                    <div class="hero-stat-num">85</div>
+                    <div class="hero-stat-label">Neighborhood profiles</div>
                 </div>
             </div>
             <div class="hero-ctas">
@@ -202,6 +223,11 @@
                 <a href="#tools" class="btn-text-link">See all tools</a>
             </div>
         </div>
+    </div>
+    <div class="hero-wave">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 60" preserveAspectRatio="none" style="width:100%;height:60px;display:block;">
+            <path d="M0,42 C240,10 480,58 720,36 C960,14 1200,52 1440,30 L1440,60 L0,60 Z" fill="#c9a84c" fill-opacity="0.45"/>
+        </svg>
     </div>
 </section>
 
@@ -354,7 +380,7 @@
         }, 300);
     }
 
-    // Lazy-load hero slides 6-20 after a short delay
+    // Lazy-load hero slides 6-20
     setTimeout(function () {
         document.querySelectorAll('.hero-slide[data-bg]').forEach(function (el) {
             el.style.backgroundImage = 'url(' + el.dataset.bg + ')';
@@ -362,6 +388,66 @@
     }, 800);
 
     setTimeout(phase1, 2000);
+})();
+
+// Task 4: measure Phase 3 height and lock card min-height to prevent reflow
+(function () {
+    function setCardMinHeight() {
+        var card    = document.getElementById('tw-card');
+        var pForm   = document.getElementById('tw-phase-form');
+        var pGen    = document.getElementById('tw-phase-gen');
+        var pResult = document.getElementById('tw-phase-result');
+        if (!card || !pResult) return;
+
+        var formDisplay = pForm ? pForm.style.display : '';
+        var genDisplay  = pGen  ? pGen.style.display  : 'none';
+
+        if (pForm) pForm.style.display = 'none';
+        if (pGen)  pGen.style.display  = 'none';
+        pResult.style.visibility = 'hidden';
+        pResult.style.display    = 'block';
+        pResult.querySelectorAll('.tw-para').forEach(function (p) { p.classList.add('show'); });
+
+        var h = card.offsetHeight;
+
+        pResult.style.display    = 'none';
+        pResult.style.visibility = '';
+        pResult.querySelectorAll('.tw-para').forEach(function (p) { p.classList.remove('show'); });
+        if (pForm) pForm.style.display = formDisplay !== null ? formDisplay : '';
+        if (pGen)  pGen.style.display  = genDisplay;
+
+        if (h > 300) card.style.minHeight = h + 'px';
+    }
+
+    setCardMinHeight();
+    window.addEventListener('resize', setCardMinHeight, { passive: true });
+})();
+
+// Task 1 + 3: parallax fade on scroll + nav solid-on-scroll
+(function () {
+    var heroSlides = document.getElementById('hero-slides');
+    var nav        = document.querySelector('.nav');
+
+    function onScroll() {
+        var y  = window.scrollY;
+        var vh = window.innerHeight;
+
+        if (heroSlides) {
+            var progress = Math.min(y / vh, 1);
+            heroSlides.style.opacity   = (1 - progress).toFixed(3);
+            heroSlides.style.transform = 'scale(' + (1 + progress * 0.04).toFixed(4) + ')';
+        }
+
+        if (nav) {
+            if (y > vh * 0.6) {
+                nav.classList.add('nav-scrolled');
+            } else {
+                nav.classList.remove('nav-scrolled');
+            }
+        }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
 })();
 </script>
 
@@ -371,8 +457,7 @@
         <h2 class="section-heading">Everything you need to market, communicate, and close with confidence.</h2>
         <div class="tools-grid">
 
-            <div class="tool-card live">
-                <span class="tool-badge live-badge"><span class="live-dot"></span>LIVE</span>
+            <div class="tool-card">
                 <div class="tool-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
@@ -383,8 +468,7 @@
                 <a href="/listing" class="btn-gold" style="display:inline-block; margin-top:auto;">Generate Listing →</a>
             </div>
 
-            <div class="tool-card live">
-                <span class="tool-badge live-badge"><span class="live-dot"></span>LIVE</span>
+            <div class="tool-card">
                 <div class="tool-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
@@ -395,8 +479,7 @@
                 <a href="/open-house" class="btn-gold" style="display:inline-block; margin-top:auto;">Create Post →</a>
             </div>
 
-            <div class="tool-card live">
-                <span class="tool-badge live-badge"><span class="live-dot"></span>LIVE</span>
+            <div class="tool-card">
                 <div class="tool-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
@@ -407,8 +490,7 @@
                 <a href="/offer-letter" class="btn-gold" style="display:inline-block; margin-top:auto;">Draft Offer →</a>
             </div>
 
-            <div class="tool-card live">
-                <span class="tool-badge live-badge"><span class="live-dot"></span>LIVE</span>
+            <div class="tool-card">
                 <div class="tool-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -420,8 +502,7 @@
                 <a href="/social-media" class="btn-gold" style="display:inline-block; margin-top:auto;">Create Content →</a>
             </div>
 
-            <div class="tool-card live">
-                <span class="tool-badge live-badge"><span class="live-dot"></span>LIVE</span>
+            <div class="tool-card">
                 <div class="tool-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
@@ -432,8 +513,7 @@
                 <a href="/market-report" class="btn-gold" style="display:inline-block; margin-top:auto;">Create Report →</a>
             </div>
 
-            <div class="tool-card live">
-                <span class="tool-badge live-badge"><span class="live-dot"></span>LIVE</span>
+            <div class="tool-card">
                 <div class="tool-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
@@ -441,11 +521,10 @@
                 </div>
                 <div class="tool-name">Client Email Templates</div>
                 <div class="tool-desc">Professional client communication templates for every stage of buying and selling.</div>
-                <a href="/client-emails" class="btn-gold" style="display:inline-block; margin-top:auto;">View Analysis →</a>
+                <a href="/client-emails" class="btn-gold" style="display:inline-block; margin-top:auto;">Write Email →</a>
             </div>
 
-            <div class="tool-card live">
-                <span class="tool-badge live-badge"><span class="live-dot"></span>LIVE</span>
+            <div class="tool-card">
                 <div class="tool-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -456,8 +535,7 @@
                 <a href="/bio-generator" class="btn-gold" style="display:inline-block; margin-top:auto;">Generate Bio →</a>
             </div>
 
-            <div class="tool-card live">
-                <span class="tool-badge live-badge"><span class="live-dot"></span>LIVE</span>
+            <div class="tool-card">
                 <div class="tool-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/>
@@ -471,7 +549,6 @@
         </div>
     </div>
 </section>
-
 
 <section class="how-section" id="how-it-works">
     <div class="how-inner">
@@ -497,16 +574,16 @@
     </div>
 </section>
 
-<section class="waitlist-section" id="waitlist">
-    <div class="waitlist-inner">
-        <div class="section-eyebrow">JOIN THE COMMUNITY</div>
-        <h2 class="section-heading">Built for Hawaii. Free to start.</h2>
-        <p class="waitlist-sub">Get notified when new tools launch and stay ahead of the market with AI-powered real estate content.</p>
-        <form action="/waitlist" method="POST" class="waitlist-form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="email" name="email" placeholder="your@email.com" required>
-            <button type="submit" class="btn-gold">Join Waitlist</button>
-        </form>
+<section class="pro-section" id="pro">
+    <div class="pro-inner">
+        <div class="section-eyebrow">GO UNLIMITED</div>
+        <h2 class="section-heading" style="margin:0 auto 0.75rem;">Ready to close more deals?</h2>
+        <p class="pro-sub">Everything you need — unlimited generations, all 8 tools, PDF export, neighborhood intelligence.</p>
+        <div class="pro-price">$79<span class="pro-price-period">/ month</span></div>
+        <div style="margin-top:2rem;">
+            <a href="/pricing" class="btn-gold" style="font-size:1rem;padding:0.9rem 2.25rem;">Upgrade to Pro →</a>
+        </div>
+        <a href="/pricing" class="pro-secondary-link">See what's included →</a>
     </div>
 </section>
 {% endblock %}
