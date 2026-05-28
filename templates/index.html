@@ -12,7 +12,7 @@
     height: 100vh;
     min-height: 600px;
     overflow: hidden;
-    background-color: var(--navy);
+    background-color: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -97,7 +97,7 @@
 .btn-text-link:hover { color: #c9a84c; }
 
 /* ── Typewriter Demo ── */
-.typewriter-section { background: #040e1f; padding: 4.5rem 2rem; border-top: 1px solid rgba(255,255,255,0.05); }
+.typewriter-section { background: var(--navy); padding: 4.5rem 2rem; border-top: 1px solid rgba(255,255,255,0.05); }
 .typewriter-inner { max-width: 780px; margin: 0 auto; text-align: center; }
 .typewriter-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #c9a84c; margin-bottom: 1rem; }
 .typewriter-heading { font-size: clamp(1.4rem,2.5vw,2rem); font-weight: 700; color: #fff; margin-bottom: 2rem; letter-spacing: -0.5px; }
@@ -455,10 +455,12 @@
         var vh = window.innerHeight;
         var progress = Math.min(y / vh, 1);
 
-        // Fade the whole hero section — background-color: var(--navy) on .hero ensures
-        // no color flash as opacity drops; all layers (slides, overlay, text) fade together
+        // Fade whole hero section as one unit — transparent background-color means
+        // no opaque layer can flash through from the hero's own base paint layer;
+        // the navy body background shows cleanly through as photos fade
         if (heroSection) {
-            heroSection.style.opacity = (1 - progress).toFixed(3);
+            heroSection.style.opacity      = (1 - progress).toFixed(3);
+            heroSection.style.pointerEvents = progress > 0 ? 'none' : '';
         }
 
         // Scale only the slides layer for the cinematic zoom
