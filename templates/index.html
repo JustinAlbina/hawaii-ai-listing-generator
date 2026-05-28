@@ -3,7 +3,7 @@
 {% block top_banner %}{% endblock %}
 {% block styles %}
 /* ── Nav: transparent on hero, solid on scroll ── */
-.nav { position: fixed !important; background: transparent !important; border-bottom: none !important; transition: background 0.3s, border-color 0.3s; }
+.nav { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; background: transparent !important; border-bottom: none !important; transition: background 0.3s, border-color 0.3s; }
 .nav.nav-scrolled { background: rgba(6,19,38,0.95) !important; border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
 
 /* ── Hero: full viewport ── */
@@ -12,7 +12,7 @@
     height: 100vh;
     min-height: 600px;
     overflow: hidden;
-    background: #061326;
+    background-color: var(--navy);
     display: flex;
     align-items: center;
     justify-content: center;
