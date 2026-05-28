@@ -17,9 +17,12 @@
     align-items: center;
     justify-content: center;
     padding: 0;
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
 }
 /* ── Crossfade Carousel — 20 slides, 8s hold + 2.5s dissolve = 160s cycle ── */
-.hero-slides { position: absolute; inset: 0; z-index: 0; transform-origin: center center; }
+.hero-slides { position: absolute; inset: 0; z-index: 0; transform-origin: center center; animation: heroZoom 40s ease-in-out infinite; }
+@keyframes heroZoom { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 .hero-slide {
     position: absolute; inset: 0;
     background-size: cover; background-position: center;
@@ -80,8 +83,8 @@
     background: linear-gradient(to bottom, rgba(6,19,38,0.85) 0%, transparent 100%);
     z-index: 3; pointer-events: none;
 }
-/* Wave divider at hero bottom */
-.hero-wave { position: absolute; bottom: 0; left: 0; right: 0; z-index: 3; pointer-events: none; line-height: 0; }
+/* Wave divider — sits outside hero so mask-image doesn't clip it */
+.hero-wave { position: relative; z-index: 10; pointer-events: none; line-height: 0; margin-top: -55px; }
 /* Hero content: centered */
 .hero-inner { max-width: 900px; margin: 0 auto; position: relative; z-index: 4; padding: 5rem 2rem 2rem; text-align: center; }
 .hero-content { position: relative; z-index: 2; }
@@ -222,12 +225,12 @@
             </div>
         </div>
     </div>
-    <div class="hero-wave">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 60" preserveAspectRatio="none" style="width:100%;height:60px;display:block;">
-            <path d="M0,42 C240,10 480,58 720,36 C960,14 1200,52 1440,30 L1440,60 L0,60 Z" fill="#c9a84c" fill-opacity="0.45"/>
-        </svg>
-    </div>
 </section>
+<div class="hero-wave">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 60" preserveAspectRatio="none" style="width:100%;height:60px;display:block;">
+        <path d="M0,42 C240,10 480,58 720,36 C960,14 1200,52 1440,30 L1440,60 L0,60 Z" fill="#c9a84c" fill-opacity="0.45"/>
+    </svg>
+</div>
 
 <section class="typewriter-section">
     <div class="typewriter-inner">
@@ -441,40 +444,17 @@
     }, { passive: true });
 })();
 
-// FIX 1: parallax fades entire hero section as one unit (no layer desync flash)
-// nav becomes solid past 60% scroll depth
+// Nav: transparent on hero, solid after scrolling 60% of viewport
 (function () {
-    var heroSection = document.querySelector('section.hero');
-    var heroSlides  = document.getElementById('hero-slides');
-    var nav         = document.querySelector('.nav');
-
+    var nav = document.querySelector('.nav');
+    if (!nav) return;
     function onScroll() {
-        var y  = window.scrollY;
-        var vh = window.innerHeight;
-        var progress = Math.min(y / vh, 1);
-
-        // Fade whole hero section as one unit — transparent background-color means
-        // no opaque layer can flash through from the hero's own base paint layer;
-        // the navy body background shows cleanly through as photos fade
-        if (heroSection) {
-            heroSection.style.opacity      = (1 - progress).toFixed(3);
-            heroSection.style.pointerEvents = progress > 0 ? 'none' : '';
-        }
-
-        // Scale only the slides layer for the cinematic zoom
-        if (heroSlides) {
-            heroSlides.style.transform = 'scale(' + (1 + progress * 0.04).toFixed(4) + ')';
-        }
-
-        if (nav) {
-            if (y > vh * 0.6) {
-                nav.classList.add('nav-scrolled');
-            } else {
-                nav.classList.remove('nav-scrolled');
-            }
+        if (window.scrollY > window.innerHeight * 0.6) {
+            nav.classList.add('nav-scrolled');
+        } else {
+            nav.classList.remove('nav-scrolled');
         }
     }
-
     window.addEventListener('scroll', onScroll, { passive: true });
 })();
 </script>
