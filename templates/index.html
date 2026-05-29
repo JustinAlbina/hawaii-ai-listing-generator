@@ -91,7 +91,8 @@
 .hero h1 { font-size: clamp(2.8rem, 5vw, 4.2rem); font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 1.25rem; text-shadow: 0 2px 12px rgba(0,0,0,0.5); }
 .hero h1 .gold { color: #c9a84c; }
 .hero-sub { font-size: 1.05rem; color: #a8b8cc; max-width: 480px; line-height: 1.75; margin: 0 auto 2.5rem; text-shadow: 0 2px 12px rgba(0,0,0,0.5); }
-.hero-stats { display: flex; gap: 2.5rem; margin-bottom: 2.5rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); justify-content: center; }
+.hero-stats-wrap { display: flex; justify-content: center; margin-bottom: 2.5rem; padding-top: 2rem; }
+.hero-stats { display: inline-flex; gap: 2.5rem; background: rgba(0,0,0,0.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 14px; border: 0.5px solid rgba(255,255,255,0.1); padding: 0.9rem 1.75rem; }
 .hero-stat-num { font-size: 1.35rem; font-weight: 700; color: #c9a84c; }
 .hero-stat-label { font-size: 11px; color: #8892a4; margin-top: 2px; }
 .hero-ctas { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; justify-content: center; }
@@ -170,7 +171,8 @@
 @media (max-width: 600px) {
     .hero-inner { padding: 6rem 1.25rem 2rem; }
     .hero h1 { font-size: 2.4rem; }
-    .hero-stats { flex-direction: column; gap: 1rem; align-items: center; }
+    .hero-stats-wrap { padding-top: 2rem; }
+    .hero-stats { flex-direction: column; gap: 1rem; align-items: center; padding: 1rem 1.5rem; width: 100%; max-width: 320px; }
     .tools-grid { grid-template-columns: 1fr; }
     .steps-grid { grid-template-columns: 1fr; gap: 2.5rem; }
 }
@@ -205,18 +207,20 @@
         <div class="hero-content">
             <h1>List smarter.<br><span class="gold">Sell faster.</span></h1>
             <p class="hero-sub">Built exclusively for Hawaii agents.</p>
-            <div class="hero-stats">
-                <div>
-                    <div class="hero-stat-num">~15s</div>
-                    <div class="hero-stat-label">Generation time</div>
-                </div>
-                <div>
-                    <div class="hero-stat-num">Knows your market</div>
-                    <div class="hero-stat-label">Kailua to Kona · Poipu to Princeville</div>
-                </div>
-                <div>
-                    <div class="hero-stat-num">8 tools</div>
-                    <div class="hero-stat-label">Built for Hawaii agents</div>
+            <div class="hero-stats-wrap">
+                <div class="hero-stats">
+                    <div>
+                        <div class="hero-stat-num">~15s</div>
+                        <div class="hero-stat-label">Generation time</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-num">Knows your market</div>
+                        <div class="hero-stat-label">Kailua to Kona · Poipu to Princeville</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-num">8 tools</div>
+                        <div class="hero-stat-label">Built for Hawaii agents</div>
+                    </div>
                 </div>
             </div>
             <div class="hero-ctas">
