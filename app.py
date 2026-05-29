@@ -88,6 +88,35 @@ class Generation(db.Model):
     output_text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
+class SharedResult(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(32), unique=True, nullable=False, index=True)
+    address = db.Column(db.String(200))
+    neighborhood = db.Column(db.String(100))
+    island = db.Column(db.String(50))
+    price = db.Column(db.String(50))
+    bedrooms = db.Column(db.String(20))
+    bathrooms = db.Column(db.String(20))
+    sqft = db.Column(db.String(20))
+    view = db.Column(db.String(100))
+    pool_yn = db.Column(db.String(10))
+    price_per_sqft = db.Column(db.String(20))
+    property_type = db.Column(db.String(50))
+    year_built = db.Column(db.String(20))
+    parking = db.Column(db.String(100))
+    land_tenure = db.Column(db.String(50))
+    solar = db.Column(db.String(5))
+    ohana = db.Column(db.String(5))
+    renovation_year = db.Column(db.String(20))
+    flood_zone = db.Column(db.String(100))
+    extra = db.Column(db.Text)
+    hoa_fee = db.Column(db.String(50))
+    listing_html = db.Column(db.Text)
+    analysis_html = db.Column(db.Text)
+    neighborhood_html = db.Column(db.Text)
+    photo_count = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
     @property
     def input_parsed(self):
         try:
@@ -532,7 +561,7 @@ def _generate_inner():
     neighborhood = request.form["neighborhood"]
     island = request.form["island"]
     view = request.form.get("view", "").strip()
-    pool = request.form["pool"]
+    pool_yn = request.form.get("pool", "no")
     extra = request.form["extra"]
     year_built = request.form.get("year_built", "").strip()
     parking = request.form.get("parking", "").strip()
@@ -541,6 +570,8 @@ def _generate_inner():
     ohana = request.form.get("ohana", "")
     renovation_year = request.form.get("renovation_year", "").strip()
     flood_zone = request.form.get("flood_zone", "").strip()
+    property_type = request.form.get("property_type", "Single Family").strip()
+    hoa_fee = request.form.get("hoa_fee", "").strip()
 
     try:
         sqft_num = float(sqft.replace(",", ""))
@@ -556,6 +587,15 @@ def _generate_inner():
     renovation_year_line = f"Renovation year: {renovation_year}" if renovation_year else ""
     flood_zone_line = f"Flood zone: {flood_zone}" if flood_zone else ""
     view_line = f"View: {view}" if view else ""
+    hoa_fee_line = f"HOA Fee (monthly): {hoa_fee}" if hoa_fee else ""
+
+    _pt_rules = {
+        "Single Family": "For single family homes, emphasize the yard, privacy, sense of ownership, and Hawaii family lifestyle. Highlight indoor-outdoor flow and lot ownership.",
+        "Condo": "For condos, emphasize lock-and-leave lifestyle, building amenities, lanai living, and HOA-managed exterior maintenance. Condo copy must feel distinctly different from single-family copy — no mention of yards or driveways. Focus on community amenities, views from the unit, and the ease of island living." + (f" Monthly HOA of {hoa_fee} — frame this as value against owning and maintaining a property outright." if hoa_fee else ""),
+        "Townhome": "For townhomes, highlight the balance of privacy and community, multi-level living, and the attached or assigned parking that many Hawaii condos lack.",
+        "Land": "For land listings, NO interior narrative — there is no interior. Focus entirely on the lot: views, topography, zoning, utilities, building potential, and what life looks like after the buyer builds their vision here.",
+    }
+    _property_type_rule = _pt_rules.get(property_type, "")
 
     # Neighborhood context injection
     _nb_data = get_neighborhood_context(neighborhood, island)
@@ -585,7 +625,7 @@ Square footage: {sqft}
 Price: {price}
 Price per sqft: ${price_per_sqft}
 {view_line}
-Pool: {pool}
+Pool: {pool_yn}
 Standout feature: {extra}
 Land tenure: {land_tenure}
 {year_built_line}
@@ -594,10 +634,15 @@ Land tenure: {land_tenure}
 {ohana_line}
 {renovation_year_line}
 {flood_zone_line}
+Property Type: {property_type}
+{hoa_fee_line}
 
 Generation ID: {generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
 
 {_nb_context}
+
+PROPERTY TYPE RULES:
+{_property_type_rule}
 
 HAWAII VOICE RULES:
 Always write with authentic Hawaii personality. Reference specific Hawaii lifestyle elements naturally — trade winds, island pace, proximity to beaches or mountains, local community feel, indoor-outdoor living, year-round weather. Never use mainland real estate clichés without grounding them in a Hawaii context. Write like a local expert, not like a generic real estate AI. Avoid anything that sounds like it was written for a suburban home in Phoenix or Dallas.
@@ -641,7 +686,7 @@ Bedrooms: {bedrooms}, Bathrooms: {bathrooms}
 Square footage: {sqft}, Price: {price}
 Price per sqft: ${price_per_sqft}
 {view_line}
-Pool: {pool}
+Pool: {pool_yn}
 Standout feature: {extra}
 Land tenure: {land_tenure}
 
@@ -699,9 +744,39 @@ NEIGHBORHOOD VIBE:
 
     save_generation("Listing Generator",
         {"address": address, "neighborhood": neighborhood, "island": island,
-         "price": price, "bedrooms": bedrooms, "bathrooms": bathrooms, "sqft": sqft},
+         "price": price, "bedrooms": bedrooms, "bathrooms": bathrooms, "sqft": sqft,
+         "property_type": property_type},
         f"LISTING:\n{listing_text}\n\nANALYSIS:\n{analysis_text}\n\nNEIGHBORHOOD REPORT:\n{neighborhood_text}"
     )
+
+    listing_html = to_html(listing_text)
+    analysis_html = to_html(analysis_text)
+    neighborhood_html = to_html(neighborhood_text)
+
+    share_token = _secrets_mod.token_hex(8)
+    shared = SharedResult(
+        token=share_token,
+        address=address, neighborhood=neighborhood, island=island,
+        price=price, bedrooms=bedrooms, bathrooms=bathrooms, sqft=sqft,
+        view=view, pool_yn=pool_yn, price_per_sqft=str(price_per_sqft),
+        property_type=property_type, year_built=year_built, parking=parking,
+        land_tenure=land_tenure, solar=solar, ohana=ohana,
+        renovation_year=renovation_year, flood_zone=flood_zone, extra=extra,
+        hoa_fee=hoa_fee, listing_html=listing_html, analysis_html=analysis_html,
+        neighborhood_html=neighborhood_html, photo_count=photo_count
+    )
+    db.session.add(shared)
+    db.session.commit()
+    share_url = url_for('listing_shared_result', token=share_token, _external=True)
+
+    prefill_data = {
+        "address": address, "neighborhood": neighborhood, "island": island,
+        "property_type": property_type, "bedrooms": bedrooms, "bathrooms": bathrooms,
+        "sqft": sqft, "price": price, "year_built": year_built, "parking": parking,
+        "view": view, "pool": pool_yn, "land_tenure": land_tenure,
+        "solar": solar, "ohana": ohana, "renovation_year": renovation_year,
+        "flood_zone": flood_zone, "extra": extra, "hoa_fee": hoa_fee
+    }
 
     return render_template("results.html",
         address=address,
@@ -712,12 +787,70 @@ NEIGHBORHOOD VIBE:
         neighborhood=neighborhood,
         island=island,
         view=view,
-        pool=pool,
+        pool=pool_yn,
         price_per_sqft=price_per_sqft,
-        listing=to_html(listing_text),
-        analysis=to_html(analysis_text),
-        neighborhood_report=to_html(neighborhood_text),
-        photo_count=photo_count
+        property_type=property_type,
+        year_built=year_built,
+        parking=parking,
+        land_tenure=land_tenure,
+        solar=solar,
+        ohana=ohana,
+        renovation_year=renovation_year,
+        flood_zone=flood_zone,
+        extra=extra,
+        hoa_fee=hoa_fee,
+        listing=listing_html,
+        analysis=analysis_html,
+        neighborhood_report=neighborhood_html,
+        photo_count=photo_count,
+        share_url=share_url,
+        prefill_data=prefill_data
+    )
+
+@app.route("/listing/result/<token>")
+def listing_shared_result(token):
+    result = SharedResult.query.filter_by(token=token).first_or_404()
+    share_url = request.url
+    prefill_data = {
+        "address": result.address or "", "neighborhood": result.neighborhood or "",
+        "island": result.island or "", "property_type": result.property_type or "Single Family",
+        "bedrooms": result.bedrooms or "", "bathrooms": result.bathrooms or "",
+        "sqft": result.sqft or "", "price": result.price or "",
+        "year_built": result.year_built or "", "parking": result.parking or "",
+        "view": result.view or "", "pool": result.pool_yn or "no",
+        "land_tenure": result.land_tenure or "Fee Simple",
+        "solar": result.solar or "", "ohana": result.ohana or "",
+        "renovation_year": result.renovation_year or "",
+        "flood_zone": result.flood_zone or "", "extra": result.extra or "",
+        "hoa_fee": result.hoa_fee or ""
+    }
+    return render_template("results.html",
+        address=result.address,
+        bedrooms=result.bedrooms,
+        bathrooms=result.bathrooms,
+        sqft=result.sqft,
+        price=result.price,
+        neighborhood=result.neighborhood,
+        island=result.island,
+        view=result.view or "",
+        pool=result.pool_yn,
+        price_per_sqft=result.price_per_sqft,
+        property_type=result.property_type or "",
+        year_built=result.year_built or "",
+        parking=result.parking or "",
+        land_tenure=result.land_tenure or "",
+        solar=result.solar or "",
+        ohana=result.ohana or "",
+        renovation_year=result.renovation_year or "",
+        flood_zone=result.flood_zone or "",
+        extra=result.extra or "",
+        hoa_fee=result.hoa_fee or "",
+        listing=result.listing_html,
+        analysis=result.analysis_html,
+        neighborhood_report=result.neighborhood_html,
+        photo_count=result.photo_count,
+        share_url=share_url,
+        prefill_data=prefill_data
     )
 
 @app.route("/refine-listing", methods=["POST"])

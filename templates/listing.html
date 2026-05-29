@@ -86,7 +86,7 @@ select option { background: #1a2f45; color: #fff; }
                 </div>
                 <div class="form-group">
                     <label>Island</label>
-                    <select name="island">
+                    <select name="island" id="island-select">
                         {% set _island = current_user.island if current_user.is_authenticated else '' %}
                         <option {% if _island == 'Kauai' %}selected{% endif %}>Kauai</option>
                         <option {% if _island == 'Oahu' %}selected{% endif %}>Oahu</option>
@@ -96,6 +96,19 @@ select option { background: #1a2f45; color: #fff; }
                         <option {% if _island == 'Lanai' %}selected{% endif %}>Lanai</option>
                     </select>
                 </div>
+            </div>
+            <div class="form-group">
+                <label>Property Type</label>
+                <select name="property_type" id="property-type-select">
+                    <option value="Single Family">Single Family</option>
+                    <option value="Condo">Condo</option>
+                    <option value="Townhome">Townhome</option>
+                    <option value="Land">Land</option>
+                </select>
+            </div>
+            <div class="form-group" id="hoa-field" style="display:none">
+                <label>HOA Fee (monthly)</label>
+                <input type="text" name="hoa_fee" id="hoa-fee-input" placeholder="e.g. $650/mo">
             </div>
             <div class="row">
                 <div class="form-group">
@@ -231,6 +244,46 @@ select option { background: #1a2f45; color: #fff; }
 </div>
 {% endblock %}
 {% block scripts %}
+(function(){
+    var ptSel = document.getElementById('property-type-select');
+    var hoaField = document.getElementById('hoa-field');
+    function toggleHoa() {
+        if (ptSel && hoaField) {
+            hoaField.style.display = ptSel.value === 'Condo' ? '' : 'none';
+        }
+    }
+    if (ptSel) {
+        ptSel.addEventListener('change', toggleHoa);
+        toggleHoa();
+    }
+})();
+
+(function(){
+    var stored = sessionStorage.getItem('alohaagent_listing_prefill');
+    if (!stored) return;
+    sessionStorage.removeItem('alohaagent_listing_prefill');
+    var data;
+    try { data = JSON.parse(stored); } catch(e) { return; }
+    function setVal(name, val) {
+        var el = document.querySelector('[name="' + name + '"]');
+        if (!el || val === undefined || val === null) return;
+        if (el.type === 'checkbox') { el.checked = (val === 'yes'); }
+        else { el.value = val; }
+    }
+    ['address','neighborhood','bedrooms','bathrooms','sqft','price','year_built','parking','extra','hoa_fee','renovation_year'].forEach(function(n){ setVal(n, data[n]); });
+    ['island','view','pool','land_tenure','flood_zone'].forEach(function(n){ setVal(n, data[n]); });
+    ['solar','ohana'].forEach(function(n){ setVal(n, data[n]); });
+    var ptSel = document.getElementById('property-type-select');
+    if (ptSel && data.property_type) {
+        ptSel.value = data.property_type;
+        ptSel.dispatchEvent(new Event('change'));
+    }
+    if (data.hoa_fee) {
+        var hoaInput = document.getElementById('hoa-fee-input');
+        if (hoaInput) hoaInput.value = data.hoa_fee;
+    }
+})();
+
 (function(){
     var form = document.querySelector('form');
     if (!form) return;
