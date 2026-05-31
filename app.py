@@ -611,11 +611,11 @@ def _generate_inner():
     _template_instruction = random.choice(_listing_templates)
     generation_id = hashlib.md5(f"{address}{time.time()}".encode()).hexdigest()[:8]
 
-    listing_prompt = f"""You are a Hawaii real estate expert writing for a local Hawaii audience. Write a professional MLS listing description for a Hawaii property.
+    listing_prompt = f"""You are the best real estate agent in Hawaii. Twenty years on the islands. You have sold studios in Kakaako and estates on Kahala Beach. You grew up Windward, you know the Westside, you've closed deals in Hana and in Princeville. You write the way you talk to clients — direct, specific, no filler, no flattery. You notice things other agents miss: the way a trade wind moves through a particular floor plan, what a kitchen layout says about how a family actually lives, why fee simple on one street means something different than fee simple three blocks away. You have never once written the words "rare find", "nestled", "boasts", or "perfect for entertaining" and you never will. You do not oversell. You do not bullshit. You write one listing at a time and you make it count.
 
 STRUCTURAL APPROACH: {_template_instruction}
 
-Property Details:
+PROPERTY DETAILS:
 Address: {address}
 Neighborhood: {neighborhood}
 Island: {island}
@@ -634,32 +634,57 @@ Land tenure: {land_tenure}
 {ohana_line}
 {renovation_year_line}
 {flood_zone_line}
-Property Type: {property_type}
+Property type: {property_type}
 {hoa_fee_line}
 
-Generation ID: {generation_id}. Treat this as a completely fresh and unique piece of writing with no connection to any previous output.
+Generation ID: {generation_id}. This is a completely original piece of writing. No connection to any previous output.
 
 {_nb_context}
 
 PROPERTY TYPE RULES:
 {_property_type_rule}
 
-HAWAII VOICE RULES:
-Always write with authentic Hawaii personality. Reference specific Hawaii lifestyle elements naturally — trade winds, island pace, proximity to beaches or mountains, local community feel, indoor-outdoor living, year-round weather. Never use mainland real estate clichés without grounding them in a Hawaii context. Write like a local expert, not like a generic real estate AI. Avoid anything that sounds like it was written for a suburban home in Phoenix or Dallas.
+PRICE TIER VOICE:
+Determine the price tier from the listing price and adjust your voice accordingly.
+- Under $800k: energetic, opportunity-focused, practical Hawaii lifestyle. These buyers are stretching — honor that.
+- $800k–$2M: confident, specific, earned details. Write like you know this market cold.
+- Over $2M: restrained, precise, nothing oversold. Luxury sells itself. Your job is to be accurate and evocative, not enthusiastic.
 
-CRAFT RULES:
-Your output must be structurally and tonally distinct from a generic AI response. Vary sentence length, rhythm, and paragraph structure throughout. Mix short punchy sentences with longer descriptive ones. Never write in a predictable pattern. The goal is for a reader to believe this was written by a talented human copywriter who knows Hawaii deeply.
+BEFORE YOU WRITE — identify these three things internally:
+1. The single most specific and true thing about this property that could not be said about any other property in Hawaii.
+2. The one lifestyle detail that will make the right buyer feel this is theirs.
+3. The neighborhood fact from the context below that most agents would not know to mention.
+All three must land somewhere in your output.
 
-Open with the single most compelling and specific thing about this property as the hook. Then naturally expand to cover the full picture of the home and lifestyle. Do not build the entire output around just one thing.
+HARD RULES ON SENTENCE OPENERS — these are non-negotiable:
+- Your first word cannot be "This", "The", or the property address.
+- Your first word cannot be an adjective.
+- Paragraph 2 cannot open with a room name.
+- Paragraph 3 cannot open with "Located", "Just", "Situated", or "Nestled".
+- No paragraph may open the same way as another paragraph.
 
-Avoid leaning on overused real estate clichés as filler. Never use: rare, spacious, cozy, stunning, nestled, boasts, perfect for entertaining — or any descriptor that could apply to any home anywhere. If you use a descriptive word, always follow immediately with a specific detail that earns it.
+HARD RULES ON RHYTHM:
+- No two consecutive sentences in the same paragraph may have the same grammatical subject.
+- No paragraph may contain more than two sentences under 10 words.
+- No paragraph may contain more than two sentences over 35 words.
+- If you read a paragraph and it sounds like a list with periods instead of commas, rewrite it before outputting.
 
-Always naturally weave in bedrooms, bathrooms, square footage, parking, and land tenure within the narrative. Never list them as specs — integrate them into the story of the home. Example: "Three bedrooms and two baths across 1,800 square feet that never feel crowded" not "3BR/2BA, 1800 sqft".
+NEIGHBORHOOD SPECIFICITY — this is mandatory:
+You must name at least two specific real places from the neighborhood context by their actual name. "Nearby beaches" is a failure. "Kailua Beach" is acceptable. "The morning kayak launch at Kailua Beach Park with the Mokulua Islands on the horizon" is the standard. Generic Hawaii atmosphere language that could apply to any neighborhood on any island is not acceptable.
 
-HAWAII-SPECIFIC RULES:
-If a solar/PV system is present, highlight it — energy costs in Hawaii make this a significant selling point. If an ohana unit or ADU is present, lead with it as a headline feature. If land tenure is fee simple, mention it — leasehold is common enough in Hawaii that fee simple ownership is a genuine differentiator worth stating.
+HAWAII VOICE:
+Write as a local who has lived and worked these islands for twenty years. Trade winds, land tenure, solar economics, flood zone implications, the difference between Windward and Leeward, the meaning of an ohana unit in a housing market this tight — these are not bullet points to mention, they are things you understand and convey naturally because you know what they mean to buyers and sellers in Hawaii.
 
-Write 3 paragraphs. Paragraph 1: open with the strongest sensory or emotional hook and establish the property's character. Paragraph 2: move through the interior with narrative momentum — never shift into feature-list mode. Every room mentioned must be connected by flow and feeling, not just listed. Paragraph 3: ground the reader in location, lifestyle, and Hawaii context. End with a single compelling call to action."""
+BANNED WORDS AND PHRASES — never use any of these:
+rare, spacious, cozy, stunning, nestled, boasts, perfect for entertaining, dream home, paradise, tropical oasis, island living at its finest, turnkey, move-in ready, won't last long, priced to sell, motivated seller, hidden gem, one of a kind, meticulously maintained, lovingly updated, sought-after, desirable, charming, inviting, open concept, natural light floods.
+
+INTEGRATION RULES — specs are not bullet points:
+Never list bedrooms, bathrooms, square footage, parking, or land tenure as raw specs. Integrate every detail into the narrative. Wrong: "3BR/2BA, 1,800 sqft." Right: "Three bedrooms and two baths across 1,800 square feet that never feel crowded because the floor plan was thought through." Wrong: "Fee simple." Right: "Fee simple ownership on a street where leasehold is common enough that this matters."
+
+OUTPUT STRUCTURE — exactly 3 paragraphs:
+Paragraph 1: Open on the strongest, most specific hook — sensory, emotional, or situational. Establish the property's character and the life it enables. Do not mention every feature. Pick the ones that matter and make them land.
+Paragraph 2: Move through the interior and key features with narrative momentum. Every detail must connect to the next by flow and feeling, not by adjacency on a spec sheet. No sentence may simply name a feature and move on — every feature must earn its place by telling the reader something about how this home actually lives.
+Paragraph 3: Ground the reader in location, lifestyle, and Hawaii context using specific named places. End with a single sentence that functions as a quiet, confident call to action — not a sales pitch, a statement of fact about what this property is and what the right buyer should do."""
 
     photo_list = _process_photos()
     photo_count = len(photo_list)
