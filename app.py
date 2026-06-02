@@ -46,7 +46,7 @@ if database_url.startswith("postgres://"):
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024  # 32 MB — handles up to 8 large photos
-app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_SECURE"] = os.getenv("FLASK_DEBUG", "0") != "1"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=7)
@@ -307,11 +307,12 @@ def set_security_headers(response):
     # form-action self-only; Stripe checkout is a server-side redirect, not a client-side form post.
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline'; "
+        "script-src 'self' 'unsafe-inline' https://js.stripe.com; "
         "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: blob:; "
-        "connect-src 'self'; "
+        "connect-src 'self' https://api.stripe.com; "
         "font-src 'self'; "
+        "frame-src https://checkout.stripe.com https://js.stripe.com; "
         "frame-ancestors 'none'; "
         "base-uri 'self'; "
         "form-action 'self';"
