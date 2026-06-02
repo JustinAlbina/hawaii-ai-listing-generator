@@ -605,8 +605,8 @@ def _generate_inner():
         "Lead with lifestyle — paint a picture of how this home feels to live in day to day. Start with the daily rhythms, routines, and sensory details of life in this specific home before introducing the property facts.",
         "Lead with location — open by anchoring the reader in the specific place this home sits. What surrounds it, what you can access, what the setting means for daily life in Hawaii. Then bring them inside.",
         "Lead with the home's single most standout physical feature. Open on that one thing specifically and vividly, then let it naturally expand outward to the full property and lifestyle.",
-        "Lead with a vivid sensory scene — what you see, hear, and feel when you first arrive at this property. Make the reader feel like they're standing there. Then unfold the full picture of the home.",
-        "Lead with the story of the home — its character, its history if known, or what makes it feel lived in and loved. Start with soul, then bring in the facts.",
+        "Lead with one specific sensory detail that only exists at this exact property — not Hawaii in general, not the neighborhood, but this address. What do you see, hear, or feel that you would not find anywhere else. Then expand outward.",
+        "Lead with what this home has clearly been through — its age, its renovation, its land tenure, its position on the street — and what that history means for the buyer standing in it today. Soul first, facts second.",
     ]
     _template_instruction = random.choice(_listing_templates)
     generation_id = hashlib.md5(f"{address}{time.time()}".encode()).hexdigest()[:8]
@@ -650,15 +650,14 @@ Determine the price tier from the listing price and adjust your voice accordingl
 - $800k–$2M: confident, specific, earned details. Write like you know this market cold.
 - Over $2M: restrained, precise, nothing oversold. Luxury sells itself. Your job is to be accurate and evocative, not enthusiastic.
 
-BEFORE YOU WRITE — identify these three things internally:
-1. The single most specific and true thing about this property that could not be said about any other property in Hawaii.
-2. The one lifestyle detail that will make the right buyer feel this is theirs.
-3. The neighborhood fact from the context below that most agents would not know to mention.
-All three must land somewhere in your output.
+BEFORE YOU WRITE — complete these three steps. The output must prove you did them:
+1. Identify the single most specific and true thing about this property that could not be said about any other property in Hawaii. It must appear in paragraph 1.
+2. Identify the one lifestyle detail that will make the right buyer feel this home is theirs. It must appear in paragraph 2.
+3. Identify the neighborhood fact from the context provided that most agents would not know to mention. It must appear in paragraph 3.
+If any of these three things cannot be found in the output, the output is wrong. Rewrite it.
 
-HARD RULES ON SENTENCE OPENERS — these are non-negotiable:
-- Your first word cannot be "This", "The", or the property address.
-- Your first word cannot be an adjective.
+HARD RULES ON SENTENCE OPENERS — non-negotiable:
+- First word of paragraph 1 cannot be "This", "The", the property address, or any adjective.
 - Paragraph 2 cannot open with a room name.
 - Paragraph 3 cannot open with "Located", "Just", "Situated", or "Nestled".
 - No paragraph may open the same way as another paragraph.
@@ -667,24 +666,38 @@ HARD RULES ON RHYTHM:
 - No two consecutive sentences in the same paragraph may have the same grammatical subject.
 - No paragraph may contain more than two sentences under 10 words.
 - No paragraph may contain more than two sentences over 35 words.
-- If you read a paragraph and it sounds like a list with periods instead of commas, rewrite it before outputting.
+- If a paragraph reads like a list with periods instead of commas, rewrite it before outputting.
 
-NEIGHBORHOOD SPECIFICITY — this is mandatory:
-You must name at least two specific real places from the neighborhood context by their actual name. "Nearby beaches" is a failure. "Kailua Beach" is acceptable. "The morning kayak launch at Kailua Beach Park with the Mokulua Islands on the horizon" is the standard. Generic Hawaii atmosphere language that could apply to any neighborhood on any island is not acceptable.
+PARAGRAPH 2 RULE — mandatory:
+Every sentence in paragraph 2 must answer the question "so what?" A feature named without a consequence for the buyer does not belong.
+Wrong: "Hardwood floors carry through every room."
+Right: "Hardwood carries through every room — no carpet transitions, no cold tile underfoot at 6am, no flooring decisions to make before you move in."
+If a sentence in paragraph 2 cannot pass the "so what?" test, cut it or rewrite it. No exceptions.
+
+NEIGHBORHOOD SPECIFICITY — mandatory:
+Name at least two specific real places from the neighborhood context by their actual name. "Nearby beaches" is a failure. "Kailua Beach" is acceptable. "The morning kayak launch at Kailua Beach Park with the Mokulua Islands on the horizon" is the standard. Generic Hawaii atmosphere language that could apply to any neighborhood on any island is not acceptable. Every named location must be on the same island as the subject property. Referencing a place on a different island is a factual error that destroys agent credibility instantly.
 
 HAWAII VOICE:
 Write as a local who has lived and worked these islands for twenty years. Trade winds, land tenure, solar economics, flood zone implications, the difference between Windward and Leeward, the meaning of an ohana unit in a housing market this tight — these are not bullet points to mention, they are things you understand and convey naturally because you know what they mean to buyers and sellers in Hawaii.
 
-BANNED WORDS AND PHRASES — never use any of these:
-rare, spacious, cozy, stunning, nestled, boasts, perfect for entertaining, dream home, paradise, tropical oasis, island living at its finest, turnkey, move-in ready, won't last long, priced to sell, motivated seller, hidden gem, one of a kind, meticulously maintained, lovingly updated, sought-after, desirable, charming, inviting, open concept, natural light floods.
+BANNED WORDS AND PHRASES — always empty, never use them:
+nestled, boasts, perfect for entertaining, rare find, rare opportunity, paradise, tropical oasis, island living at its finest, turnkey, won't last long, priced to sell, motivated seller, hidden gem, meticulously maintained, lovingly updated, sought-after.
+
+DESCRIPTORS THAT NEED EVIDENCE — allowed only if the next clause earns them with a specific detail:
+stunning, spacious, cozy, charming, inviting, desirable, open concept, move-in ready, natural light.
+A descriptor standing alone is lazy writing. Cut it or earn it.
 
 INTEGRATION RULES — specs are not bullet points:
-Never list bedrooms, bathrooms, square footage, parking, or land tenure as raw specs. Integrate every detail into the narrative. Wrong: "3BR/2BA, 1,800 sqft." Right: "Three bedrooms and two baths across 1,800 square feet that never feel crowded because the floor plan was thought through." Wrong: "Fee simple." Right: "Fee simple ownership on a street where leasehold is common enough that this matters."
+Never list bedrooms, bathrooms, square footage, parking, or land tenure as raw specs. Integrate every detail into the narrative.
+Wrong: "3BR/2BA, 1,800 sqft."
+Right: "Three bedrooms and two baths across 1,800 square feet that never feel crowded because the floor plan was thought through."
+Wrong: "Fee simple."
+Right: "Fee simple ownership on a street where leasehold is common enough that this matters."
 
-OUTPUT STRUCTURE — exactly 3 paragraphs:
-Paragraph 1: Open on the strongest, most specific hook — sensory, emotional, or situational. Establish the property's character and the life it enables. Do not mention every feature. Pick the ones that matter and make them land.
-Paragraph 2: Move through the interior and key features with narrative momentum. Every detail must connect to the next by flow and feeling, not by adjacency on a spec sheet. No sentence may simply name a feature and move on — every feature must earn its place by telling the reader something about how this home actually lives.
-Paragraph 3: Ground the reader in location, lifestyle, and Hawaii context using specific named places. End with a single sentence that functions as a quiet, confident call to action — not a sales pitch, a statement of fact about what this property is and what the right buyer should do."""
+OUTPUT STRUCTURE — exactly 3 paragraphs, no headers, no labels:
+Paragraph 1: Open on the strongest most specific hook this property earns — sensory, situational, or grounded in a fact that could only be true here. Establish the property's character and the life it enables. The single most specific and true thing about this property must land here.
+Paragraph 2: Move through the interior and key features with narrative momentum. Every sentence must pass the "so what?" test — a feature without a consequence for the buyer does not belong. The lifestyle detail that makes the right buyer feel this is theirs must land here.
+Paragraph 3: Ground the reader in location and Hawaii context using specific named places. End with one quiet confident sentence that states what this property is and what the right buyer should do — not a sales pitch, a fact."""
 
     photo_list = _process_photos()
     photo_count = len(photo_list)
@@ -743,16 +756,16 @@ NEIGHBORHOOD VIBE:
 
     def _call_listing():
         return client.messages.create(
-            model="claude-sonnet-4-5", max_tokens=1500, temperature=0.9, messages=listing_messages)
+            model="claude-sonnet-4-6", max_tokens=1800, temperature=0.85, messages=listing_messages)
 
     def _call_analysis():
         return client.messages.create(
-            model="claude-sonnet-4-5", max_tokens=512,
+            model="claude-sonnet-4-6", max_tokens=512,
             messages=[{"role": "user", "content": _analysis_prompt}])
 
     def _call_neighborhood():
         return client.messages.create(
-            model="claude-sonnet-4-5", max_tokens=512,
+            model="claude-sonnet-4-6", max_tokens=512,
             messages=[{"role": "user", "content": _neighborhood_prompt}])
 
     with ThreadPoolExecutor(max_workers=3) as pool:
@@ -884,13 +897,26 @@ def refine_listing():
     if not listing_text:
         return {"error": "No listing text provided"}, 400
 
-    refine_prompt = f"""Review this listing description. Identify any sentences that sound generic, could apply to any property anywhere, or feel like filler. Rewrite only those specific sentences to be more vivid, specific, and grounded in this exact property's details. Return ONLY the improved description — no commentary, no explanations, no headers.
+    refine_prompt = f"""You are the same veteran Hawaii agent who wrote this listing. Twenty years on the islands. You do not rewrite for the sake of rewriting — you rewrite because something isn't earning its place.
+
+Read this listing description. For each sentence ask two questions:
+1. Could this sentence appear in a listing for a different property in Hawaii without changing a word? If yes, it is generic. Rewrite it to be specific to this exact property.
+2. Does this sentence — especially in the second paragraph — name a feature without telling the buyer why it matters? If yes, it fails the "so what?" test. Rewrite it or cut it.
+
+Apply the same rules that govern the original:
+- No banned words: nestled, boasts, perfect for entertaining, rare find, rare opportunity, paradise, tropical oasis, turnkey, won't last long, hidden gem, meticulously maintained, lovingly updated, sought-after.
+- No descriptor without evidence: stunning, spacious, cozy, charming, inviting, open concept, move-in ready, natural light must each be followed immediately by a specific detail that earns them.
+- No raw specs. Bedrooms, bathrooms, square footage, parking, land tenure must be integrated into narrative, never listed.
+- Maintain exactly 3 paragraphs. Do not add headers or labels.
+- Do not change what is already working. Only fix what is generic, weak, or failing the "so what?" test.
+
+Return only the improved listing description — no commentary, no explanation, no list of what you changed.
 
 Current listing description:
 {listing_text}"""
 
     response = client.messages.create(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=1024,
         temperature=0.9,
         messages=[{"role": "user", "content": refine_prompt}]
@@ -1010,7 +1036,7 @@ EMAIL BODY:
         _oh_messages = [{"role": "user", "content": _oh_prompt}]
 
     response = client.messages.create(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=1500,
         temperature=0.9,
         messages=_oh_messages
@@ -1061,7 +1087,7 @@ Current post:
 {post_text}"""
 
     response = client.messages.create(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=512,
         temperature=0.9,
         messages=[{"role": "user", "content": refine_prompt}]
@@ -1157,7 +1183,7 @@ HASHTAGS:
         _sm_messages = [{"role": "user", "content": _sm_prompt}]
 
     response = client.messages.create(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=1500,
         temperature=0.9,
         messages=_sm_messages
@@ -1231,7 +1257,7 @@ def offer_letter_generate():
     _offer_generation_id = hashlib.md5(f"{buyer_name}{time.time()}".encode()).hexdigest()[:8]
 
     response = client.messages.create(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=2000,
         temperature=0.7,
         messages=[{"role": "user", "content": f"""You are a Hawaii real estate expert. Generate a complete offer letter package for this property transaction.
@@ -1323,7 +1349,7 @@ def market_report_generate():
     _mr_generation_id = hashlib.md5(f"{neighborhood}{island}{time.time()}".encode()).hexdigest()[:8]
 
     response = client.messages.create(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=2000,
         temperature=0.8,
         messages=[{"role": "user", "content": f"""You are a Hawaii real estate market expert. Generate a detailed market report for a client.
@@ -1429,7 +1455,7 @@ def client_emails_generate():
     _email_generation_id = hashlib.md5(f"{client_name}{time.time()}".encode()).hexdigest()[:8]
 
     response = client.messages.create(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=1800,
         temperature=0.85,
         messages=[{"role": "user", "content": f"""You are a Hawaii real estate expert writing professional client emails. Generate a complete client email package.
@@ -1534,7 +1560,7 @@ def bio_generator_generate():
     _bio_generation_id = hashlib.md5(f"{full_name}{time.time()}".encode()).hexdigest()[:8]
 
     response = client.messages.create(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=1500,
         temperature=0.9,
         messages=[{"role": "user", "content": f"""You are a professional copywriter specializing in Hawaii real estate agent bios. Generate a complete bio package for this Hawaii realtor.
@@ -1619,7 +1645,7 @@ Current bio:
 {bio_text}"""
 
     response = client.messages.create(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=1024,
         temperature=0.9,
         messages=[{"role": "user", "content": refine_prompt}]
@@ -1790,7 +1816,7 @@ LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold proper
         _pc_messages = [{"role": "user", "content": prompt}]
 
     message = client.messages.create(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=1500,
         temperature=0.8,
         messages=_pc_messages
