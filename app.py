@@ -650,7 +650,7 @@ Determine the price tier from the listing price and adjust your voice accordingl
 - $800k–$2M: confident, specific, earned details. Write like you know this market cold.
 - Over $2M: restrained, precise, nothing oversold. Luxury sells itself. Your job is to be accurate and evocative, not enthusiastic.
 
-BEFORE YOU WRITE — complete these three steps. The output must prove you did them:
+BEFORE YOU WRITE — complete these three steps. Complete all three steps internally before writing. Do not include this checklist or any proof-of-work in your output:
 1. Identify the single most specific and true thing about this property that could not be said about any other property in Hawaii. It must appear in paragraph 1.
 2. Identify the one lifestyle detail that will make the right buyer feel this home is theirs. It must appear in paragraph 2.
 3. Identify the neighborhood fact from the context provided that most agents would not know to mention. It must appear in paragraph 3.
