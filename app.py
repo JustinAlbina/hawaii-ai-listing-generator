@@ -88,6 +88,13 @@ class Generation(db.Model):
     output_text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
+    @property
+    def input_parsed(self):
+        try:
+            return json.loads(self.input_data)
+        except Exception:
+            return {}
+
 class SharedResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     token = db.Column(db.String(32), unique=True, nullable=False, index=True)
