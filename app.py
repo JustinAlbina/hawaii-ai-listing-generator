@@ -304,7 +304,7 @@ def set_security_headers(response):
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     # CSP: self-only for scripts/styles (templates use inline JS/CSS); data: for photo previews;
-    # form-action self-only; Stripe checkout is a server-side redirect, not a client-side form post.
+    # form-action allows Stripe checkout redirect target in addition to self.
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' https://js.stripe.com; "
@@ -315,7 +315,7 @@ def set_security_headers(response):
         "frame-src https://checkout.stripe.com https://js.stripe.com; "
         "frame-ancestors 'none'; "
         "base-uri 'self'; "
-        "form-action 'self';"
+        "form-action 'self' https://checkout.stripe.com;"
     )
     return response
 
