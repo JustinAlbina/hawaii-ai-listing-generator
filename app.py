@@ -46,6 +46,10 @@ if database_url.startswith("postgres://"):
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024  # 32 MB — handles up to 8 large photos
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=7)
 
 csrf = CSRFProtect(app)
 limiter = Limiter(get_remote_address, app=app, default_limits=[])
@@ -53,6 +57,28 @@ limiter = Limiter(get_remote_address, app=app, default_limits=[])
 @app.errorhandler(CSRFError)
 def csrf_error(e):
     return render_template("login.html", error="Your session expired. Please try again."), 400
+
+def _dark_error(code, title, body):
+    html = (
+        f'<html><head><title>{title}</title></head>'
+        f'<body style="background:#061326;color:#fff;font-family:sans-serif;'
+        f'display:flex;align-items:center;justify-content:center;height:100vh;margin:0">'
+        f'<div style="text-align:center;max-width:420px">'
+        f'<h1 style="color:#c9a84c;font-size:3rem;margin:0">{code}</h1>'
+        f'<p style="color:rgba(255,255,255,0.8);margin:1rem 0">{body}</p>'
+        f'<a href="/" style="color:#c9a84c;text-decoration:none">← Back to AlohaAgent</a>'
+        f'</div></body></html>'
+    )
+    return make_response(html, code)
+
+@app.errorhandler(404)
+def not_found(e):
+    return _dark_error(404, "Not Found", "The page you're looking for doesn't exist.")
+
+@app.errorhandler(500)
+def server_error(e):
+    app.logger.error(f"500 error: {e}")
+    return _dark_error(500, "Server Error", "Something went wrong on our end. Please try again in a moment.")
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -167,16 +193,59 @@ def get_monthly_count(user):
         Generation.created_at >= start
     ).count()
 
+def get_daily_count(user):
+    now = datetime.datetime.utcnow()
+    start = datetime.datetime(now.year, now.month, now.day)
+    return Generation.query.filter(
+        Generation.user_id == user.id,
+        Generation.created_at >= start
+    ).count()
+
+# Daily hard caps per plan — protect against API cost runaway
+_DAILY_CAP = {"free": 10, "pro": 50}
+
 def generation_limit_response():
-    """Check limit. Returns limit page or None. Increments session counter for non-auth users."""
+    """Check monthly plan limit + daily API cost cap. Returns limit page or None."""
     if current_user.is_authenticated:
         if current_user.plan == 'free' and get_monthly_count(current_user) >= 3:
             return render_template("limit.html")
+        daily_cap = _DAILY_CAP.get(current_user.plan, 10)
+        if get_daily_count(current_user) >= daily_cap:
+            return render_template("limit.html")
         return None
+    # Unauthenticated: session-based fallback (IP-based enforced via @limiter.limit on each route)
     if session.get("generation_count", 0) >= 3:
         return render_template("limit.html")
     session["generation_count"] = session.get("generation_count", 0) + 1
     return None
+
+_FIELD_MAX = {
+    "address": 200, "neighborhood": 100, "p1_address": 200, "p2_address": 200, "p3_address": 200,
+    "p1_neighborhood": 100, "p2_neighborhood": 100, "p3_neighborhood": 100,
+    "extra": 1000, "personal_message": 1000, "hawaii_connection": 1000,
+    "fun_fact": 1000, "buyer_priorities": 1000, "key_detail": 1000,
+}
+
+def _validate_lengths(**fields):
+    """Return (message, 400) if any field exceeds its max length, else None."""
+    for name, value in fields.items():
+        limit = _FIELD_MAX.get(name, 500)
+        if len(str(value or "")) > limit:
+            return f"Input too long: '{name}' exceeds {limit} characters.", 400
+    return None
+
+def _api_error_response():
+    html = (
+        '<html><body style="background:#061326;color:#fff;font-family:sans-serif;'
+        'display:flex;align-items:center;justify-content:center;height:100vh;margin:0">'
+        '<div style="text-align:center;max-width:400px">'
+        '<h2 style="color:#c9a84c">Generation unavailable</h2>'
+        '<p style="color:rgba(255,255,255,0.7)">Something went wrong reaching the AI service. '
+        'Please try again in a moment.</p>'
+        '<a href="javascript:history.back()" style="color:#c9a84c">← Go back</a>'
+        '</div></body></html>'
+    )
+    return make_response(html, 503)
 
 def save_generation(tool_name, input_data, output_text):
     if current_user.is_authenticated:
@@ -189,13 +258,23 @@ def save_generation(tool_name, input_data, output_text):
         db.session.add(gen)
         db.session.commit()
 
+_MAX_PHOTO_BYTES = 5 * 1024 * 1024  # 5 MB per individual photo
+
 def _process_photos(field_name="photos"):
-    """Read uploaded photos, compress to max 1024px / JPEG q75, return list of (base64_data, media_type). Max 8. In-memory only."""
+    """Read uploaded photos, compress to max 1024px / JPEG q75, return list of (base64_data, media_type).
+    Max 8 files enforced via slice. Max 5 MB per file. In-memory only — never written to disk.
+    Pillow Image.open() validates actual file content (not just headers/extensions)."""
     results = []
     allowed_types = {"image/jpeg", "image/png"}
     ext_map = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png"}
     for f in request.files.getlist(field_name)[:8]:
         if not f or not f.filename:
+            continue
+        # Per-file size check before reading content
+        f.stream.seek(0, 2)
+        file_size = f.stream.tell()
+        f.stream.seek(0)
+        if file_size > _MAX_PHOTO_BYTES:
             continue
         mt = (f.content_type or "").split(";")[0].strip().lower()
         if mt not in allowed_types:
@@ -203,7 +282,10 @@ def _process_photos(field_name="photos"):
             mt = ext_map.get(ext)
             if not mt:
                 continue
-        img = Image.open(f.stream)
+        try:
+            img = Image.open(f.stream)
+        except Exception:
+            continue  # invalid image file — skip silently
         if img.mode not in ("RGB", "L"):
             img = img.convert("RGB")
         img.thumbnail((1024, 1024), Image.LANCZOS)
@@ -220,6 +302,20 @@ def set_security_headers(response):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    # CSP: self-only for scripts/styles (templates use inline JS/CSS); data: for photo previews;
+    # form-action self-only; Stripe checkout is a server-side redirect, not a client-side form post.
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: blob:; "
+        "connect-src 'self'; "
+        "font-src 'self'; "
+        "frame-ancestors 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self';"
+    )
     return response
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -553,6 +649,8 @@ def pricing():
     return render_template("pricing.html")
 
 @app.route("/generate", methods=["POST"])
+@limiter.limit("10 per minute; 100 per day")
+@limiter.limit("3 per day", exempt_when=lambda: current_user.is_authenticated)
 def generate():
     return _generate_inner()
 
@@ -560,25 +658,31 @@ def _generate_inner():
     limit = generation_limit_response()
     if limit:
         return limit
-    address = request.form["address"]
-    bedrooms = request.form["bedrooms"]
-    bathrooms = request.form["bathrooms"]
-    sqft = request.form["sqft"]
-    price = request.form["price"]
-    neighborhood = request.form["neighborhood"]
-    island = request.form["island"]
+    address = request.form.get("address", "").strip()
+    bedrooms = request.form.get("bedrooms", "").strip()
+    bathrooms = request.form.get("bathrooms", "").strip()
+    sqft = request.form.get("sqft", "").strip()
+    price = request.form.get("price", "").strip()
+    neighborhood = request.form.get("neighborhood", "").strip()
+    island = request.form.get("island", "").strip()
     view = request.form.get("view", "").strip()
     pool_yn = request.form.get("pool", "no")
-    extra = request.form["extra"]
+    extra = request.form.get("extra", "").strip()
     year_built = request.form.get("year_built", "").strip()
     parking = request.form.get("parking", "").strip()
-    land_tenure = request.form.get("land_tenure", "Fee Simple")
+    land_tenure = request.form.get("land_tenure", "Fee Simple").strip()
     solar = request.form.get("solar", "")
     ohana = request.form.get("ohana", "")
     renovation_year = request.form.get("renovation_year", "").strip()
     flood_zone = request.form.get("flood_zone", "").strip()
     property_type = request.form.get("property_type", "Single Family").strip()
     hoa_fee = request.form.get("hoa_fee", "").strip()
+    err = _validate_lengths(address=address, neighborhood=neighborhood, extra=extra,
+                            view=view, parking=parking, flood_zone=flood_zone,
+                            year_built=year_built, renovation_year=renovation_year,
+                            property_type=property_type, hoa_fee=hoa_fee)
+    if err:
+        return err
 
     try:
         sqft_num = float(sqft.replace(",", ""))
@@ -775,13 +879,17 @@ NEIGHBORHOOD VIBE:
             model="claude-sonnet-4-6", max_tokens=512,
             messages=[{"role": "user", "content": _neighborhood_prompt}])
 
-    with ThreadPoolExecutor(max_workers=3) as pool:
-        f_listing = pool.submit(_call_listing)
-        f_analysis = pool.submit(_call_analysis)
-        f_neighborhood = pool.submit(_call_neighborhood)
-        listing_response = f_listing.result()
-        analysis_response = f_analysis.result()
-        neighborhood_response = f_neighborhood.result()
+    try:
+        with ThreadPoolExecutor(max_workers=3) as pool:
+            f_listing = pool.submit(_call_listing)
+            f_analysis = pool.submit(_call_analysis)
+            f_neighborhood = pool.submit(_call_neighborhood)
+            listing_response = f_listing.result()
+            analysis_response = f_analysis.result()
+            neighborhood_response = f_neighborhood.result()
+    except Exception as e:
+        app.logger.error(f"Anthropic API error in listing generate: {e}")
+        return _api_error_response()
 
     listing_text = listing_response.content[0].text
     analysis_text = analysis_response.content[0].text
@@ -899,10 +1007,13 @@ def listing_shared_result(token):
     )
 
 @app.route("/refine-listing", methods=["POST"])
+@limiter.limit("20 per minute; 200 per day")
 def refine_listing():
     listing_text = request.form.get("listing_text", "").strip()
     if not listing_text:
         return {"error": "No listing text provided"}, 400
+    if len(listing_text) > 5000:
+        return {"error": "Listing text exceeds maximum length."}, 400
 
     refine_prompt = f"""You are the same veteran Hawaii agent who wrote this listing. Twenty years on the islands. You do not rewrite for the sake of rewriting — you rewrite because something isn't earning its place.
 
@@ -922,15 +1033,20 @@ Return only the improved listing description — no commentary, no explanation, 
 Current listing description:
 {listing_text}"""
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1024,
-        temperature=0.9,
-        messages=[{"role": "user", "content": refine_prompt}]
-    )
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1024,
+            temperature=0.9,
+            messages=[{"role": "user", "content": refine_prompt}]
+        )
+    except Exception as e:
+        app.logger.error(f"Anthropic API error in refine-listing: {e}")
+        return {"error": "Generation service unavailable. Please try again."}, 503
     return {"refined": response.content[0].text}
 
 @app.route("/waitlist", methods=["POST"])
+@limiter.limit("5 per hour")
 def waitlist():
     email = request.form["email"]
     try:
@@ -947,21 +1063,26 @@ def open_house():
     return render_template("open_house.html", current_user=current_user)
 
 @app.route("/open-house/generate", methods=["POST"])
+@limiter.limit("10 per minute; 100 per day")
+@limiter.limit("3 per day", exempt_when=lambda: current_user.is_authenticated)
 def open_house_generate():
     limit = generation_limit_response()
     if limit:
         return limit
-    address = request.form["address"]
-    neighborhood = request.form["neighborhood"]
-    island = request.form["island"]
-    bedrooms = request.form["bedrooms"]
-    bathrooms = request.form["bathrooms"]
-    price = request.form["price"]
-    date = request.form["date"]
-    time_start = request.form["time_start"]
-    time_end = request.form["time_end"]
-    extra = request.form["extra"]
+    address = request.form.get("address", "").strip()
+    neighborhood = request.form.get("neighborhood", "").strip()
+    island = request.form.get("island", "").strip()
+    bedrooms = request.form.get("bedrooms", "").strip()
+    bathrooms = request.form.get("bathrooms", "").strip()
+    price = request.form.get("price", "").strip()
+    date = request.form.get("date", "").strip()
+    time_start = request.form.get("time_start", "").strip()
+    time_end = request.form.get("time_end", "").strip()
+    extra = request.form.get("extra", "").strip()
     agent_name = request.form.get("agent_name", "").strip()
+    err = _validate_lengths(address=address, neighborhood=neighborhood, extra=extra, agent_name=agent_name)
+    if err:
+        return err
 
     agent_line = f"Agent: {agent_name}" if agent_name else ""
     sign_off_instruction = f" Sign off all posts and the email from {agent_name}." if agent_name else ""
@@ -1042,12 +1163,16 @@ EMAIL BODY:
     else:
         _oh_messages = [{"role": "user", "content": _oh_prompt}]
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1500,
-        temperature=0.9,
-        messages=_oh_messages
-    )
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1500,
+            temperature=0.9,
+            messages=_oh_messages
+        )
+    except Exception as e:
+        app.logger.error(f"Anthropic API error in open-house/generate: {e}")
+        return _api_error_response()
 
     content = response.content[0].text
 
@@ -1083,22 +1208,29 @@ EMAIL BODY:
     )
 
 @app.route("/refine-open-house", methods=["POST"])
+@limiter.limit("20 per minute; 200 per day")
 def refine_open_house():
     post_text = request.form.get("post_text", "").strip()
     if not post_text:
         return {"error": "No post text provided"}, 400
+    if len(post_text) > 5000:
+        return {"error": "Post text exceeds maximum length."}, 400
 
     refine_prompt = f"""Review this open house Instagram post. Identify any sentences that sound generic, could apply to any property anywhere, or feel like filler. Rewrite only those specific sentences to be more vivid, specific, and grounded in this exact property's details and Hawaii location. Return ONLY the improved post — no commentary, no explanations, no headers.
 
 Current post:
 {post_text}"""
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=512,
-        temperature=0.9,
-        messages=[{"role": "user", "content": refine_prompt}]
-    )
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=512,
+            temperature=0.9,
+            messages=[{"role": "user", "content": refine_prompt}]
+        )
+    except Exception as e:
+        app.logger.error(f"Anthropic API error in refine-open-house: {e}")
+        return {"error": "Generation service unavailable. Please try again."}, 503
     return {"refined": response.content[0].text}
 
 @app.route("/social-media")
@@ -1106,21 +1238,26 @@ def social_media():
     return render_template("social_media.html", current_user=current_user)
 
 @app.route("/social-media/generate", methods=["POST"])
+@limiter.limit("10 per minute; 100 per day")
+@limiter.limit("3 per day", exempt_when=lambda: current_user.is_authenticated)
 def social_media_generate():
     limit = generation_limit_response()
     if limit:
         return limit
-    address = request.form["address"]
-    neighborhood = request.form["neighborhood"]
-    island = request.form["island"]
-    bedrooms = request.form["bedrooms"]
-    bathrooms = request.form["bathrooms"]
-    sqft = request.form["sqft"]
-    price = request.form["price"]
-    ocean_view = request.form["ocean_view"]
-    pool = request.form["pool"]
-    extra = request.form["extra"]
-    tone = request.form["tone"]
+    address = request.form.get("address", "").strip()
+    neighborhood = request.form.get("neighborhood", "").strip()
+    island = request.form.get("island", "").strip()
+    bedrooms = request.form.get("bedrooms", "").strip()
+    bathrooms = request.form.get("bathrooms", "").strip()
+    sqft = request.form.get("sqft", "").strip()
+    price = request.form.get("price", "").strip()
+    ocean_view = request.form.get("ocean_view", "").strip()
+    pool = request.form.get("pool", "").strip()
+    extra = request.form.get("extra", "").strip()
+    tone = request.form.get("tone", "").strip()
+    err = _validate_lengths(address=address, neighborhood=neighborhood, extra=extra)
+    if err:
+        return err
 
     # Neighborhood context injection
     _nb_data = get_neighborhood_context(neighborhood, island)
@@ -1189,12 +1326,16 @@ HASHTAGS:
     else:
         _sm_messages = [{"role": "user", "content": _sm_prompt}]
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1500,
-        temperature=0.9,
-        messages=_sm_messages
-    )
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1500,
+            temperature=0.9,
+            messages=_sm_messages
+        )
+    except Exception as e:
+        app.logger.error(f"Anthropic API error in social-media/generate: {e}")
+        return _api_error_response()
 
     content = response.content[0].text
 
@@ -1231,21 +1372,27 @@ def offer_letter():
     return render_template("offer_letter.html", current_user=current_user)
 
 @app.route("/offer-letter/generate", methods=["POST"])
+@limiter.limit("10 per minute; 100 per day")
+@limiter.limit("3 per day", exempt_when=lambda: current_user.is_authenticated)
 def offer_letter_generate():
     limit = generation_limit_response()
     if limit:
         return limit
-    address = request.form["address"]
-    neighborhood = request.form["neighborhood"]
-    island = request.form["island"]
-    offer_price = request.form["offer_price"]
-    listing_price = request.form["listing_price"]
-    buyer_name = request.form["buyer_name"]
-    closing_date = request.form["closing_date"]
+    address = request.form.get("address", "").strip()
+    neighborhood = request.form.get("neighborhood", "").strip()
+    island = request.form.get("island", "").strip()
+    offer_price = request.form.get("offer_price", "").strip()
+    listing_price = request.form.get("listing_price", "").strip()
+    buyer_name = request.form.get("buyer_name", "").strip()
+    closing_date = request.form.get("closing_date", "").strip()
     contingencies = request.form.getlist("contingencies")
-    personal_message = request.form["personal_message"]
-    tone = request.form["tone"]
-    land_tenure = request.form.get("land_tenure", "Fee Simple")
+    personal_message = request.form.get("personal_message", "").strip()
+    tone = request.form.get("tone", "").strip()
+    land_tenure = request.form.get("land_tenure", "Fee Simple").strip()
+    err = _validate_lengths(address=address, neighborhood=neighborhood,
+                            personal_message=personal_message, buyer_name=buyer_name)
+    if err:
+        return err
 
     contingencies_str = ", ".join(contingencies) if contingencies else "None"
 
@@ -1263,11 +1410,12 @@ def offer_letter_generate():
 
     _offer_generation_id = hashlib.md5(f"{buyer_name}{time.time()}".encode()).hexdigest()[:8]
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=2000,
-        temperature=0.7,
-        messages=[{"role": "user", "content": f"""You are a Hawaii real estate expert. Generate a complete offer letter package for this property transaction.
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=2000,
+            temperature=0.7,
+            messages=[{"role": "user", "content": f"""You are a Hawaii real estate expert. Generate a complete offer letter package for this property transaction.
 
 Property: {address}, {neighborhood}, {island}
 Listing Price: ${listing_price}
@@ -1302,7 +1450,10 @@ EMAIL SUBJECT:
 
 NEGOTIATION TIP:
 [2-3 sentences of strategic advice for {buyer_name} based on the offer price vs listing price of ${listing_price}. Be specific and actionable.]"""}]
-    )
+        )
+    except Exception as e:
+        app.logger.error(f"Anthropic API error in offer-letter/generate: {e}")
+        return _api_error_response()
 
     content = response.content[0].text
     sections = {}
@@ -1339,15 +1490,20 @@ def market_report():
     return render_template("market_report.html", current_user=current_user)
 
 @app.route("/market-report/generate", methods=["POST"])
+@limiter.limit("10 per minute; 100 per day")
+@limiter.limit("3 per day", exempt_when=lambda: current_user.is_authenticated)
 def market_report_generate():
     limit = generation_limit_response()
     if limit:
         return limit
-    neighborhood = request.form["neighborhood"]
-    island = request.form["island"]
-    report_type = request.form["report_type"]
-    price_range = request.form["price_range"]
-    property_type = request.form["property_type"]
+    neighborhood = request.form.get("neighborhood", "").strip()
+    island = request.form.get("island", "").strip()
+    report_type = request.form.get("report_type", "").strip()
+    price_range = request.form.get("price_range", "").strip()
+    property_type = request.form.get("property_type", "").strip()
+    err = _validate_lengths(neighborhood=neighborhood)
+    if err:
+        return err
 
     # Neighborhood context injection
     _nb_data = get_neighborhood_context(neighborhood, island)
@@ -1355,11 +1511,12 @@ def market_report_generate():
 
     _mr_generation_id = hashlib.md5(f"{neighborhood}{island}{time.time()}".encode()).hexdigest()[:8]
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=2000,
-        temperature=0.8,
-        messages=[{"role": "user", "content": f"""You are a Hawaii real estate market expert. Generate a detailed market report for a client.
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=2000,
+            temperature=0.8,
+            messages=[{"role": "user", "content": f"""You are a Hawaii real estate market expert. Generate a detailed market report for a client.
 
 Neighborhood: {neighborhood}
 Island: {island}
@@ -1404,7 +1561,10 @@ RECOMMENDATION:
 
 If the neighborhood or property type has significant leasehold inventory, you MUST note in the PRICE TRENDS section:
 LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold properties in Hawaii typically sell at a significant discount (20-40%) vs fee simple. Many lenders will not finance leasehold properties with fewer than 30 years remaining on the lease. Buyers should verify lease expiration, rent renegotiation terms, and financing eligibility before making an offer."""}]
-    )
+        )
+    except Exception as e:
+        app.logger.error(f"Anthropic API error in market-report/generate: {e}")
+        return _api_error_response()
 
     content = response.content[0].text
     sections = {}
@@ -1442,18 +1602,24 @@ def client_emails():
     return render_template("client_emails.html", current_user=current_user)
 
 @app.route("/client-emails/generate", methods=["POST"])
+@limiter.limit("10 per minute; 100 per day")
+@limiter.limit("3 per day", exempt_when=lambda: current_user.is_authenticated)
 def client_emails_generate():
     limit = generation_limit_response()
     if limit:
         return limit
-    email_type = request.form["email_type"]
-    client_name = request.form["client_name"]
-    address = request.form["address"]
-    neighborhood = request.form["neighborhood"]
-    island = request.form["island"]
-    key_detail = request.form["key_detail"]
-    agent_name = request.form["agent_name"]
-    tone = request.form["tone"]
+    email_type = request.form.get("email_type", "").strip()
+    client_name = request.form.get("client_name", "").strip()
+    address = request.form.get("address", "").strip()
+    neighborhood = request.form.get("neighborhood", "").strip()
+    island = request.form.get("island", "").strip()
+    key_detail = request.form.get("key_detail", "").strip()
+    agent_name = request.form.get("agent_name", "").strip()
+    tone = request.form.get("tone", "").strip()
+    err = _validate_lengths(address=address, neighborhood=neighborhood, key_detail=key_detail,
+                            client_name=client_name, agent_name=agent_name)
+    if err:
+        return err
 
     # Neighborhood context injection
     _nb_data = get_neighborhood_context(neighborhood, island)
@@ -1461,11 +1627,12 @@ def client_emails_generate():
 
     _email_generation_id = hashlib.md5(f"{client_name}{time.time()}".encode()).hexdigest()[:8]
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1800,
-        temperature=0.85,
-        messages=[{"role": "user", "content": f"""You are a Hawaii real estate expert writing professional client emails. Generate a complete client email package.
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1800,
+            temperature=0.85,
+            messages=[{"role": "user", "content": f"""You are a Hawaii real estate expert writing professional client emails. Generate a complete client email package.
 
 Email Type: {email_type}
 Client Name: {client_name}
@@ -1499,7 +1666,10 @@ EMAIL BODY:
 
 FOLLOW UP TEXT:
 [A short, friendly SMS/text follow-up message under 160 characters. Casual and warm, referencing the email.]"""}]
-    )
+        )
+    except Exception as e:
+        app.logger.error(f"Anthropic API error in client-emails/generate: {e}")
+        return _api_error_response()
 
     content = response.content[0].text
     sections = {}
@@ -1534,20 +1704,25 @@ def bio_generator():
     return render_template("bio_generator.html", current_user=current_user)
 
 @app.route("/bio-generator/generate", methods=["POST"])
+@limiter.limit("10 per minute; 100 per day")
+@limiter.limit("3 per day", exempt_when=lambda: current_user.is_authenticated)
 def bio_generator_generate():
     limit = generation_limit_response()
     if limit:
         return limit
-    full_name = request.form["full_name"]
-    years_experience = request.form["years_experience"]
-    primary_island = request.form["primary_island"]
+    full_name = request.form.get("full_name", "").strip()
+    years_experience = request.form.get("years_experience", "").strip()
+    primary_island = request.form.get("primary_island", "").strip()
     specialties = request.form.getlist("specialties")
-    languages = request.form["languages"]
-    hawaii_connection = request.form["hawaii_connection"]
-    fun_fact = request.form["fun_fact"]
-    tone = request.form["tone"]
-    length = request.form["length"]
+    languages = request.form.get("languages", "").strip()
+    hawaii_connection = request.form.get("hawaii_connection", "").strip()
+    fun_fact = request.form.get("fun_fact", "").strip()
+    tone = request.form.get("tone", "").strip()
+    length = request.form.get("length", "").strip()
     designations = request.form.get("designations", "").strip()
+    err = _validate_lengths(full_name=full_name, hawaii_connection=hawaii_connection, fun_fact=fun_fact)
+    if err:
+        return err
 
     specialties_str = ", ".join(specialties) if specialties else "General real estate"
     designations_line = f"Designations/Certifications: {designations}" if designations else ""
@@ -1566,10 +1741,11 @@ def bio_generator_generate():
     _bio_template_instruction = random.choice(_bio_templates)
     _bio_generation_id = hashlib.md5(f"{full_name}{time.time()}".encode()).hexdigest()[:8]
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1500,
-        temperature=0.9,
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1500,
+            temperature=0.9,
         messages=[{"role": "user", "content": f"""You are a professional copywriter specializing in Hawaii real estate agent bios. Generate a complete bio package for this Hawaii realtor.
 
 STRUCTURAL APPROACH: {_bio_template_instruction}
@@ -1612,7 +1788,10 @@ ELEVATOR PITCH:
 
 SOCIAL MEDIA BIO:
 [Under 150 characters. First-person, bold, include a Hawaii reference and their specialty.]"""}]
-    )
+        )
+    except Exception as e:
+        app.logger.error(f"Anthropic API error in bio-generator/generate: {e}")
+        return _api_error_response()
 
     content = response.content[0].text
     sections = {}
@@ -1641,22 +1820,29 @@ SOCIAL MEDIA BIO:
     )
 
 @app.route("/refine-bio", methods=["POST"])
+@limiter.limit("20 per minute; 200 per day")
 def refine_bio():
     bio_text = request.form.get("bio_text", "").strip()
     if not bio_text:
         return {"error": "No bio text provided"}, 400
+    if len(bio_text) > 5000:
+        return {"error": "Bio text exceeds maximum length."}, 400
 
     refine_prompt = f"""Review this agent bio. Identify any sentences that sound generic, could apply to any agent anywhere, or feel like filler. Rewrite only those specific sentences to be more vivid, specific, and authentic. Return ONLY the improved bio — no commentary, no explanations, no headers.
 
 Current bio:
 {bio_text}"""
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1024,
-        temperature=0.9,
-        messages=[{"role": "user", "content": refine_prompt}]
-    )
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1024,
+            temperature=0.9,
+            messages=[{"role": "user", "content": refine_prompt}]
+        )
+    except Exception as e:
+        app.logger.error(f"Anthropic API error in refine-bio: {e}")
+        return {"error": "Generation service unavailable. Please try again."}, 503
     return {"refined": response.content[0].text}
 
 @app.route("/property-comparison")
@@ -1664,44 +1850,52 @@ def property_comparison():
     return render_template("property_comparison.html", current_user=current_user)
 
 @app.route("/property-comparison/generate", methods=["POST"])
+@limiter.limit("10 per minute; 100 per day")
+@limiter.limit("3 per day", exempt_when=lambda: current_user.is_authenticated)
 def property_comparison_generate():
     limit = generation_limit_response()
     if limit:
         return limit
-    p1_address = request.form["p1_address"]
-    p1_neighborhood = request.form["p1_neighborhood"]
-    p1_island = request.form["p1_island"]
-    p1_price = request.form["p1_price"]
-    p1_bedrooms = request.form["p1_bedrooms"]
-    p1_bathrooms = request.form["p1_bathrooms"]
-    p1_sqft = request.form["p1_sqft"]
-    p1_feature = request.form["p1_feature"]
-    p1_condition = request.form["p1_condition"]
+    p1_address = request.form.get("p1_address", "").strip()
+    p1_neighborhood = request.form.get("p1_neighborhood", "").strip()
+    p1_island = request.form.get("p1_island", "").strip()
+    p1_price = request.form.get("p1_price", "").strip()
+    p1_bedrooms = request.form.get("p1_bedrooms", "").strip()
+    p1_bathrooms = request.form.get("p1_bathrooms", "").strip()
+    p1_sqft = request.form.get("p1_sqft", "").strip()
+    p1_feature = request.form.get("p1_feature", "").strip()
+    p1_condition = request.form.get("p1_condition", "").strip()
 
-    p2_address = request.form["p2_address"]
-    p2_neighborhood = request.form["p2_neighborhood"]
-    p2_island = request.form["p2_island"]
-    p2_price = request.form["p2_price"]
-    p2_bedrooms = request.form["p2_bedrooms"]
-    p2_bathrooms = request.form["p2_bathrooms"]
-    p2_sqft = request.form["p2_sqft"]
-    p2_feature = request.form["p2_feature"]
-    p2_condition = request.form["p2_condition"]
+    p2_address = request.form.get("p2_address", "").strip()
+    p2_neighborhood = request.form.get("p2_neighborhood", "").strip()
+    p2_island = request.form.get("p2_island", "").strip()
+    p2_price = request.form.get("p2_price", "").strip()
+    p2_bedrooms = request.form.get("p2_bedrooms", "").strip()
+    p2_bathrooms = request.form.get("p2_bathrooms", "").strip()
+    p2_sqft = request.form.get("p2_sqft", "").strip()
+    p2_feature = request.form.get("p2_feature", "").strip()
+    p2_condition = request.form.get("p2_condition", "").strip()
 
     p3_address = request.form.get("p3_address", "").strip()
     p3_neighborhood = request.form.get("p3_neighborhood", "").strip()
-    p3_island = request.form.get("p3_island", "")
+    p3_island = request.form.get("p3_island", "").strip()
     p3_price = request.form.get("p3_price", "").strip()
     p3_bedrooms = request.form.get("p3_bedrooms", "").strip()
     p3_bathrooms = request.form.get("p3_bathrooms", "").strip()
     p3_sqft = request.form.get("p3_sqft", "").strip()
     p3_feature = request.form.get("p3_feature", "").strip()
-    p3_condition = request.form.get("p3_condition", "")
+    p3_condition = request.form.get("p3_condition", "").strip()
     has_p3 = bool(p3_address)
 
-    buyer_priorities = request.form["buyer_priorities"]
+    buyer_priorities = request.form.get("buyer_priorities", "").strip()
     buyer_budget = request.form.get("buyer_budget", "").strip()
-    land_tenure = request.form.get("land_tenure", "Any")
+    land_tenure = request.form.get("land_tenure", "Any").strip()
+    err = _validate_lengths(p1_address=p1_address, p2_address=p2_address, p3_address=p3_address,
+                            p1_neighborhood=p1_neighborhood, p2_neighborhood=p2_neighborhood,
+                            p3_neighborhood=p3_neighborhood, buyer_priorities=buyer_priorities,
+                            p1_feature=p1_feature, p2_feature=p2_feature, p3_feature=p3_feature)
+    if err:
+        return err
 
     def calc_ppsf(price_str, sqft_str):
         try:
@@ -1822,12 +2016,16 @@ LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold proper
     else:
         _pc_messages = [{"role": "user", "content": prompt}]
 
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1500,
-        temperature=0.8,
-        messages=_pc_messages
-    )
+    try:
+        message = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1500,
+            temperature=0.8,
+            messages=_pc_messages
+        )
+    except Exception as e:
+        app.logger.error(f"Anthropic API error in property-comparison/generate: {e}")
+        return _api_error_response()
     content = message.content[0].text
 
     sections = {}
@@ -1883,6 +2081,7 @@ LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold proper
 
 
 @app.route("/admin")
+@limiter.limit("10 per hour")
 def admin_panel():
     secret = request.args.get("secret")
     if not secret or secret != os.getenv("ADMIN_SECRET"):
@@ -1917,6 +2116,7 @@ def admin_panel():
     )
 
 @app.route("/admin/set-plan", methods=["POST"])
+@limiter.limit("10 per hour")
 @csrf.exempt
 def admin_set_plan():
     data = request.get_json(force=True, silent=True) or {}
@@ -1930,8 +2130,13 @@ def admin_set_plan():
     plan = data.get("plan")
     if plan not in ("pro", "free"):
         return {"ok": False, "error": "Invalid plan"}, 400
+    old_plan = user.plan
     user.plan = plan
     db.session.commit()
+    app.logger.info(
+        f"ADMIN plan_change: user={user.email} old={old_plan} new={plan} "
+        f"ip={request.remote_addr} ts={datetime.datetime.utcnow().isoformat()}"
+    )
     return {"ok": True, "plan": plan, "email": user.email}
 
 @app.context_processor
