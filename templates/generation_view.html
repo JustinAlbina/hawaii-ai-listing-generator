@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}{{ gen.tool_name }} — AlohaAgent{% endblock %}
+{% block styles %}
+.page-wrap { max-width: 860px; margin: 0 auto; padding: 2rem; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; color: #8892a4; font-size: 13px; text-decoration: none; margin-bottom: 1.75rem; transition: color 0.2s; }
+.back-link:hover { color: #c9a84c; }
+.gen-header { background: #0d1b34; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 1.5rem 1.75rem; margin-bottom: 1.5rem; }
+.gen-header-tool { font-size: 11px; font-weight: 700; color: #c9a84c; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.35rem; }
+.gen-header-title { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 0.35rem; }
+.gen-header-meta { font-size: 12px; color: #4a5a70; }
+.gen-actions-row { display: flex; gap: 0.75rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+.btn-sm { font-size: 13px; font-weight: 600; padding: 0.5rem 1.1rem; border-radius: 8px; cursor: pointer; text-decoration: none; border: none; transition: all 0.18s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-copy { background: rgba(255,255,255,0.06); color: #a8b8cc; }
+.btn-copy:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.btn-pdf { background: rgba(201,168,76,0.12); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); }
+.btn-pdf:hover { background: rgba(201,168,76,0.2); }
+.output-card { background: #0d1b34; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 1.75rem 2rem; }
+.output-card h1, .output-card h2, .output-card h3 { color: #c9a84c; margin: 1.25rem 0 0.6rem; font-weight: 700; }
+.output-card h1 { font-size: 1.2rem; }
+.output-card h2 { font-size: 1.05rem; }
+.output-card h3 { font-size: 0.95rem; }
+.output-card p { color: rgba(255,255,255,0.82); line-height: 1.75; margin-bottom: 0.9rem; }
+.output-card ul, .output-card ol { color: rgba(255,255,255,0.82); padding-left: 1.5rem; margin-bottom: 0.9rem; }
+.output-card li { line-height: 1.65; margin-bottom: 0.3rem; }
+.output-card strong { color: #fff; }
+.output-card em { color: rgba(255,255,255,0.7); }
+.output-card blockquote { border-left: 3px solid rgba(201,168,76,0.4); padding-left: 1rem; color: rgba(255,255,255,0.65); margin: 1rem 0; }
+.output-card table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+.output-card th { background: rgba(201,168,76,0.1); color: #c9a84c; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.6rem 0.75rem; border: 1px solid rgba(255,255,255,0.08); text-align: left; }
+.output-card td { padding: 0.6rem 0.75rem; border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); font-size: 13.5px; }
+.copied-msg { font-size: 12px; color: #22c55e; display: none; }
+{% endblock %}
+{% block content %}
+<div class="page-wrap">
+    <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+
+    <div class="gen-header">
+        <div class="gen-header-tool">{{ gen.tool_name }}</div>
+        {% set inp = gen.input_parsed %}
+        <div class="gen-header-title">
+            {% if inp.get('address') %}
+                {{ inp.get('address') }}{% if inp.get('neighborhood') %}, {{ inp.get('neighborhood') }}{% endif %}{% if inp.get('island') %} — {{ inp.get('island') }}{% endif %}
+            {% elif inp.get('neighborhood') %}
+                {{ inp.get('neighborhood') }}{% if inp.get('island') %}, {{ inp.get('island') }}{% endif %}
+            {% elif inp.get('full_name') %}
+                {{ inp.get('full_name') }}
+            {% elif inp.get('p1_address') %}
+                {{ inp.get('p1_address') }} vs {{ inp.get('p2_address', '') }}
+            {% else %}
+                Saved Generation
+            {% endif %}
+        </div>
+        <div class="gen-header-meta">{{ gen.created_at.strftime('%B %d, %Y at %-I:%M %p') }}</div>
+    </div>
+
+    <div class="gen-actions-row">
+        <button class="btn-sm btn-copy" onclick="copyOutput()">&#128203; Copy</button>
+        <span class="copied-msg" id="copied-msg">Copied!</span>
+        <a href="/download/{{ gen.id }}" class="btn-sm btn-pdf">&#8595; Download PDF</a>
+    </div>
+
+    <div class="output-card" id="output-content">
+        {{ gen.output_text | markdown | safe }}
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+function copyOutput() {
+    var el = document.getElementById('output-content');
+    var text = el ? el.innerText : '';
+    navigator.clipboard.writeText(text).then(function() {
+        var msg = document.getElementById('copied-msg');
+        if (msg) { msg.style.display = 'inline'; setTimeout(function(){ msg.style.display = 'none'; }, 2000); }
+    });
+}
+{% endblock %}

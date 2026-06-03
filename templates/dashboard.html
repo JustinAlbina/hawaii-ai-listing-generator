@@ -31,13 +31,10 @@
 .gen-tool { font-size: 13px; font-weight: 700; color: #c9a84c; margin-bottom: 2px; }
 .gen-date { font-size: 11px; color: #4a5a70; margin-bottom: 0.5rem; }
 .gen-address { font-size: 13px; color: #8892a4; }
-.gen-preview { font-size: 13px; color: #a8b8cc; line-height: 1.6; margin-top: 0.6rem; display: none; }
-.gen-preview.visible { display: block; }
 .gen-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
 .btn-sm { font-size: 12px; font-weight: 600; padding: 0.4rem 0.85rem; border-radius: 8px; cursor: pointer; text-decoration: none; border: none; transition: all 0.18s; display: inline-flex; align-items: center; gap: 5px; }
 .btn-view { background: rgba(255,255,255,0.06); color: #a8b8cc; }
 .btn-view:hover { background: rgba(255,255,255,0.1); color: #fff; }
-.btn-view.active { background: rgba(201,168,76,0.12); color: #c9a84c; }
 .btn-pdf { background: rgba(201,168,76,0.12); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); }
 .btn-pdf:hover { background: rgba(201,168,76,0.2); }
 .plan-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: 0.5px; text-transform: uppercase; }
@@ -153,12 +150,11 @@
                     {% elif inp.get('p1_address') %}
                         <div class="gen-address">{{ inp.get('p1_address') }} vs {{ inp.get('p2_address', '') }}</div>
                     {% endif %}
-                    <div class="gen-preview" id="preview-{{ gen.id }}">{{ gen.output_preview }}</div>
                 </div>
                 <div class="gen-actions">
-                    <button class="btn-sm btn-view" id="btn-{{ gen.id }}" onclick="togglePreview({{ gen.id }})">
+                    <a href="/generation/{{ gen.id }}" class="btn-sm btn-view">
                         <span>&#128065;</span> View
-                    </button>
+                    </a>
                     <a href="/download/{{ gen.id }}" class="btn-sm btn-pdf">
                         <span>&#8595;</span> PDF
                     </a>
@@ -196,13 +192,5 @@ function filterGens() {
         else { card.style.display = 'none'; }
     });
     document.getElementById('no-results').style.display = visible === 0 && cards.length > 0 ? 'block' : 'none';
-}
-function togglePreview(id) {
-    var preview = document.getElementById('preview-' + id);
-    var btn = document.getElementById('btn-' + id);
-    var isVisible = preview.classList.contains('visible');
-    preview.classList.toggle('visible', !isVisible);
-    btn.classList.toggle('active', !isVisible);
-    btn.innerHTML = isVisible ? '<span>&#128065;</span> View' : '<span>&#215;</span> Hide';
 }
 {% endblock %}

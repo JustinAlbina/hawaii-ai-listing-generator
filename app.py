@@ -185,6 +185,10 @@ def safe_markdown(text):
 def to_html(text):
     return safe_markdown(text)
 
+@app.template_filter('markdown')
+def markdown_filter(text):
+    return safe_markdown(text)
+
 def get_monthly_count(user):
     now = datetime.datetime.utcnow()
     start = datetime.datetime(now.year, now.month, 1)
@@ -385,6 +389,12 @@ def dashboard():
         generations=generations,
         monthly_count=monthly_count
     )
+
+@app.route("/generation/<int:gen_id>")
+@login_required
+def view_generation(gen_id):
+    gen = Generation.query.filter_by(id=gen_id, user_id=current_user.id).first_or_404()
+    return render_template("generation_view.html", gen=gen)
 
 @app.route("/download/<int:gen_id>")
 @login_required
