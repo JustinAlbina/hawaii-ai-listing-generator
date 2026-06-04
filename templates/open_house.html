@@ -33,7 +33,12 @@ select option { background: #1a2f45; color: #fff; }
 .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .thumb-remove { position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,0.72); color: #fff; border: none; border-radius: 50%; width: 19px; height: 19px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; transition: background 0.15s; }
 .thumb-remove:hover { background: rgba(200,40,40,0.85); }
-@media (max-width: 768px) { .row { grid-template-columns: 1fr; } }
+@media (max-width: 768px) {
+  .row { grid-template-columns: 1fr; max-width: 100%; overflow: hidden; }
+  input, select, textarea { box-sizing: border-box; max-width: 100%; width: 100%; }
+  .form-group { overflow: hidden; max-width: 100%; }
+  .container { overflow-x: hidden; }
+}
 {% endblock %}
 {% block content %}
 <div class="hero">
