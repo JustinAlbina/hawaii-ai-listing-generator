@@ -253,14 +253,18 @@ def _api_error_response():
 
 def save_generation(tool_name, input_data, output_text):
     if current_user.is_authenticated:
-        gen = Generation(
-            user_id=current_user.id,
-            tool_name=tool_name,
-            input_data=json.dumps(input_data),
-            output_text=output_text
-        )
-        db.session.add(gen)
-        db.session.commit()
+        try:
+            gen = Generation(
+                user_id=current_user.id,
+                tool_name=tool_name,
+                input_data=json.dumps(input_data),
+                output_text=output_text
+            )
+            db.session.add(gen)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Failed to save generation for user {current_user.id}: {e}")
 
 _MAX_PHOTO_BYTES = 5 * 1024 * 1024  # 5 MB per individual photo
 
@@ -468,8 +472,8 @@ def download_pdf(gen_id):
         if "Bio" in tool:
             return val("full_name","agent_name","name")
         if "Property Comparison" in tool:
-            a1 = val("address_1","property_1_address","address1")
-            a2 = val("address_2","property_2_address","address2")
+            a1 = val("p1_address","address_1","address1")
+            a2 = val("p2_address","address_2","address2")
             if a1 and a2: return f"{a1} vs {a2}"
             return a1 or a2
         return val("address","neighborhood","full_name","client_name")
