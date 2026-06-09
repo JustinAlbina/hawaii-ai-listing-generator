@@ -6,11 +6,19 @@
   function initReveal() {
     var sections = document.querySelectorAll('.reveal-section');
     if (!sections.length) return;
-    sections.forEach(function (el, i) {
-      setTimeout(function () {
-        el.classList.add('revealed');
-      }, i * 300);
-    });
+    if (!('IntersectionObserver' in window)) {
+      sections.forEach(function (el) { el.classList.add('revealed'); });
+      return;
+    }
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    sections.forEach(function (el) { observer.observe(el); });
   }
 
   /* ── Task 5: Form Field Fade-in via IntersectionObserver ── */
