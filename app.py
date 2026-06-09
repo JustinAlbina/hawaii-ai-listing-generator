@@ -1929,11 +1929,6 @@ def property_comparison_generate():
         _label_nb_context(_nb2_ctx, "PROPERTY 2"),
     ]))
 
-    p1_photos = _process_photos("p1_photos")
-    p2_photos = _process_photos("p2_photos")
-    p1_photo_count = len(p1_photos)
-    p2_photo_count = len(p2_photos)
-
     prompt = f"""You are a Hawaii real estate expert helping a buyer compare properties.
 
 {_combined_nb_context}
@@ -1989,21 +1984,7 @@ RECOMMENDATION:
 If any property has Leasehold land tenure, you MUST include a prominent warning in the RECOMMENDATION section:
 LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold properties in Hawaii typically sell at a significant discount (20-40%) vs fee simple. Many lenders will not finance leasehold properties with fewer than 30 years remaining on the lease. Buyers should verify lease expiration, rent renegotiation terms, and financing eligibility before making an offer."""
 
-    if p1_photos or p2_photos:
-        _pc_photo_prefix_parts = []
-        if p1_photos:
-            _pc_photo_prefix_parts.append(f"Property 1 photos ({p1_photo_count} provided): analyze these images for Property 1's condition, finishes, and features.")
-        if p2_photos:
-            _pc_photo_prefix_parts.append(f"Property 2 photos ({p2_photo_count} provided): analyze these images for Property 2's condition, finishes, and features.")
-        _pc_photo_prefix = "PHOTO ANALYSIS INSTRUCTIONS:\n" + "\n".join(_pc_photo_prefix_parts) + "\nBe specific about what you observe in each set — do not apply observations from one property's photos to the other.\n\n"
-        _pc_image_blocks = [
-            *[{"type": "image", "source": {"type": "base64", "media_type": mt, "data": img_data}} for img_data, mt in p1_photos],
-            *[{"type": "image", "source": {"type": "base64", "media_type": mt, "data": img_data}} for img_data, mt in p2_photos],
-            {"type": "text", "text": _pc_photo_prefix + prompt}
-        ]
-        _pc_messages = [{"role": "user", "content": _pc_image_blocks}]
-    else:
-        _pc_messages = [{"role": "user", "content": prompt}]
+    _pc_messages = [{"role": "user", "content": prompt}]
 
     try:
         message = client.messages.create(
@@ -2055,8 +2036,6 @@ LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold proper
         best_value=to_html(sections.get("BEST VALUE PICK", "")),
         best_fit=to_html(sections.get("BEST FIT FOR BUYER", "")),
         recommendation=to_html(sections.get("RECOMMENDATION", "")),
-        p1_photo_count=p1_photo_count,
-        p2_photo_count=p2_photo_count
     )
 
 # ─── Admin routes ─────────────────────────────────────────────────────────────

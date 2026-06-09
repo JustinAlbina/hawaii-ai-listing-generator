@@ -26,17 +26,6 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 .optional-note { font-size: 12px; color: #8892a4; margin-bottom: 1rem; padding: 0.6rem 1rem; background: rgba(255,255,255,0.04); border-radius: 8px; border: 1px solid rgba(255,255,255,0.07); }
 .btn { width: 100%; padding: 1rem; background: var(--gold-btn); color: #000; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.75rem; transition: all 0.2s; }
 .btn:hover { filter: brightness(1.1); transform: scale(1.01); }
-.photo-drop-zone { border: 2px dashed rgba(201,168,76,0.35); border-radius: 12px; padding: 1.5rem 1rem; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(201,168,76,0.03); color: #8892a4; font-size: 13px; user-select: none; }
-.photo-drop-zone:hover, .photo-drop-zone.drag-over { border-color: #c9a84c; background: rgba(201,168,76,0.07); color: #e8c97a; }
-.photo-drop-zone .drop-icon { font-size: 1.5rem; margin-bottom: 0.4rem; display: block; opacity: 0.65; }
-.photo-drop-zone strong { color: #c9a84c; }
-.photo-count-label { font-size: 12px; color: #8892a4; margin-top: 0.75rem; display: none; }
-.photo-thumbs { display: flex; gap: 0.75rem; flex-wrap: nowrap; overflow-x: auto; margin-top: 0.5rem; padding-bottom: 4px; }
-.photo-thumbs::-webkit-scrollbar { height: 4px; } .photo-thumbs::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 2px; } .photo-thumbs::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.35); border-radius: 2px; }
-.photo-thumb { position: relative; width: 100px; height: 100px; border-radius: 8px; overflow: hidden; border: 1.5px solid rgba(201,168,76,0.4); flex-shrink: 0; }
-.photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.thumb-remove { position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,0.72); color: #fff; border: none; border-radius: 50%; width: 19px; height: 19px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; transition: background 0.15s; }
-.thumb-remove:hover { background: rgba(200,40,40,0.85); }
 @media (max-width: 768px) { .row { grid-template-columns: 1fr; } .row-3 { grid-template-columns: 1fr; } }
 {% endblock %}
 
@@ -50,7 +39,7 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 <div class="container">
     <a href="/" class="back-link">← Back to all tools</a>
 
-    <form action="/property-comparison/generate" method="POST" enctype="multipart/form-data" class="aloha-form" style="margin-top:1.25rem;">
+    <form action="/property-comparison/generate" method="POST" class="aloha-form" style="margin-top:1.25rem;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <!-- Property 1 -->
@@ -119,25 +108,6 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
             </div>
         </div>
 
-        <!-- Property 1 Photos -->
-        <div class="card">
-            <div class="card-header">
-                <div class="card-icon">📷</div>
-                <div>
-                    <div class="card-title">Property 1 Photos</div>
-                    <div class="card-subtitle">Property 1 Photos (optional) — AlohaAgent will analyze these for the comparison</div>
-                </div>
-            </div>
-            <div id="p1-photo-drop-zone" class="photo-drop-zone" role="button" tabindex="0">
-                <span class="drop-icon">🖼️</span>
-                <div>Drop photos here or <strong>click to browse</strong></div>
-                <div style="margin-top:4px;font-size:12px;color:#4a5a70;">JPEG · PNG &nbsp;·&nbsp; up to 8 images</div>
-            </div>
-            <div id="p1-photo-count-label" class="photo-count-label"></div>
-            <div id="p1-photo-thumbs" class="photo-thumbs"></div>
-            <input type="file" id="p1-photo-input" name="p1_photos" accept="image/jpeg,image/png,image/jpg" multiple style="display:none">
-        </div>
-
         <!-- Property 2 -->
         <div class="card">
             <div class="card-header">
@@ -203,25 +173,6 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
             </div>
         </div>
 
-        <!-- Property 2 Photos -->
-        <div class="card">
-            <div class="card-header">
-                <div class="card-icon">📷</div>
-                <div>
-                    <div class="card-title">Property 2 Photos</div>
-                    <div class="card-subtitle">Property 2 Photos (optional) — AlohaAgent will analyze these for the comparison</div>
-                </div>
-            </div>
-            <div id="p2-photo-drop-zone" class="photo-drop-zone" role="button" tabindex="0">
-                <span class="drop-icon">🖼️</span>
-                <div>Drop photos here or <strong>click to browse</strong></div>
-                <div style="margin-top:4px;font-size:12px;color:#4a5a70;">JPEG · PNG &nbsp;·&nbsp; up to 8 images</div>
-            </div>
-            <div id="p2-photo-count-label" class="photo-count-label"></div>
-            <div id="p2-photo-thumbs" class="photo-thumbs"></div>
-            <input type="file" id="p2-photo-input" name="p2_photos" accept="image/jpeg,image/png,image/jpg" multiple style="display:none">
-        </div>
-
         <!-- Buyer Info -->
         <div class="card">
             <div class="card-header">
@@ -281,51 +232,4 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
     });
 })();
 
-function initPhotoCarousel(dropZoneId, inputId, thumbsId, countLabelId) {
-    var dropZone = document.getElementById(dropZoneId);
-    var photoInput = document.getElementById(inputId);
-    var thumbsContainer = document.getElementById(thumbsId);
-    var countLabel = document.getElementById(countLabelId);
-    if (!dropZone || !photoInput) return;
-    var selectedFiles = [];
-    function syncToInput() { var dt = new DataTransfer(); selectedFiles.forEach(function(f) { dt.items.add(f); }); photoInput.files = dt.files; }
-    function updateCountLabel() {
-        if (!countLabel) return;
-        if (selectedFiles.length === 0) { countLabel.style.display = 'none'; countLabel.textContent = ''; }
-        else { countLabel.style.display = 'block'; countLabel.textContent = selectedFiles.length + ' photo' + (selectedFiles.length !== 1 ? 's' : '') + ' selected — AlohaAgent will analyze all of them'; }
-    }
-    function renderThumbs() {
-        thumbsContainer.innerHTML = '';
-        selectedFiles.forEach(function(file, idx) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var thumb = document.createElement('div'); thumb.className = 'photo-thumb';
-                var img = document.createElement('img'); img.src = e.target.result; img.alt = 'Photo ' + (idx + 1);
-                var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'thumb-remove'; btn.title = 'Remove'; btn.textContent = '✕';
-                btn.onclick = function() { selectedFiles.splice(idx, 1); syncToInput(); updateCountLabel(); renderThumbs(); };
-                thumb.appendChild(img); thumb.appendChild(btn); thumbsContainer.appendChild(thumb);
-            };
-            reader.readAsDataURL(file);
-        });
-        updateCountLabel();
-    }
-    function setFiles(fileList, replace) {
-        var allowed = ['image/jpeg', 'image/png', 'image/jpg'];
-        if (replace) selectedFiles = [];
-        for (var i = 0; i < fileList.length; i++) {
-            if (selectedFiles.length >= 8) break;
-            var f = fileList[i];
-            if (allowed.indexOf(f.type) !== -1) selectedFiles.push(f);
-        }
-        syncToInput(); renderThumbs();
-    }
-    dropZone.addEventListener('click', function() { photoInput.click(); });
-    dropZone.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') photoInput.click(); });
-    dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
-    dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('drag-over'); });
-    dropZone.addEventListener('drop', function(e) { e.preventDefault(); dropZone.classList.remove('drag-over'); setFiles(e.dataTransfer.files, true); });
-    photoInput.addEventListener('change', function() { setFiles(photoInput.files, true); });
-}
-initPhotoCarousel('p1-photo-drop-zone', 'p1-photo-input', 'p1-photo-thumbs', 'p1-photo-count-label');
-initPhotoCarousel('p2-photo-drop-zone', 'p2-photo-input', 'p2-photo-thumbs', 'p2-photo-count-label');
 {% endblock %}

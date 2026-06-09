@@ -148,9 +148,6 @@
             <button class="copy-btn" onclick="copySection(this)" data-target="p1-analysis" style="margin-left:auto;">📋 Copy</button>
         </div>
         <div class="prop-addr-tag">{{ p1_neighborhood }}, {{ p1_island }} · ${{ p1_price }}</div>
-        {% if p1_photo_count %}
-        <div style="margin-bottom:0.75rem;font-size:12px;color:#c9a84c;">✓ {{ p1_photo_count }} photo{{ 's' if p1_photo_count != 1 else '' }} analyzed for Property 1</div>
-        {% endif %}
         <div id="p1-analysis" class="pros-cons-grid">
             <div class="pros-box">
                 <div class="pros-cons-label pros-label">Pros</div>
@@ -178,9 +175,6 @@
             <button class="copy-btn" onclick="copySection(this)" data-target="p2-analysis" style="margin-left:auto;">📋 Copy</button>
         </div>
         <div class="prop-addr-tag">{{ p2_neighborhood }}, {{ p2_island }} · ${{ p2_price }}</div>
-        {% if p2_photo_count %}
-        <div style="margin-bottom:0.75rem;font-size:12px;color:#c9a84c;">✓ {{ p2_photo_count }} photo{{ 's' if p2_photo_count != 1 else '' }} analyzed for Property 2</div>
-        {% endif %}
         <div id="p2-analysis" class="pros-cons-grid">
             <div class="pros-box">
                 <div class="pros-cons-label pros-label">Pros</div>
