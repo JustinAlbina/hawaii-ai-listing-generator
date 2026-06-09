@@ -55,10 +55,6 @@
         <span class="hero-addr">{{ p1_address }}</span>
         <span class="hero-vs">VS</span>
         <span class="hero-addr">{{ p2_address }}</span>
-        {% if has_p3 %}
-        <span class="hero-vs">VS</span>
-        <span class="hero-addr">{{ p3_address }}</span>
-        {% endif %}
     </div>
 </div>
 
@@ -102,43 +98,36 @@
                     <th></th>
                     <th>{{ p1_address|truncate(30, True, '…') }}</th>
                     <th>{{ p2_address|truncate(30, True, '…') }}</th>
-                    {% if has_p3 %}<th>{{ p3_address|truncate(30, True, '…') }}</th>{% endif %}
                 </tr>
                 <tr>
                     <td>Neighborhood</td>
                     <td>{{ p1_neighborhood }}, {{ p1_island }}</td>
                     <td>{{ p2_neighborhood }}, {{ p2_island }}</td>
-                    {% if has_p3 %}<td>{{ p3_neighborhood }}, {{ p3_island }}</td>{% endif %}
                 </tr>
                 <tr>
                     <td>Price</td>
                     <td>${{ p1_price }}</td>
                     <td>${{ p2_price }}</td>
-                    {% if has_p3 %}<td>${{ p3_price }}</td>{% endif %}
                 </tr>
                 <tr>
                     <td>Beds / Baths</td>
                     <td>{{ p1_bedrooms }} bd / {{ p1_bathrooms }} ba</td>
                     <td>{{ p2_bedrooms }} bd / {{ p2_bathrooms }} ba</td>
-                    {% if has_p3 %}<td>{{ p3_bedrooms }} bd / {{ p3_bathrooms }} ba</td>{% endif %}
                 </tr>
                 <tr>
                     <td>Sq Footage</td>
                     <td>{{ p1_sqft }} sqft</td>
                     <td>{{ p2_sqft }} sqft</td>
-                    {% if has_p3 %}<td>{{ p3_sqft }} sqft</td>{% endif %}
                 </tr>
                 <tr>
                     <td>Price / Sqft</td>
                     <td>{{ p1_ppsf }}</td>
                     <td>{{ p2_ppsf }}</td>
-                    {% if has_p3 %}<td>{{ p3_ppsf }}</td>{% endif %}
                 </tr>
                 <tr>
                     <td>Condition</td>
                     <td>{{ p1_condition }}</td>
                     <td>{{ p2_condition }}</td>
-                    {% if has_p3 %}<td>{{ p3_condition }}</td>{% endif %}
                 </tr>
             </table>
         </div>
@@ -203,35 +192,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Property 3 (conditional) -->
-    {% if has_p3 %}
-    <div class="card reveal-section">
-        <div class="card-header">
-            <div class="card-icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
-            </div>
-            <div>
-                <div class="card-title">Property 3 Analysis</div>
-                <div class="card-subtitle">{{ p3_address }}</div>
-            </div>
-            <button class="copy-btn" onclick="copySection(this)" data-target="p3-analysis" style="margin-left:auto;">📋 Copy</button>
-        </div>
-        <div class="prop-addr-tag">{{ p3_neighborhood }}, {{ p3_island }} · ${{ p3_price }}</div>
-        <div id="p3-analysis" class="pros-cons-grid">
-            <div class="pros-box">
-                <div class="pros-cons-label pros-label">Pros</div>
-                <div class="pros-cons-text">{{ p3_pros | safe }}</div>
-            </div>
-            <div class="cons-box">
-                <div class="pros-cons-label cons-label">Cons</div>
-                <div class="pros-cons-text">{{ p3_cons | safe }}</div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
 
     <!-- Best Value -->
     <div class="card gold-highlight">

@@ -224,8 +224,8 @@ def generation_limit_response():
     return None
 
 _FIELD_MAX = {
-    "address": 200, "neighborhood": 100, "p1_address": 200, "p2_address": 200, "p3_address": 200,
-    "p1_neighborhood": 100, "p2_neighborhood": 100, "p3_neighborhood": 100,
+    "address": 200, "neighborhood": 100, "p1_address": 200, "p2_address": 200,
+    "p1_neighborhood": 100, "p2_neighborhood": 100,
     "extra": 1000, "personal_message": 1000, "hawaii_connection": 1000,
     "fun_fact": 1000, "buyer_priorities": 1000, "key_detail": 1000,
 }
@@ -292,14 +292,14 @@ def _process_photos(field_name="photos"):
                 continue
         try:
             img = Image.open(f.stream)
+            if img.mode not in ("RGB", "L"):
+                img = img.convert("RGB")
+            img.thumbnail((1024, 1024), Image.LANCZOS)
+            buf = io.BytesIO()
+            img.save(buf, format="JPEG", quality=75, optimize=True)
+            results.append((base64.b64encode(buf.getvalue()).decode("utf-8"), "image/jpeg"))
         except Exception:
-            continue  # invalid image file — skip silently
-        if img.mode not in ("RGB", "L"):
-            img = img.convert("RGB")
-        img.thumbnail((1024, 1024), Image.LANCZOS)
-        buf = io.BytesIO()
-        img.save(buf, format="JPEG", quality=75, optimize=True)
-        results.append((base64.b64encode(buf.getvalue()).decode("utf-8"), "image/jpeg"))
+            continue  # invalid or unprocessable image — skip silently
     return results
 
 # ─── Security headers ─────────────────────────────────────────────────────────
@@ -1891,24 +1891,13 @@ def property_comparison_generate():
     p2_feature = request.form.get("p2_feature", "").strip()
     p2_condition = request.form.get("p2_condition", "").strip()
 
-    p3_address = request.form.get("p3_address", "").strip()
-    p3_neighborhood = request.form.get("p3_neighborhood", "").strip()
-    p3_island = request.form.get("p3_island", "").strip()
-    p3_price = request.form.get("p3_price", "").strip()
-    p3_bedrooms = request.form.get("p3_bedrooms", "").strip()
-    p3_bathrooms = request.form.get("p3_bathrooms", "").strip()
-    p3_sqft = request.form.get("p3_sqft", "").strip()
-    p3_feature = request.form.get("p3_feature", "").strip()
-    p3_condition = request.form.get("p3_condition", "").strip()
-    has_p3 = bool(p3_address)
-
     buyer_priorities = request.form.get("buyer_priorities", "").strip()
     buyer_budget = request.form.get("buyer_budget", "").strip()
     land_tenure = request.form.get("land_tenure", "Any").strip()
-    err = _validate_lengths(p1_address=p1_address, p2_address=p2_address, p3_address=p3_address,
+    err = _validate_lengths(p1_address=p1_address, p2_address=p2_address,
                             p1_neighborhood=p1_neighborhood, p2_neighborhood=p2_neighborhood,
-                            p3_neighborhood=p3_neighborhood, buyer_priorities=buyer_priorities,
-                            p1_feature=p1_feature, p2_feature=p2_feature, p3_feature=p3_feature)
+                            buyer_priorities=buyer_priorities,
+                            p1_feature=p1_feature, p2_feature=p2_feature)
     if err:
         return err
 
@@ -1922,17 +1911,12 @@ def property_comparison_generate():
 
     p1_ppsf = calc_ppsf(p1_price, p1_sqft)
     p2_ppsf = calc_ppsf(p2_price, p2_sqft)
-    p3_ppsf = calc_ppsf(p3_price, p3_sqft) if has_p3 else ""
 
-    # Neighborhood context injection — dual property
+    # Neighborhood context injection
     _nb1_data = get_neighborhood_context(p1_neighborhood, p1_island)
     _nb1_ctx = format_neighborhood_for_prompt(_nb1_data, p1_neighborhood) if _nb1_data else ""
     _nb2_data = get_neighborhood_context(p2_neighborhood, p2_island)
     _nb2_ctx = format_neighborhood_for_prompt(_nb2_data, p2_neighborhood) if _nb2_data else ""
-    _nb3_ctx = ""
-    if has_p3:
-        _nb3_data = get_neighborhood_context(p3_neighborhood, p3_island)
-        _nb3_ctx = format_neighborhood_for_prompt(_nb3_data, p3_neighborhood) if _nb3_data else ""
 
     def _label_nb_context(ctx, label):
         if not ctx:
@@ -1942,22 +1926,12 @@ def property_comparison_generate():
     _combined_nb_context = "\n\n".join(filter(None, [
         _label_nb_context(_nb1_ctx, "PROPERTY 1"),
         _label_nb_context(_nb2_ctx, "PROPERTY 2"),
-        _label_nb_context(_nb3_ctx, "PROPERTY 3") if has_p3 else "",
     ]))
 
     p1_photos = _process_photos("p1_photos")
     p2_photos = _process_photos("p2_photos")
     p1_photo_count = len(p1_photos)
     p2_photo_count = len(p2_photos)
-
-    p3_block = ""
-    if has_p3:
-        p3_block = f"""
-Property 3: {p3_address}, {p3_neighborhood}, {p3_island}
-- Price: ${p3_price} | Beds: {p3_bedrooms} | Baths: {p3_bathrooms} | Sqft: {p3_sqft} | Price/sqft: {p3_ppsf}
-- Standout feature: {p3_feature}
-- Condition/notes: {p3_condition}
-"""
 
     prompt = f"""You are a Hawaii real estate expert helping a buyer compare properties.
 
@@ -1980,7 +1954,7 @@ Property 2: {p2_address}, {p2_neighborhood}, {p2_island}
 - Price: ${p2_price} | Beds: {p2_bedrooms} | Baths: {p2_bathrooms} | Sqft: {p2_sqft} | Price/sqft: {p2_ppsf}
 - Standout feature: {p2_feature}
 - Condition/notes: {p2_condition}
-{p3_block}
+
 BUYER PRIORITIES: {buyer_priorities}
 {"BUYER BUDGET: $" + buyer_budget if buyer_budget else ""}
 LAND TENURE PREFERENCE: {land_tenure}
@@ -2001,7 +1975,6 @@ PROPERTY 2 PROS:
 
 PROPERTY 2 CONS:
 [3-5 bullet points starting with •]
-{"PROPERTY 3 PROS:" + chr(10) + "[3-5 bullet points starting with •]" + chr(10) + chr(10) + "PROPERTY 3 CONS:" + chr(10) + "[3-5 bullet points starting with •]" if has_p3 else ""}
 
 BEST VALUE PICK:
 [Which property offers the best value per dollar and why, 2-3 sentences]
@@ -2047,7 +2020,6 @@ LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold proper
     section_keys = [
         "EXECUTIVE SUMMARY", "PROPERTY 1 PROS", "PROPERTY 1 CONS",
         "PROPERTY 2 PROS", "PROPERTY 2 CONS",
-        "PROPERTY 3 PROS", "PROPERTY 3 CONS",
         "BEST VALUE PICK", "BEST FIT FOR BUYER", "RECOMMENDATION"
     ]
     for section in section_keys:
@@ -2061,7 +2033,7 @@ LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold proper
                 sections[section] = content[start:].strip()
 
     save_generation("Property Comparison",
-        {"p1_address": p1_address, "p2_address": p2_address, "p3_address": p3_address or "",
+        {"p1_address": p1_address, "p2_address": p2_address,
          "p1_neighborhood": p1_neighborhood, "p2_neighborhood": p2_neighborhood},
         content
     )
@@ -2073,18 +2045,12 @@ LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold proper
         p2_address=p2_address, p2_neighborhood=p2_neighborhood, p2_island=p2_island,
         p2_price=p2_price, p2_bedrooms=p2_bedrooms, p2_bathrooms=p2_bathrooms,
         p2_sqft=p2_sqft, p2_ppsf=p2_ppsf, p2_feature=p2_feature, p2_condition=p2_condition,
-        p3_address=p3_address, p3_neighborhood=p3_neighborhood, p3_island=p3_island,
-        p3_price=p3_price, p3_bedrooms=p3_bedrooms, p3_bathrooms=p3_bathrooms,
-        p3_sqft=p3_sqft, p3_ppsf=p3_ppsf, p3_feature=p3_feature, p3_condition=p3_condition,
-        has_p3=has_p3,
         buyer_priorities=buyer_priorities, buyer_budget=buyer_budget,
         executive_summary=to_html(sections.get("EXECUTIVE SUMMARY", "")),
         p1_pros=to_html(sections.get("PROPERTY 1 PROS", "")),
         p1_cons=to_html(sections.get("PROPERTY 1 CONS", "")),
         p2_pros=to_html(sections.get("PROPERTY 2 PROS", "")),
         p2_cons=to_html(sections.get("PROPERTY 2 CONS", "")),
-        p3_pros=to_html(sections.get("PROPERTY 3 PROS", "")),
-        p3_cons=to_html(sections.get("PROPERTY 3 CONS", "")),
         best_value=to_html(sections.get("BEST VALUE PICK", "")),
         best_fit=to_html(sections.get("BEST FIT FOR BUYER", "")),
         recommendation=to_html(sections.get("RECOMMENDATION", "")),
