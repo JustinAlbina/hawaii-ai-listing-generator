@@ -60,7 +60,7 @@ def csrf_error(e):
 
 def _dark_error(code, title, body):
     html = (
-        f'<html><head><title>{title}</title></head>'
+        f'<!DOCTYPE html><html><head><title>{title}</title></head>'
         f'<body style="background:#061326;color:#fff;font-family:sans-serif;'
         f'display:flex;align-items:center;justify-content:center;height:100vh;margin:0">'
         f'<div style="text-align:center;max-width:420px">'
@@ -240,13 +240,14 @@ def _validate_lengths(**fields):
 
 def _api_error_response():
     html = (
-        '<html><body style="background:#061326;color:#fff;font-family:sans-serif;'
+        '<!DOCTYPE html><html><head><title>Generation Unavailable</title></head>'
+        '<body style="background:#061326;color:#fff;font-family:sans-serif;'
         'display:flex;align-items:center;justify-content:center;height:100vh;margin:0">'
         '<div style="text-align:center;max-width:400px">'
         '<h2 style="color:#c9a84c">Generation unavailable</h2>'
         '<p style="color:rgba(255,255,255,0.7)">Something went wrong reaching the AI service. '
         'Please try again in a moment.</p>'
-        '<a href="javascript:history.back()" style="color:#c9a84c">← Go back</a>'
+        '<a href="/" style="color:#c9a84c;text-decoration:none">← Back to AlohaAgent</a>'
         '</div></body></html>'
     )
     return make_response(html, 503)
