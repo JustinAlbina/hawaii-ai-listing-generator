@@ -1929,68 +1929,48 @@ def property_comparison_generate():
         _label_nb_context(_nb2_ctx, "PROPERTY 2"),
     ]))
 
-    prompt = f"""You are a Hawaii real estate expert helping a buyer compare properties.
+    prompt = f"""You are a Hawaii real estate expert helping a buyer compare two properties.
 
 {_combined_nb_context}
 
-HAWAII VOICE RULES:
-Write with local authority and Hawaii-specific insight. Reference Hawaii-specific factors naturally — proximity to beaches, island lifestyle, trade winds, flood zones, leasehold vs fee simple, HOA culture in Hawaii. Never produce generic comparison commentary that ignores Hawaii context.
+Write with local Hawaii authority. Reference Hawaii-specific factors naturally — beaches, flood zones, trade winds, leasehold vs fee simple. Never generic.
 
-CRAFT RULES:
-Write the analysis sections with varied sentence rhythm. Avoid robotic bullet-point thinking even if the output is structured. Each property's summary should read like a local expert's genuine assessment, not a checklist.
-
-PROPERTIES TO COMPARE:
+PROPERTIES:
 
 Property 1: {p1_address}, {p1_neighborhood}, {p1_island}
 - Price: ${p1_price} | Beds: {p1_bedrooms} | Baths: {p1_bathrooms} | Sqft: {p1_sqft} | Price/sqft: {p1_ppsf}
-- Standout feature: {p1_feature}
-- Condition/notes: {p1_condition}
+- Standout feature: {p1_feature} | Condition: {p1_condition}
 
 Property 2: {p2_address}, {p2_neighborhood}, {p2_island}
 - Price: ${p2_price} | Beds: {p2_bedrooms} | Baths: {p2_bathrooms} | Sqft: {p2_sqft} | Price/sqft: {p2_ppsf}
-- Standout feature: {p2_feature}
-- Condition/notes: {p2_condition}
+- Standout feature: {p2_feature} | Condition: {p2_condition}
 
 BUYER PRIORITIES: {buyer_priorities}
 {"BUYER BUDGET: $" + buyer_budget if buyer_budget else ""}
 LAND TENURE PREFERENCE: {land_tenure}
 
-Write a detailed property comparison report. Use EXACTLY these section headers:
+Use EXACTLY these section headers:
 
 EXECUTIVE SUMMARY:
-[2-3 sentence overview of the comparison and key differences]
+[2 sentences: the core trade-off between these two properties for this buyer]
 
-PROPERTY 1 PROS:
-[3-5 bullet points starting with •]
+PROPERTY 1 ANALYSIS:
+[2-3 sentences: what this property is, what it delivers, one real drawback]
 
-PROPERTY 1 CONS:
-[3-5 bullet points starting with •]
-
-PROPERTY 2 PROS:
-[3-5 bullet points starting with •]
-
-PROPERTY 2 CONS:
-[3-5 bullet points starting with •]
-
-BEST VALUE PICK:
-[Which property offers the best value per dollar and why, 2-3 sentences]
-
-BEST FIT FOR BUYER:
-[Which property best matches the buyer's stated priorities and why, 2-3 sentences]
+PROPERTY 2 ANALYSIS:
+[2-3 sentences: what this property is, what it delivers, one real drawback]
 
 RECOMMENDATION:
-[Clear recommendation of which property to choose and the top 3 reasons, 3-4 sentences]
-
-If any property has Leasehold land tenure, you MUST include a prominent warning in the RECOMMENDATION section:
-LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold properties in Hawaii typically sell at a significant discount (20-40%) vs fee simple. Many lenders will not finance leasehold properties with fewer than 30 years remaining on the lease. Buyers should verify lease expiration, rent renegotiation terms, and financing eligibility before making an offer."""
+[3 sentences: which is better value, which fits the buyer's priorities, and the final pick with the single strongest reason. If either property is Leasehold, add: Leasehold note — verify lease expiration, renegotiation terms, and financing eligibility before making an offer.]"""
 
     _pc_messages = [{"role": "user", "content": prompt}]
 
     try:
         message = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=1500,
+            max_tokens=1200,
             temperature=0.8,
+            timeout=90,
             messages=_pc_messages
         )
     except Exception as e:
@@ -2000,9 +1980,8 @@ LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold proper
 
     sections = {}
     section_keys = [
-        "EXECUTIVE SUMMARY", "PROPERTY 1 PROS", "PROPERTY 1 CONS",
-        "PROPERTY 2 PROS", "PROPERTY 2 CONS",
-        "BEST VALUE PICK", "BEST FIT FOR BUYER", "RECOMMENDATION"
+        "EXECUTIVE SUMMARY", "PROPERTY 1 ANALYSIS",
+        "PROPERTY 2 ANALYSIS", "RECOMMENDATION"
     ]
     for section in section_keys:
         if section + ":" in content:
@@ -2029,12 +2008,8 @@ LEASEHOLD PROPERTY: This property is leasehold, not fee simple. Leasehold proper
         p2_sqft=p2_sqft, p2_ppsf=p2_ppsf, p2_feature=p2_feature, p2_condition=p2_condition,
         buyer_priorities=buyer_priorities, buyer_budget=buyer_budget,
         executive_summary=to_html(sections.get("EXECUTIVE SUMMARY", "")),
-        p1_pros=to_html(sections.get("PROPERTY 1 PROS", "")),
-        p1_cons=to_html(sections.get("PROPERTY 1 CONS", "")),
-        p2_pros=to_html(sections.get("PROPERTY 2 PROS", "")),
-        p2_cons=to_html(sections.get("PROPERTY 2 CONS", "")),
-        best_value=to_html(sections.get("BEST VALUE PICK", "")),
-        best_fit=to_html(sections.get("BEST FIT FOR BUYER", "")),
+        p1_analysis=to_html(sections.get("PROPERTY 1 ANALYSIS", "")),
+        p2_analysis=to_html(sections.get("PROPERTY 2 ANALYSIS", "")),
         recommendation=to_html(sections.get("RECOMMENDATION", "")),
     )
 

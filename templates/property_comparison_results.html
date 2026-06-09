@@ -133,7 +133,7 @@
         </div>
     </div>
 
-    <!-- Property 1 Pros & Cons -->
+    <!-- Property 1 Analysis -->
     <div class="card reveal-section">
         <div class="card-header">
             <div class="card-icon">
@@ -148,19 +148,10 @@
             <button class="copy-btn" onclick="copySection(this)" data-target="p1-analysis" style="margin-left:auto;">📋 Copy</button>
         </div>
         <div class="prop-addr-tag">{{ p1_neighborhood }}, {{ p1_island }} · ${{ p1_price }}</div>
-        <div id="p1-analysis" class="pros-cons-grid">
-            <div class="pros-box">
-                <div class="pros-cons-label pros-label">Pros</div>
-                <div class="pros-cons-text">{{ p1_pros | safe }}</div>
-            </div>
-            <div class="cons-box">
-                <div class="pros-cons-label cons-label">Cons</div>
-                <div class="pros-cons-text">{{ p1_cons | safe }}</div>
-            </div>
-        </div>
+        <div class="content-box" id="p1-analysis">{{ p1_analysis | safe }}</div>
     </div>
 
-    <!-- Property 2 Pros & Cons -->
+    <!-- Property 2 Analysis -->
     <div class="card reveal-section">
         <div class="card-header">
             <div class="card-icon">
@@ -175,56 +166,7 @@
             <button class="copy-btn" onclick="copySection(this)" data-target="p2-analysis" style="margin-left:auto;">📋 Copy</button>
         </div>
         <div class="prop-addr-tag">{{ p2_neighborhood }}, {{ p2_island }} · ${{ p2_price }}</div>
-        <div id="p2-analysis" class="pros-cons-grid">
-            <div class="pros-box">
-                <div class="pros-cons-label pros-label">Pros</div>
-                <div class="pros-cons-text">{{ p2_pros | safe }}</div>
-            </div>
-            <div class="cons-box">
-                <div class="pros-cons-label cons-label">Cons</div>
-                <div class="pros-cons-text">{{ p2_cons | safe }}</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Best Value -->
-    <div class="card gold-highlight">
-        <div class="card-header">
-            <div class="card-icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-            </div>
-            <div>
-                <div class="card-title">Best Value Pick</div>
-                <div class="card-subtitle">Best dollar-for-dollar value</div>
-            </div>
-            <button class="copy-btn" onclick="copySection(this)" data-target="best-value" style="margin-left:auto;">📋 Copy</button>
-        </div>
-        <div class="rec-box">
-            <div class="rec-box-label">Value Analysis</div>
-            <p id="best-value">{{ best_value | safe }}</p>
-        </div>
-    </div>
-
-    <!-- Best Fit -->
-    <div class="card gold-highlight">
-        <div class="card-header">
-            <div class="card-icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                </svg>
-            </div>
-            <div>
-                <div class="card-title">Best Fit for Buyer</div>
-                <div class="card-subtitle">Matched to stated priorities</div>
-            </div>
-            <button class="copy-btn" onclick="copySection(this)" data-target="best-fit" style="margin-left:auto;">📋 Copy</button>
-        </div>
-        <div class="rec-box">
-            <div class="rec-box-label">Buyer Match</div>
-            <p id="best-fit">{{ best_fit | safe }}</p>
-        </div>
+        <div class="content-box" id="p2-analysis">{{ p2_analysis | safe }}</div>
     </div>
 
     <!-- Recommendation -->
