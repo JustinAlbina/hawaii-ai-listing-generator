@@ -317,10 +317,10 @@ def set_security_headers(response):
     # form-action allows Stripe checkout redirect target in addition to self.
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://js.stripe.com; "
+        "script-src 'self' 'unsafe-inline' https://js.stripe.com https://plausible.io; "
         "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: blob:; "
-        "connect-src 'self' https://api.stripe.com; "
+        "connect-src 'self' https://api.stripe.com https://plausible.io; "
         "font-src 'self'; "
         "frame-src https://checkout.stripe.com https://js.stripe.com; "
         "frame-ancestors 'none'; "
