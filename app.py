@@ -180,6 +180,7 @@ _SAFE_ATTRS = {'*': ['class']}
 
 def safe_markdown(text):
     raw = md_lib.markdown(text or "", extensions=["nl2br"])
+    raw = raw.replace('**', '')  # strip unconverted md bold markers (e.g. "** text **" with spaces)
     return bleach.clean(raw, tags=_SAFE_TAGS, attributes=_SAFE_ATTRS, strip=True)
 
 def to_html(text):
@@ -2007,10 +2008,10 @@ RECOMMENDATION:
         p2_price=p2_price, p2_bedrooms=p2_bedrooms, p2_bathrooms=p2_bathrooms,
         p2_sqft=p2_sqft, p2_ppsf=p2_ppsf, p2_feature=p2_feature, p2_condition=p2_condition,
         buyer_priorities=buyer_priorities, buyer_budget=buyer_budget,
-        executive_summary=to_html(sections.get("EXECUTIVE SUMMARY", "")),
-        p1_analysis=to_html(sections.get("PROPERTY 1 ANALYSIS", "")),
-        p2_analysis=to_html(sections.get("PROPERTY 2 ANALYSIS", "")),
-        recommendation=to_html(sections.get("RECOMMENDATION", "")),
+        executive_summary=sections.get("EXECUTIVE SUMMARY", ""),
+        p1_analysis=sections.get("PROPERTY 1 ANALYSIS", ""),
+        p2_analysis=sections.get("PROPERTY 2 ANALYSIS", ""),
+        recommendation=sections.get("RECOMMENDATION", ""),
     )
 
 # ─── Admin routes ─────────────────────────────────────────────────────────────
